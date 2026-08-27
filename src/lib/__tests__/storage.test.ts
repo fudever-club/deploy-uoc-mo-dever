@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { createDream, getDreams, updateDreamVisibility, deleteDream } from "../storage";
+import {
+  createDream,
+  getDreams,
+  updateDreamVisibility,
+  deleteDream,
+  broadcastReaction,
+  setBroadcastAnnouncement,
+  getActiveAnnouncement,
+} from "../storage";
 
 describe("Storage Engine", () => {
   it("should create and retrieve dreams", async () => {
@@ -55,5 +63,27 @@ describe("Storage Engine", () => {
 
     const all = await getDreams(true);
     expect(all.find((d) => d.id === created.id)).toBeUndefined();
+  });
+
+  it("should broadcast reactions", () => {
+    const reaction = broadcastReaction("🚀");
+    expect(reaction.id).toBeDefined();
+    expect(reaction.emoji).toBe("🚀");
+    expect(reaction.timestamp).toBeGreaterThan(0);
+  });
+
+  it("should manage broadcast announcements", () => {
+    const ann = setBroadcastAnnouncement("Thử nghiệm phát thanh gian hàng DEVER");
+    expect(ann).not.toBeNull();
+    expect(ann?.message).toBe("Thử nghiệm phát thanh gian hàng DEVER");
+    expect(ann?.active).toBe(true);
+
+    const active = getActiveAnnouncement();
+    expect(active?.message).toBe("Thử nghiệm phát thanh gian hàng DEVER");
+
+    // Clear announcement
+    const cleared = setBroadcastAnnouncement(null);
+    expect(cleared).toBeNull();
+    expect(getActiveAnnouncement()).toBeNull();
   });
 });

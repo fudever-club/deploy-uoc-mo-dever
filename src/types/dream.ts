@@ -57,3 +57,10 @@ export interface BroadcastAnnouncement {
   active: boolean;
   timestamp: string;
 }
+
+export interface LiveReaction {
+  id: string;
+  emoji: string;
+  x: number; // random percentage
+  timestamp: number;
+}

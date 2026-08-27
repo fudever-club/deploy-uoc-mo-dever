@@ -244,6 +244,17 @@ export async function deleteDream(id: string): Promise<boolean> {
   return false;
 }
 
+export function broadcastReaction(emoji: string): LiveReaction {
+  const reaction: LiveReaction = {
+    id: `react-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    emoji,
+    x: Math.random() * 80 + 10,
+    timestamp: Date.now(),
+  };
+  realtimeBus.emit("reaction:broadcast", reaction);
+  return reaction;
+}
+
 // Announcements Management
 export function setBroadcastAnnouncement(message: string | null): BroadcastAnnouncement | null {
   if (!message || message.trim().length === 0) {

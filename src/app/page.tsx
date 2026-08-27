@@ -7,6 +7,7 @@ import { DREAM_CATEGORIES, BUGGY_MOODS, INSPIRATION_PROMPTS, EVENT_INFO } from "
 import { Dream, DreamCategory, CardTheme } from "@/types/dream";
 import { playLanternChime } from "@/lib/audio";
 import { DreamCardModal } from "@/components/DreamCardModal";
+import { ReactionBar } from "@/components/ReactionBar";
 import {
   Sparkles,
   Send,
@@ -437,8 +438,11 @@ export default function WishSubmissionPage() {
               </p>
             </div>
 
+            {/* Live Reaction Bar */}
+            <ReactionBar />
+
             {/* Action Buttons */}
-            <div className="space-y-3">
+            <div className="space-y-3 mt-4">
               <button
                 id="btn-view-card"
                 onClick={() => setShowCardModal(true)}

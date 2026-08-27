@@ -43,10 +43,17 @@ export async function GET(req: NextRequest) {
         );
       };
 
+      const onReaction = (react: unknown) => {
+        controller.enqueue(
+          encoder.encode(`event: reaction\ndata: ${JSON.stringify(react)}\n\n`)
+        );
+      };
+
       realtimeBus.on("dream:inserted", onInsert);
       realtimeBus.on("dream:updated", onUpdate);
       realtimeBus.on("dream:deleted", onDelete);
       realtimeBus.on("announcement:broadcast", onAnnouncement);
+      realtimeBus.on("reaction:broadcast", onReaction);
 
       const interval = setInterval(() => {
         try {
@@ -62,6 +69,7 @@ export async function GET(req: NextRequest) {
         realtimeBus.off("dream:updated", onUpdate);
         realtimeBus.off("dream:deleted", onDelete);
         realtimeBus.off("announcement:broadcast", onAnnouncement);
+        realtimeBus.off("reaction:broadcast", onReaction);
         try {
           controller.close();
         } catch {

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import Image from "next/image";
-import { Dream, LanternItem, BroadcastAnnouncement } from "@/types/dream";
+import { Dream, LanternItem, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
 import { DREAM_CATEGORIES, EVENT_INFO } from "@/lib/constants";
 import { playLanternChime } from "@/lib/audio";
 import {
@@ -33,6 +33,7 @@ export default function DisplaySkyPage() {
   const [activeAnnouncement, setActiveAnnouncement] = useState<BroadcastAnnouncement | null>(null);
   const [spotlightIndex, setSpotlightIndex] = useState<number>(0);
   const [isAutoSpotlight, setIsAutoSpotlight] = useState<boolean>(true);
+  const [reactions, setReactions] = useState<LiveReaction[]>([]);
 
   const audioUnlocked = useRef(false);
 
@@ -177,6 +178,18 @@ export default function DisplaySkyPage() {
         setActiveAnnouncement(ann);
       } catch (e) {
         console.error("SSE announcement error:", e);
+      }
+    });
+
+    eventSource.addEventListener("reaction", (event) => {
+      try {
+        const react = JSON.parse(event.data) as LiveReaction;
+        setReactions((prev) => [...prev.slice(-15), react]);
+        setTimeout(() => {
+          setReactions((prev) => prev.filter((r) => r.id !== react.id));
+        }, 4000);
+      } catch (e) {
+        console.error("SSE reaction error:", e);
       }
     });
 
@@ -449,6 +462,23 @@ export default function DisplaySkyPage() {
           </div>
         </div>
       )}
+
+      {/* 3.6 LIVE FLOATING REACTIONS STREAM */}
+      <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
+        {reactions.map((r) => (
+          <div
+            key={r.id}
+            className="absolute text-4xl sm:text-5xl animate-in fade-in slide-in-from-bottom-12 duration-1000 transition-all drop-shadow-[0_0_15px_rgba(250,199,117,0.8)]"
+            style={{
+              left: `${r.x}%`,
+              bottom: "10%",
+              animation: "floatSlow 4s ease-out forwards",
+            }}
+          >
+            {r.emoji}
+          </div>
+        ))}
+      </div>
 
       {/* 4. FOOTER OVERLAY (LOGO, CATEGORY FILTER & QR) */}
       <div className="absolute bottom-4 left-6 right-6 z-30 flex items-end justify-between pointer-events-none">

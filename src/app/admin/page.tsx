@@ -24,6 +24,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
+import { WordCloudVisualizer } from "@/components/WordCloudVisualizer";
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -473,6 +474,9 @@ export default function AdminPage() {
             })}
           </div>
         </div>
+
+        {/* Word Cloud Visualizer */}
+        <WordCloudVisualizer dreams={dreams} />
 
         {/* Search & Filter Bar */}
         <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
