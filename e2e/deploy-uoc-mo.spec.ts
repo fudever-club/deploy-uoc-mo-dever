@@ -22,7 +22,7 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
 
     await nameInput.fill("Phan Quang Nhật K22");
     await contentInput.fill("Xây dựng cộng đồng lập trình FU-DEVER ngày càng vững mạnh và rực rỡ!");
-    
+
     // Choose Category Tag
     const tagBtn = page.locator("button:has-text('Ước mơ lớn')");
     if (await tagBtn.isVisible()) {
@@ -39,14 +39,14 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
 
     // 6. Open Dream Card Modal
     await viewCardBtn.click();
-    await expect(page.locator("text=Thiệp Ước Mơ Của Bạn")).toBeVisible();
+    await expect(page.locator("text=Thiệp Ước Mơ Cá Nhân Hoá")).toBeVisible();
     await expect(page.locator("button:has-text('Tải Ảnh Về Máy')")).toBeVisible();
   });
 
   test("2. Public Lantern Sky Display Screen (/display)", async ({ page }) => {
     await page.goto("/display");
     await expect(page.locator("text=Deploy Ước Mơ · Club Day 2026")).toBeVisible();
-    await expect(page.locator("text=CLB LẬP TRÌNH FU-DEVER")).toBeVisible();
+    await expect(page.locator("text=CLB LẬP TRÌNH FU-DEVER").first()).toBeVisible();
     await expect(page.locator("#counter-pill")).toBeVisible();
   });
 
