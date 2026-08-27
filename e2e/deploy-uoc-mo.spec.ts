@@ -66,4 +66,20 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     await expect(page.locator("#btn-export-csv")).toBeVisible();
     await expect(page.locator("table")).toBeVisible();
   });
+
+  test("4. Standee Poster Generator Screen (/standee)", async ({ page }) => {
+    await page.goto("/standee");
+    await expect(page.locator("h1")).toContainText("DEPLOY ƯỚC MƠ");
+    await expect(page.locator("text=Quét Mã Tham Gia Ngay")).toBeVisible();
+    await expect(page.locator("button:has-text('In Standee Poster')")).toBeVisible();
+  });
+
+  test("5. Lucky Draw Minigame Screen (/admin/lucky-draw)", async ({ page }) => {
+    await page.goto("/admin/lucky-draw");
+    await expect(page.locator("h1")).toContainText("VÒNG QUAY MAY MẮN");
+    const spinBtn = page.locator("button:has-text('Quay Số Ngay!')");
+    await expect(spinBtn).toBeVisible();
+    await spinBtn.click();
+    await expect(page.locator("text=Đang quay số...")).toBeVisible();
+  });
 });

@@ -1,0 +1,22 @@
+{
+  "name": "Deploy Ước Mơ — FU-DEVER Club Day 2026",
+  "short_name": "Deploy Ước Mơ",
+  "description": "Thả đèn lồng ước mơ và nhận thiệp Story 9:16 cùng CLB Lập trình FU-DEVER",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#12203A",
+  "theme_color": "#993C1D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/assets/logo/logo-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/logo/logo-dever.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

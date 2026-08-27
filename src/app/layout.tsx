@@ -23,6 +23,11 @@ export const metadata: Metadata = {
       },
     ],
   },
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/assets/logo/logo-icon.png",
+    apple: "/assets/logo/logo-icon.png",
+  },
 };
 
 export const viewport: Viewport = {

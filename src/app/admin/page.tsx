@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { Dream, BroadcastAnnouncement } from "@/types/dream";
 import { DREAM_CATEGORIES, EVENT_INFO } from "@/lib/constants";
 import { generateDreamsCSV } from "@/lib/csv-export";
@@ -294,13 +295,21 @@ export default function AdminPage() {
           </div>
 
           <div className="flex items-center flex-wrap gap-2">
-            <button
-              onClick={() => setShowQRModal(true)}
-              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            <Link
+              href="/standee"
+              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
               <QrCode className="w-4 h-4 text-[#0091ea]" />
-              <span>Mã QR Standee</span>
-            </button>
+              <span>In Poster Standee</span>
+            </Link>
+
+            <Link
+              href="/admin/lucky-draw"
+              className="px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5 transition-colors"
+            >
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>Vòng Quay May Mắn</span>
+            </Link>
 
             <button
               id="btn-export-csv"

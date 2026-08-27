@@ -20,6 +20,7 @@ import {
   Pause,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
+import { LanternSkyCanvas } from "@/components/LanternSkyCanvas";
 
 export default function DisplaySkyPage() {
   const [dreams, setDreams] = useState<Dream[]>([]);
@@ -222,6 +223,7 @@ export default function DisplaySkyPage() {
     >
       {/* 1. NIGHT SKY BACKGROUND & STARS */}
       <div className="absolute inset-0 bg-radial from-[#1e345e] via-[#12203A] to-[#0a1222]" />
+      <LanternSkyCanvas />
 
       {/* Glowing Full Moon */}
       <div className="absolute top-6 right-16 w-32 h-32 rounded-full bg-gradient-to-br from-[#fac775] via-[#faeeda] to-[#e5b360] shadow-[0_0_80px_rgba(250,199,117,0.6)] animate-moon opacity-90 pointer-events-none flex items-center justify-center">
