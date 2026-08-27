@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-night: #12203a;
+    --red-500: #993c1d;
+    --red-700: #712b13;
+    --amber-400: #fac775;
+    --amber-100: #faeeda;
+    --brand-blue: #0091ea;
+    --brand-blue-light: #85b7eb;
+    --surface: #ffffff;
+    --text-on-light: #2c2c2a;
+    --text-muted-on-light: #5f5e5a;
+  }
+}
+
+body {
+  color: var(--text-on-light);
+  background-color: var(--surface);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom subtle animations */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes lanternGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(250, 199, 117, 0.35), 0 0 30px rgba(153, 60, 29, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(250, 199, 117, 0.6), 0 0 45px rgba(153, 60, 29, 0.45);
+  }
+}
+
+@keyframes moonPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(250, 199, 117, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 35px rgba(250, 199, 117, 0.7));
+  }
+}
+
+.animate-float {
+  animation: floatSlow 5s ease-in-out infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: lanternGlow 3.5s ease-in-out infinite;
+}
+
+.animate-moon {
+  animation: moonPulse 6s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(153, 60, 29, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(153, 60, 29, 0.4);
+}
