@@ -1,4 +1,4 @@
-import { Dream, DreamInput, BroadcastAnnouncement } from "@/types/dream";
+import { Dream, DreamInput, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { EventEmitter } from "events";
 import fs from "fs";

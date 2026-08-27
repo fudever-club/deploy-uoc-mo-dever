@@ -203,10 +203,30 @@ export async function renderDreamCardToDataUrl(
     // skip mascot if load issue
   }
 
+  // Traditional Seal Stamp (Triện Đỏ "ĐỖ ĐẠT" or "FU-DEVER")
+  ctx.save();
+  ctx.translate(cardX + 60, cardY + 55);
+  ctx.rotate(-0.1);
+  ctx.strokeStyle = theme === "tech" ? "#00f5d4" : "#B22222";
+  ctx.fillStyle = theme === "tech" ? "rgba(0, 245, 212, 0.15)" : "rgba(178, 34, 34, 0.2)";
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, 95, 42, 8);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = theme === "tech" ? "#00f5d4" : "#ff4d4d";
+  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(theme === "tech" ? "DEVER" : "ĐỖ ĐẠT", 47.5, 21);
+  ctx.restore();
+
   // Dreamer Name
   const dreamerName = dream.name && dream.name.trim().length > 0 ? dream.name.trim() : "Ẩn danh";
   ctx.fillStyle = theme === "tech" ? "#00f5d4" : "#fac775";
   ctx.font = "bold 44px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  ctx.textAlign = "center";
   ctx.fillText(`✨ ${dreamerName} ✨`, width / 2, cardY + 90);
 
   // Quote open

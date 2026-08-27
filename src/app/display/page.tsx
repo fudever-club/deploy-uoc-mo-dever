@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Dream, LanternItem, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
 import { DREAM_CATEGORIES, EVENT_INFO } from "@/lib/constants";
 import { playLanternChime } from "@/lib/audio";
+import { ambientSound } from "@/lib/ambient-sound";
 import {
   Sparkles,
   Volume2,
@@ -18,14 +19,18 @@ import {
   Radio,
   Play,
   Pause,
+  Sun,
+  Moon,
+  Zap,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
-import { LanternSkyCanvas } from "@/components/LanternSkyCanvas";
+import { LanternSkyCanvas, SkyTheme } from "@/components/LanternSkyCanvas";
 
 export default function DisplaySkyPage() {
   const [dreams, setDreams] = useState<Dream[]>([]);
   const [lanterns, setLanterns] = useState<LanternItem[]>([]);
   const [selectedDream, setSelectedDream] = useState<Dream | null>(null);
+  const [hoveredDream, setHoveredDream] = useState<LanternItem | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
@@ -34,6 +39,7 @@ export default function DisplaySkyPage() {
   const [spotlightIndex, setSpotlightIndex] = useState<number>(0);
   const [isAutoSpotlight, setIsAutoSpotlight] = useState<boolean>(true);
   const [reactions, setReactions] = useState<LiveReaction[]>([]);
+  const [skyTheme, setSkyTheme] = useState<SkyTheme>("midnight");
 
   const audioUnlocked = useRef(false);
 
@@ -53,7 +59,6 @@ export default function DisplaySkyPage() {
     return stars;
   }, []);
 
-  // Compute position for lanterns in virtual grid
   const calculateLanternPosition = (index: number, total: number): { x: number; y: number; delay: number; scale: number } => {
     const cols = total > 50 ? 10 : total > 25 ? 7 : 5;
     const colIndex = index % cols;
@@ -219,6 +224,19 @@ export default function DisplaySkyPage() {
 
   const handleUserGesture = () => {
     audioUnlocked.current = true;
+    if (soundEnabled) {
+      ambientSound.start();
+    }
+  };
+
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    if (next) {
+      ambientSound.start();
+    } else {
+      ambientSound.stop();
+    }
   };
 
   // Filtered lanterns
@@ -229,21 +247,42 @@ export default function DisplaySkyPage() {
 
   const spotlightDream = lanterns[spotlightIndex] || null;
 
+  // Background style by sky theme
+  const getSkyBackgroundClass = () => {
+    switch (skyTheme) {
+      case "cyber":
+        return "from-[#050914] via-[#08101e] to-[#020408]";
+      case "dawn":
+        return "from-[#3a1306] via-[#1e0a04] to-[#0d0402]";
+      case "midnight":
+      default:
+        return "from-[#1e345e] via-[#12203A] to-[#0a1222]";
+    }
+  };
+
   return (
     <div
       onClick={handleUserGesture}
       className="relative w-screen h-screen overflow-hidden bg-[#12203A] text-[#faeeda] select-none font-sans"
     >
-      {/* 1. NIGHT SKY BACKGROUND & STARS */}
-      <div className="absolute inset-0 bg-radial from-[#1e345e] via-[#12203A] to-[#0a1222]" />
-      <LanternSkyCanvas />
+      {/* 1. DYNAMIC SKY BACKGROUND */}
+      <div className={`absolute inset-0 bg-radial ${getSkyBackgroundClass()} transition-colors duration-1000`} />
+      <LanternSkyCanvas theme={skyTheme} />
 
-      {/* Glowing Full Moon */}
-      <div className="absolute top-6 right-16 w-32 h-32 rounded-full bg-gradient-to-br from-[#fac775] via-[#faeeda] to-[#e5b360] shadow-[0_0_80px_rgba(250,199,117,0.6)] animate-moon opacity-90 pointer-events-none flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full bg-[#e0aa4e]/30 absolute top-6 left-8" />
-        <div className="w-10 h-10 rounded-full bg-[#e0aa4e]/20 absolute bottom-6 right-7" />
-        <div className="w-4 h-4 rounded-full bg-[#e0aa4e]/30 absolute bottom-12 left-10" />
-      </div>
+      {/* Glowing Moon / Celestial Body */}
+      {skyTheme === "cyber" ? (
+        <div className="absolute top-6 right-16 w-32 h-32 rounded-full bg-gradient-to-br from-[#00f5d4] via-[#0091ea] to-[#12203a] shadow-[0_0_80px_rgba(0,245,212,0.5)] animate-moon opacity-85 pointer-events-none flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full border border-[#00f5d4]/40" />
+        </div>
+      ) : skyTheme === "dawn" ? (
+        <div className="absolute top-6 right-16 w-32 h-32 rounded-full bg-gradient-to-br from-[#ffb800] via-[#ff6b6b] to-[#712b13] shadow-[0_0_90px_rgba(255,184,0,0.6)] animate-moon opacity-90 pointer-events-none flex items-center justify-center" />
+      ) : (
+        <div className="absolute top-6 right-16 w-32 h-32 rounded-full bg-gradient-to-br from-[#fac775] via-[#faeeda] to-[#e5b360] shadow-[0_0_80px_rgba(250,199,117,0.6)] animate-moon opacity-90 pointer-events-none flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-[#e0aa4e]/30 absolute top-6 left-8" />
+          <div className="w-10 h-10 rounded-full bg-[#e0aa4e]/20 absolute bottom-6 right-7" />
+          <div className="w-4 h-4 rounded-full bg-[#e0aa4e]/30 absolute bottom-12 left-10" />
+        </div>
+      )}
 
       {/* Sparkling Stars */}
       {staticStars.map((s) => (
@@ -274,8 +313,39 @@ export default function DisplaySkyPage() {
           </div>
         </div>
 
-        {/* Top-Right: Wish Counter & Utility Controls */}
+        {/* Top-Right: Controls & Sky Theme Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
+          {/* Sky Theme Switcher */}
+          <div className="flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+            <button
+              onClick={() => setSkyTheme("midnight")}
+              className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                skyTheme === "midnight" ? "bg-[#fac775] text-[#12203a]" : "text-white/60 hover:text-white"
+              }`}
+              title="Đêm Trăng Rằm"
+            >
+              <Moon className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setSkyTheme("cyber")}
+              className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                skyTheme === "cyber" ? "bg-[#00f5d4] text-[#050914]" : "text-white/60 hover:text-white"
+              }`}
+              title="DEVER Cyber Neon"
+            >
+              <Zap className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setSkyTheme("dawn")}
+              className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                skyTheme === "dawn" ? "bg-[#ffb800] text-[#3a1306]" : "text-white/60 hover:text-white"
+              }`}
+              title="Bình Minh Rạng Rỡ"
+            >
+              <Sun className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           {/* Realtime Counter Pill */}
           <div id="counter-pill" className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg">
             <Sparkles className="w-4 h-4 text-[#fac775] animate-pulse" />
@@ -310,11 +380,11 @@ export default function DisplaySkyPage() {
             {isAutoSpotlight ? <Radio className="w-4 h-4 animate-pulse" /> : <Play className="w-4 h-4" />}
           </button>
 
-          {/* Sound Toggle */}
+          {/* Sound Toggle (Ambient + Chime) */}
           <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
+            onClick={toggleSound}
             className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-[#fac775]/30 text-[#fac775] transition-colors shadow-md cursor-pointer"
-            title={soundEnabled ? "Tắt âm thanh" : "Bật âm thanh"}
+            title={soundEnabled ? "Tắt âm thanh nhạc nền" : "Bật âm thanh nhạc nền"}
           >
             {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 opacity-60" />}
           </button>
@@ -366,11 +436,13 @@ export default function DisplaySkyPage() {
           /* Floating Lanterns Grid */
           displayedLanterns.map((item) => {
             const category = DREAM_CATEGORIES.find((c) => c.id === item.tag);
-            const isTech = item.theme === "tech";
+            const isTech = item.theme === "tech" || skyTheme === "cyber";
             return (
               <div
                 key={item.id}
                 onClick={() => setSelectedDream(item)}
+                onMouseEnter={() => setHoveredDream(item)}
+                onMouseLeave={() => setHoveredDream(null)}
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform duration-500 hover:scale-115 hover:z-40"
                 style={{
                   left: `${item.x}%`,
