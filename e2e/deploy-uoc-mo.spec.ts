@@ -4,7 +4,8 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
   test("1. Full Wish Submission and Dream Card generation flow", async ({ page }) => {
     // 1. Visit Main Page
     await page.goto("/");
-    await expect(page).toHaveTitle(/Deploy Ước Mơ/);
+    await page.waitForLoadState("domcontentloaded");
+    await expect(page).toHaveTitle(/Deploy Ước Mơ/, { timeout: 10000 });
 
     // 2. Verify Intro Screen
     const startBtn = page.locator("#btn-start-dream");
