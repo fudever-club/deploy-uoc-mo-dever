@@ -17,7 +17,6 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     // 4. Fill form
     const nameInput = page.locator("#name-input");
     const contentInput = page.locator("#content-input");
-    const consentCheckbox = page.locator("#consent-checkbox");
     const submitBtn = page.locator("#btn-submit-dream");
 
     await nameInput.fill("Phan Quang Nhật K22");
@@ -71,7 +70,7 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     await page.goto("/standee");
     await expect(page.locator("h1")).toContainText("DEPLOY ƯỚC MƠ");
     await expect(page.locator("text=Quét Mã Tham Gia Ngay")).toBeVisible();
-    await expect(page.locator("button:has-text('In Standee Poster')")).toBeVisible();
+    await expect(page.locator("button:has-text('In Poster')")).toBeVisible();
   });
 
   test("5. Lucky Draw Minigame Screen (/admin/lucky-draw)", async ({ page }) => {
