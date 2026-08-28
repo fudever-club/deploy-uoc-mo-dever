@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import Image from "next/image";
-import { Dream, LanternItem, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
-import { DREAM_CATEGORIES, EVENT_INFO } from "@/lib/constants";
-import { playLanternAscendChime, playReactionSound, playPoemMagicSound } from "@/lib/audio-synthesizer";
+import { Dream, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
+import { DREAM_CATEGORIES } from "@/lib/constants";
+import { playLanternAscendChime, playReactionSound, playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
 import { ambientSound } from "@/lib/ambient-sound";
 import {
   Sparkles,
@@ -13,7 +13,6 @@ import {
   Maximize,
   Minimize,
   QrCode,
-  Heart,
   X,
   Megaphone,
   Radio,
@@ -21,13 +20,14 @@ import {
   Sun,
   Moon,
   Zap,
-  Layers,
+  RotateCw,
+  Wind,
   Globe2,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
 import { LanternSkyCanvas, SkyTheme } from "@/components/LanternSkyCanvas";
 import { ConstellationGalaxyView } from "@/components/ConstellationGalaxyView";
-import { FloatingLanternCardsSky } from "@/components/FloatingLanternCardsSky";
+import { FloatingLanternCardsSky, FlightMode } from "@/components/FloatingLanternCardsSky";
 
 export default function DisplaySkyPage() {
   const [dreams, setDreams] = useState<Dream[]>([]);
@@ -42,7 +42,8 @@ export default function DisplaySkyPage() {
   const [reactions, setReactions] = useState<LiveReaction[]>([]);
   const [skyTheme, setSkyTheme] = useState<SkyTheme>("midnight");
 
-  // View Mode: Floating Hanging Lanterns vs Constellation Galaxy
+  // Flight Mode: "carousel" (Xoay vòng 3D) vs "drift" (Trôi tự do) vs "galaxy" (Chòm sao)
+  const [flightMode, setFlightMode] = useState<FlightMode>("carousel");
   const [viewMode, setViewMode] = useState<"lanterns" | "galaxy">("lanterns");
 
   const audioUnlocked = useRef(false);
@@ -157,6 +158,7 @@ export default function DisplaySkyPage() {
   }, [soundEnabled]);
 
   const toggleSound = () => {
+    playTactileClick();
     const nextState = !soundEnabled;
     setSoundEnabled(nextState);
     if (nextState) {
@@ -167,6 +169,7 @@ export default function DisplaySkyPage() {
   };
 
   const toggleFullscreen = () => {
+    playTactileClick();
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
       setIsFullscreen(true);
@@ -201,6 +204,7 @@ export default function DisplaySkyPage() {
         <FloatingLanternCardsSky
           dreams={dreams}
           theme={skyTheme}
+          flightMode={flightMode}
           selectedTagFilter={selectedTagFilter}
           onSelectDream={(d) => setSelectedDream(d)}
         />
@@ -242,39 +246,67 @@ export default function DisplaySkyPage() {
 
         {/* Action Controls Dock */}
         <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
-          {/* VIEW MODE SWITCHER (Lanterns vs Galaxy) */}
+          {/* FLIGHT MOTION MODE SWITCHER */}
           <div className="flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg">
             <button
-              onClick={() => setViewMode("lanterns")}
+              onClick={() => {
+                playTactileClick();
+                setViewMode("lanterns");
+                setFlightMode("carousel");
+              }}
               className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                viewMode === "lanterns"
-                  ? "bg-[#993c1d] text-white shadow-xs"
+                viewMode === "lanterns" && flightMode === "carousel"
+                  ? "bg-gradient-to-r from-[#993c1d] to-[#712b13] text-white shadow-xs"
                   : "text-white/70 hover:text-white"
               }`}
-              title="Chế độ Đèn Lồng Treo Thẻ Ước Mơ"
+              title="Chế độ Bay Xoay Vòng 3D (Đèn Kéo Quân Vũ Trụ - Ai cũng được nhìn thấy)"
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Đèn Lồng Bay</span>
+              <RotateCw className="w-3.5 h-3.5 text-amber-300" />
+              <span className="hidden md:inline">Bay Xoay Vòng</span>
             </button>
+
             <button
-              onClick={() => setViewMode("galaxy")}
+              onClick={() => {
+                playTactileClick();
+                setViewMode("lanterns");
+                setFlightMode("drift");
+              }}
+              className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                viewMode === "lanterns" && flightMode === "drift"
+                  ? "bg-gradient-to-r from-[#0091ea] to-[#0055a5] text-white shadow-xs"
+                  : "text-white/70 hover:text-white"
+              }`}
+              title="Chế độ Trôi Tự Do Tự Nhiên"
+            >
+              <Wind className="w-3.5 h-3.5 text-sky-300" />
+              <span className="hidden md:inline">Trôi Tự Do</span>
+            </button>
+
+            <button
+              onClick={() => {
+                playTactileClick();
+                setViewMode("galaxy");
+              }}
               className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
                 viewMode === "galaxy"
-                  ? "bg-[#0091ea] text-white shadow-xs"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs"
                   : "text-white/70 hover:text-white"
               }`}
               title="Chế độ Chòm Sao Thiên Hà"
             >
-              <Globe2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Chòm Sao</span>
+              <Globe2 className="w-3.5 h-3.5 text-purple-300" />
+              <span className="hidden md:inline">Chòm Sao</span>
             </button>
           </div>
 
           {/* SKY THEME SWITCHER */}
           {viewMode === "lanterns" && (
-            <div className="hidden md:flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/30 shadow-lg">
+            <div className="hidden lg:flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/30 shadow-lg">
               <button
-                onClick={() => setSkyTheme("midnight")}
+                onClick={() => {
+                  playTactileClick();
+                  setSkyTheme("midnight");
+                }}
                 className={`p-1.5 rounded-full transition-all cursor-pointer ${
                   skyTheme === "midnight" ? "bg-[#fac775] text-[#12203A]" : "text-white/60 hover:text-white"
                 }`}
@@ -283,7 +315,10 @@ export default function DisplaySkyPage() {
                 <Moon className="w-3.5 h-3.5" />
               </button>
               <button
-                onClick={() => setSkyTheme("cyber")}
+                onClick={() => {
+                  playTactileClick();
+                  setSkyTheme("cyber");
+                }}
                 className={`p-1.5 rounded-full transition-all cursor-pointer ${
                   skyTheme === "cyber" ? "bg-[#00f5d4] text-[#050914]" : "text-white/60 hover:text-white"
                 }`}
@@ -292,7 +327,10 @@ export default function DisplaySkyPage() {
                 <Zap className="w-3.5 h-3.5" />
               </button>
               <button
-                onClick={() => setSkyTheme("dawn")}
+                onClick={() => {
+                  playTactileClick();
+                  setSkyTheme("dawn");
+                }}
                 className={`p-1.5 rounded-full transition-all cursor-pointer ${
                   skyTheme === "dawn" ? "bg-[#ffb800] text-[#3a1306]" : "text-white/60 hover:text-white"
                 }`}
@@ -317,7 +355,10 @@ export default function DisplaySkyPage() {
 
           {/* Standee QR Code Button */}
           <button
-            onClick={() => setShowQRModal(true)}
+            onClick={() => {
+              playTactileClick();
+              setShowQRModal(true);
+            }}
             className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-[#fac775]/30 text-[#fac775] transition-colors shadow-md cursor-pointer"
             title="Mở mã QR Standee"
           >
@@ -326,7 +367,10 @@ export default function DisplaySkyPage() {
 
           {/* Auto-Spotlight Toggle */}
           <button
-            onClick={() => setIsAutoSpotlight(!isAutoSpotlight)}
+            onClick={() => {
+              playTactileClick();
+              setIsAutoSpotlight(!isAutoSpotlight);
+            }}
             className={`p-2.5 rounded-full border transition-colors shadow-md cursor-pointer ${
               isAutoSpotlight
                 ? "bg-[#fac775]/25 border-[#fac775] text-[#fac775]"
@@ -388,7 +432,10 @@ export default function DisplaySkyPage() {
       {/* 6. SPOTLIGHT CAROUSEL BANNER (Bottom-left card) */}
       {currentSpotlightDream && isAutoSpotlight && (
         <div
-          onClick={() => setSelectedDream(currentSpotlightDream)}
+          onClick={() => {
+            playPoemMagicSound();
+            setSelectedDream(currentSpotlightDream);
+          }}
           className="absolute bottom-6 left-6 z-30 max-w-sm p-4 rounded-3xl bg-[#12203A]/90 border border-[#fac775] backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all animate-in slide-in-from-bottom duration-500 pointer-events-auto"
         >
           <div className="flex items-center justify-between text-xs font-bold text-[#fac775] mb-1.5">
@@ -422,7 +469,10 @@ export default function DisplaySkyPage() {
         <div className="absolute bottom-6 inset-x-0 z-30 flex justify-center pointer-events-none px-4">
           <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 rounded-full bg-[#12203A]/85 backdrop-blur-xl border border-[#fac775]/40 shadow-2xl pointer-events-auto overflow-x-auto max-w-full">
             <button
-              onClick={() => setSelectedTagFilter("all")}
+              onClick={() => {
+                playTactileClick();
+                setSelectedTagFilter("all");
+              }}
               className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 selectedTagFilter === "all"
                   ? "bg-[#fac775] text-[#12203a] shadow-xs"
@@ -437,7 +487,10 @@ export default function DisplaySkyPage() {
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedTagFilter(cat.id)}
+                  onClick={() => {
+                    playTactileClick();
+                    setSelectedTagFilter(cat.id);
+                  }}
                   className={`px-2.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
                     selectedTagFilter === cat.id
                       ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"

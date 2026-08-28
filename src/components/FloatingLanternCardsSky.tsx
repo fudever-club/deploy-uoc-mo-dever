@@ -8,9 +8,12 @@ import { SkyTheme } from "@/components/LanternSkyCanvas";
 import { LanternSVG, LanternShape } from "@/components/LanternSVG";
 import { playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
 
+export type FlightMode = "carousel" | "drift";
+
 interface FloatingLanternItem extends Dream {
   x: number; // percentage 0 - 100
   y: number; // percentage 0 - 100
+  z: number; // 3D depth -1 to +1
   vx: number;
   vy: number;
   scale: number;
@@ -18,12 +21,14 @@ interface FloatingLanternItem extends Dream {
   swayOffset: number;
   bobSpeed: number;
   bobOffset: number;
+  orbitAngle: number;
   depth: "foreground" | "midground" | "background";
 }
 
 interface FloatingLanternCardsSkyProps {
   dreams: Dream[];
   theme?: SkyTheme;
+  flightMode?: FlightMode;
   selectedTagFilter?: string;
   onSelectDream: (dream: Dream) => void;
 }
@@ -31,6 +36,7 @@ interface FloatingLanternCardsSkyProps {
 export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = ({
   dreams,
   theme = "midnight",
+  flightMode = "carousel",
   selectedTagFilter = "all",
   onSelectDream,
 }) => {
@@ -39,6 +45,7 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
 
   const lanternsRef = useRef<FloatingLanternItem[]>([]);
   const animFrameRef = useRef<number | null>(null);
+  const orbitBaseAngleRef = useRef(0);
 
   // Initialize floating lanterns with organic positions, velocities, and 3D depth
   useEffect(() => {
@@ -49,15 +56,19 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
       return;
     }
 
+    const total = visibleDreams.length;
+
     const items: FloatingLanternItem[] = visibleDreams.map((d, idx) => {
+      const angle = (idx / total) * Math.PI * 2;
+
       // 3 Depth layers: foreground (clear & big), midground, background (smaller & distant)
       const depthType: "foreground" | "midground" | "background" =
         idx % 5 === 0 ? "foreground" : idx % 3 === 0 ? "midground" : "foreground";
 
       const scale = depthType === "foreground" ? 1 : depthType === "midground" ? 0.85 : 0.72;
 
-      // Distribute evenly across viewport with random stagger
-      const cols = Math.min(8, Math.max(3, Math.ceil(Math.sqrt(visibleDreams.length * 2))));
+      // Drift grid initial distribution
+      const cols = Math.min(8, Math.max(3, Math.ceil(Math.sqrt(total * 2))));
       const row = Math.floor(idx / cols);
       const col = idx % cols;
 
@@ -68,6 +79,7 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
         ...d,
         x: Math.min(92, Math.max(8, baseX)),
         y: Math.min(82, Math.max(12, baseY)),
+        z: Math.sin(angle),
         vx: (Math.random() - 0.5) * 0.035 + (idx % 2 === 0 ? 0.015 : -0.015),
         vy: -Math.random() * 0.02 - 0.008, // gentle upward buoyancy
         scale,
@@ -75,6 +87,7 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
         swayOffset: Math.random() * Math.PI * 2,
         bobSpeed: Math.random() * 0.0018 + 0.001,
         bobOffset: Math.random() * Math.PI * 2,
+        orbitAngle: angle,
         depth: depthType,
       };
     });
@@ -83,7 +96,7 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
     setLanternList([...items]);
   }, [dreams]);
 
-  // Continuous 60fps Drift & Sway Animation Loop
+  // Continuous 60fps Animation Loop (Handles both Carousel Orbit & Drift modes)
   useEffect(() => {
     let lastTime = performance.now();
 
@@ -93,23 +106,52 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
 
       const items = lanternsRef.current;
 
-      items.forEach((item) => {
-        // Natural swaying & bobbing physics
-        item.swayOffset += item.swaySpeed * delta;
-        item.bobOffset += item.bobSpeed * delta;
+      if (flightMode === "carousel") {
+        // 3D REVOLVING ORBIT: Every card rotates gracefully from background to foreground!
+        orbitBaseAngleRef.current += 0.00035 * delta;
+        const baseAngle = orbitBaseAngleRef.current;
+        const total = items.length;
 
-        // Position update
-        item.x += item.vx * (delta / 16);
-        item.y += item.vy * (delta / 16);
+        items.forEach((item, idx) => {
+          const theta = baseAngle + (idx / Math.max(1, total)) * Math.PI * 2;
+          item.orbitAngle = theta;
 
-        // Gentle wrap-around boundaries
-        if (item.y < -15) {
-          item.y = 102;
-          item.x = Math.random() * 84 + 8;
-        }
-        if (item.x < -8) item.x = 104;
-        if (item.x > 104) item.x = -8;
-      });
+          // 3D Orbit projection
+          const cosT = Math.cos(theta);
+          const sinT = Math.sin(theta);
+
+          const radiusX = 40; // horizontal ellipse radius %
+          const radiusY = 22; // vertical ellipse radius %
+
+          item.x = 50 + cosT * radiusX;
+          item.y = 44 + sinT * radiusY * 0.6; // tilted orbital plane
+          item.z = sinT; // -1 (back) to +1 (front stage)
+
+          // Front-stage cards get enhanced scale for 100% crystal-clear readability
+          const depthMultiplier = 0.7 + (sinT + 1) * 0.28; // 0.7x back -> 1.26x front
+          item.scale = depthMultiplier;
+
+          item.swayOffset += item.swaySpeed * delta;
+          item.bobOffset += item.bobSpeed * delta;
+        });
+      } else {
+        // ORGANIC DRIFT MODE
+        items.forEach((item) => {
+          item.swayOffset += item.swaySpeed * delta;
+          item.bobOffset += item.bobSpeed * delta;
+
+          item.x += item.vx * (delta / 16);
+          item.y += item.vy * (delta / 16);
+
+          // Boundaries wrap
+          if (item.y < -15) {
+            item.y = 102;
+            item.x = Math.random() * 84 + 8;
+          }
+          if (item.x < -8) item.x = 104;
+          if (item.x > 104) item.x = -8;
+        });
+      }
 
       setLanternList([...items]);
       animFrameRef.current = requestAnimationFrame(loop);
@@ -120,7 +162,7 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, []);
+  }, [flightMode]);
 
   const filteredList = lanternList.filter(
     (l) => selectedTagFilter === "all" || l.tag === selectedTagFilter
@@ -142,6 +184,11 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
           (item.lanternShape as LanternShape) ||
           (isTech ? "cyber_dever" : item.tag === "big_dream" ? "star" : item.tag === "career" ? "keoquan" : item.tag === "travel" ? "carp_dragon" : "hoian_lotus");
 
+        // Compute 3D layer depth, opacity, and scale
+        const isFrontStage = flightMode === "carousel" ? item.z > 0.1 : item.depth === "foreground";
+        const currentZIndex = isHovered ? 60 : Math.floor((item.z + 1) * 20) + 10;
+        const currentOpacity = isHovered ? 1 : Math.max(0.65, Math.min(1, (item.z + 1.2) / 2.2));
+
         return (
           <div
             key={item.id}
@@ -159,8 +206,8 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
               left: `${item.x}%`,
               top: `${item.y}%`,
               transform: `translate3d(0, ${bobPx}px, 0) scale(${isHovered ? item.scale * 1.25 : item.scale})`,
-              zIndex: isHovered ? 50 : item.depth === "foreground" ? 30 : 20,
-              opacity: item.depth === "background" && !isHovered ? 0.8 : 1,
+              zIndex: currentZIndex,
+              opacity: currentOpacity,
             }}
           >
             {/* LANTERN & HANGING WISH CARD ASSEMBLY */}
@@ -179,9 +226,9 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
               <div className="relative">
                 <LanternSVG
                   shape={shape}
-                  size={60}
+                  size={isFrontStage ? 66 : 52}
                   glow={true}
-                  className={`transition-transform duration-300 ${isHovered ? "scale-110 brightness-125" : "animate-glow"}`}
+                  className={`transition-transform duration-300 ${isHovered ? "scale-115 brightness-125" : "animate-glow"}`}
                 />
 
                 {/* Buggy Mascot Sticker Badge */}
@@ -201,18 +248,23 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
 
               {/* 4. THE HANGING PARCHMENT WISH CARD TAG (Thẻ Ước Nguyện Treo Đèn) */}
               <div
-                className={`relative w-44 sm:w-52 p-3 rounded-2xl transition-all ${
+                className={`relative w-44 sm:w-56 p-3 rounded-2xl transition-all ${
                   isTech
                     ? "bg-[#0a162b]/95 border-2 border-[#00f5d4]/80 shadow-[0_8px_25px_rgba(0,245,212,0.3)] text-[#00f5d4]"
                     : "bg-[#fffdf8]/95 border-2 border-[#fac775] shadow-[0_8px_30px_rgba(153,60,29,0.35)] text-[#1f2937]"
-                } backdrop-blur-xl group-hover:shadow-[0_12px_40px_rgba(250,199,117,0.6)]`}
+                } backdrop-blur-xl group-hover:shadow-[0_12px_40px_rgba(250,199,117,0.6)] ${isFrontStage ? "ring-2 ring-[#fac775]/40" : ""}`}
               >
                 {/* Traditional Tag Hanging Ringlet Top */}
                 <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3.5 h-2 rounded-t-full border-t-2 border-x-2 border-[#fac775] bg-transparent" />
 
+                {/* Front-stage Spotlight Indicator Dot */}
+                {isFrontStage && (
+                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                )}
+
                 {/* Tag Header: Name + Emoji */}
                 <div className="flex items-center justify-between text-[11px] font-black mb-1 pb-1 border-b border-amber-200/50">
-                  <span className={`truncate max-w-[120px] ${isTech ? "text-white" : "text-[#993c1d]"}`}>
+                  <span className={`truncate max-w-[130px] ${isTech ? "text-white" : "text-[#993c1d]"}`}>
                     ✨ {item.name || "Tân Sinh Viên K22"}
                   </span>
                   <span className="text-xs">{category?.emoji}</span>
