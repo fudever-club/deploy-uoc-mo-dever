@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Dream, DreamCategory } from "@/types/dream";
 import { DREAM_CATEGORIES } from "@/lib/constants";
 import { SkyTheme } from "@/components/LanternSkyCanvas";
+import { LanternSVG, LanternShape } from "@/components/LanternSVG";
 import { playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
 
 interface FloatingLanternItem extends Dream {
@@ -38,7 +39,6 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
 
   const lanternsRef = useRef<FloatingLanternItem[]>([]);
   const animFrameRef = useRef<number | null>(null);
-  const mousePosRef = useRef<{ x: number; y: number }>({ x: -1000, y: -1000 });
 
   // Initialize floating lanterns with organic positions, velocities, and 3D depth
   useEffect(() => {
@@ -122,28 +122,25 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
     };
   }, []);
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    mousePosRef.current = { x: e.clientX, y: e.clientY };
-  };
-
   const filteredList = lanternList.filter(
     (l) => selectedTagFilter === "all" || l.tag === selectedTagFilter
   );
 
   return (
-    <div
-      onPointerMove={handlePointerMove}
-      className="absolute inset-0 z-15 overflow-hidden select-none pointer-events-none"
-    >
+    <div className="absolute inset-0 z-15 overflow-hidden select-none pointer-events-none">
       {filteredList.map((item) => {
         const category = DREAM_CATEGORIES.find((c) => c.id === item.tag);
         const isHovered = hoveredId === item.id;
         const isTech = item.theme === "tech" || theme === "cyber";
-        const isGold = item.theme === "gold" || theme === "dawn";
 
         // Dynamic pendulum sway calculation
         const swayDeg = Math.sin(item.swayOffset) * 4.5;
         const bobPx = Math.sin(item.bobOffset) * 6;
+
+        // Determine shape: explicitly selected or mapped from theme/category
+        const shape: LanternShape =
+          (item.lanternShape as LanternShape) ||
+          (isTech ? "cyber_dever" : item.tag === "big_dream" ? "star" : item.tag === "career" ? "keoquan" : item.tag === "travel" ? "carp_dragon" : "hoian_lotus");
 
         return (
           <div
@@ -163,7 +160,7 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
               top: `${item.y}%`,
               transform: `translate3d(0, ${bobPx}px, 0) scale(${isHovered ? item.scale * 1.25 : item.scale})`,
               zIndex: isHovered ? 50 : item.depth === "foreground" ? 30 : 20,
-              opacity: item.depth === "background" && !isHovered ? 0.75 : 1,
+              opacity: item.depth === "background" && !isHovered ? 0.8 : 1,
             }}
           >
             {/* LANTERN & HANGING WISH CARD ASSEMBLY */}
@@ -178,46 +175,25 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
               {/* 1. TOP SUSPENSION CORD */}
               <div className="w-0.5 h-6 bg-gradient-to-b from-amber-300/20 via-amber-300/80 to-[#fac775]" />
 
-              {/* 2. THE GLOWING MID-AUTUMN LANTERN BULB */}
+              {/* 2. THE GLOWING HIGH-DEFINITION SVG LANTERN */}
               <div className="relative">
-                {/* Lantern Top Wooden Cap */}
-                <div className="w-10 h-2 mx-auto rounded-t-md bg-[#fac775] border-t border-x border-amber-200 shadow-xs flex items-center justify-center">
-                  <div className="w-4 h-1 rounded-full bg-[#993c1d]/40" />
+                <LanternSVG
+                  shape={shape}
+                  size={60}
+                  glow={true}
+                  className={`transition-transform duration-300 ${isHovered ? "scale-110 brightness-125" : "animate-glow"}`}
+                />
+
+                {/* Buggy Mascot Sticker Badge */}
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#12203A] border border-[#fac775] p-0.5 shadow-md">
+                  <Image
+                    src={`/assets/buggy/${item.mascotIndex || 1}.png`}
+                    alt="Buggy Sticker"
+                    width={20}
+                    height={20}
+                    className="object-contain"
+                  />
                 </div>
-
-                {/* Lantern Body (Red Silk / Cyber / Gold) with Candle Glow */}
-                <div
-                  className={`relative w-16 h-18 rounded-[2rem] flex items-center justify-center p-1 shadow-2xl transition-all ${
-                    isTech
-                      ? "bg-gradient-to-b from-[#0091ea] via-[#0055a5] to-[#002244] border-2 border-[#00f5d4] shadow-[0_0_30px_rgba(0,245,212,0.6)]"
-                      : isGold
-                      ? "bg-gradient-to-b from-[#ffb800] via-[#993c1d] to-[#712b13] border-2 border-[#fac775] shadow-[0_0_35px_rgba(250,199,117,0.7)]"
-                      : "bg-gradient-to-b from-[#c8411b] via-[#993c1d] to-[#631f0a] border-2 border-[#fac775] shadow-[0_0_35px_rgba(250,199,117,0.6)]"
-                  } ${isHovered ? "brightness-125 scale-105" : ""}`}
-                >
-                  {/* Subtle vertical lantern rib lines */}
-                  <div className="absolute inset-x-2 inset-y-0.5 border-x border-white/20 rounded-full pointer-events-none" />
-                  <div className="absolute inset-x-4 inset-y-0.5 border-x border-white/10 rounded-full pointer-events-none" />
-
-                  {/* Inner Warm Flame Core */}
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-300 via-amber-200 to-white animate-pulse shadow-[0_0_20px_#FAC775] flex items-center justify-center text-xs">
-                    🏮
-                  </div>
-
-                  {/* Mascot Badge Ring on Lantern */}
-                  <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-[#12203A] border border-[#fac775] p-0.5 shadow-md">
-                    <Image
-                      src={`/assets/buggy/${item.mascotIndex || 1}.png`}
-                      alt="Buggy Sticker"
-                      width={20}
-                      height={20}
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-
-                {/* Lantern Bottom Wooden Base */}
-                <div className="w-10 h-2 mx-auto rounded-b-md bg-[#fac775] border-b border-x border-amber-200 shadow-xs" />
               </div>
 
               {/* 3. TETHER STRING CONNECTING LANTERN TO WISH CARD */}

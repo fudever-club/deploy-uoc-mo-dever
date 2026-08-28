@@ -26,12 +26,13 @@ export interface Dream {
   id: string;
   name: string | null;
   content: string;
-  tag: DreamCategory | null;
+  tag: DreamCategory;
   consent: boolean;
   created_at: string;
   hidden: boolean;
   mascotIndex?: number;
   theme?: CardTheme;
+  lanternShape?: string;
 }
 
 export interface DreamInput {
@@ -41,6 +42,7 @@ export interface DreamInput {
   consent: boolean;
   mascotIndex?: number;
   theme?: CardTheme;
+  lanternShape?: string;
 }
 
 export interface LanternItem extends Dream {

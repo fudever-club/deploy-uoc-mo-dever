@@ -6,6 +6,7 @@ import confetti from "canvas-confetti";
 import { DREAM_CATEGORIES, BUGGY_MOODS, INSPIRATION_PROMPTS } from "@/lib/constants";
 import { Dream, DreamCategory, CardTheme } from "@/types/dream";
 import { generatePoem } from "@/lib/poem-generator";
+import { LanternSVG, LANTERN_SHAPES, LanternShape } from "@/components/LanternSVG";
 import { playLanternAscendChime, playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
 import { DreamCardModal } from "@/components/DreamCardModal";
 import { ARPhotoBoothModal } from "@/components/ARPhotoBoothModal";
@@ -24,6 +25,7 @@ import {
   Flame,
   Camera,
   Feather,
+  Layers,
 } from "lucide-react";
 
 export default function WishSubmissionPage() {
@@ -35,6 +37,7 @@ export default function WishSubmissionPage() {
   const [tag, setTag] = useState<DreamCategory>("career");
   const [mascotIndex, setMascotIndex] = useState<number>(1);
   const [theme, setTheme] = useState<CardTheme>("classic");
+  const [lanternShape, setLanternShape] = useState<LanternShape>("hoian_lotus");
   const [consent, setConsent] = useState(true);
 
   // Status & Response
@@ -111,6 +114,7 @@ export default function WishSubmissionPage() {
           tag,
           mascotIndex,
           theme,
+          lanternShape,
           consent,
         }),
       });
@@ -148,6 +152,7 @@ export default function WishSubmissionPage() {
     setTag("career");
     setMascotIndex(1);
     setTheme("classic");
+    setLanternShape("hoian_lotus");
     setConsent(true);
     setGeneratedPoem(null);
     setCreatedDream(null);
@@ -244,16 +249,16 @@ export default function WishSubmissionPage() {
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-[#fac775]/40 text-xs text-[#712b13]">
                 <span className="text-xl">🌌</span>
                 <div>
-                  <strong className="block text-[#993c1d]">Chiếu trực tiếp lên Màn hình lớn</strong>
-                  <span className="text-slate-600 text-[11px]">Đèn lồng mang tên bạn bay lượn trên bầu trời đêm gian hàng.</span>
+                  <strong className="block text-[#993c1d]">Đèn Lồng Thả Thẻ Ước Mơ Bay Lượn</strong>
+                  <span className="text-slate-600 text-[11px]">Đèn lồng gắn thẻ ước nguyện mang tên bạn trôi dạt trên bầu trời đêm gian hàng.</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 text-xs text-[#0055a5]">
                 <span className="text-xl">🎨</span>
                 <div>
-                  <strong className="block text-[#0055a5]">Nhận Dream Card Story 9:16</strong>
-                  <span className="text-slate-600 text-[11px]">Đóng dấu triện đỏ & linh vật Buggy để chia sẻ lên Instagram/Facebook.</span>
+                  <strong className="block text-[#0055a5]">Nhận Dream Card Story 9:16 & Polaroid</strong>
+                  <span className="text-slate-600 text-[11px]">Đóng dấu triện đỏ, chụp ảnh photo booth để chia sẻ lên Instagram/Facebook.</span>
                 </div>
               </div>
             </div>
@@ -337,6 +342,37 @@ export default function WishSubmissionPage() {
                 </div>
               </div>
 
+              {/* LANTERN TEMPLATE SHAPE PICKER */}
+              <div>
+                <label className="flex items-center gap-1 text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <Layers className="w-3.5 h-3.5 text-[#993c1d]" />
+                  <span>Chọn dáng Đèn Lồng Trung Thu:</span>
+                </label>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+                  {LANTERN_SHAPES.map((shape) => (
+                    <button
+                      key={shape.id}
+                      type="button"
+                      onClick={() => {
+                        playTactileClick();
+                        setLanternShape(shape.id);
+                      }}
+                      className={`p-2 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer border ${
+                        lanternShape === shape.id
+                          ? "bg-[#fac775]/25 border-2 border-[#993c1d] scale-105 shadow-sm"
+                          : "bg-slate-50 hover:bg-slate-100 border-slate-200"
+                      }`}
+                      title={shape.description}
+                    >
+                      <LanternSVG shape={shape.id} size={30} glow={false} />
+                      <span className="text-[10px] font-bold text-slate-700 truncate w-full text-center">
+                        {shape.name.split(" ")[1] || shape.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Quick Prompts & AI Poem Engine */}
               <div>
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
@@ -391,23 +427,27 @@ export default function WishSubmissionPage() {
                 </div>
               </div>
 
-              {/* LIVE MINI PREVIEW CARD */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#12203A] to-[#0a1222] border border-[#fac775]/40 text-[#faeeda] shadow-inner relative overflow-hidden">
-                <div className="flex items-center justify-between text-[11px] text-[#fac775] font-bold mb-1">
-                  <div className="flex items-center gap-1">
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>Xem trước đèn lồng: {name || "Ẩn danh"}</span>
-                  </div>
-                  <span>{DREAM_CATEGORIES.find((c) => c.id === tag)?.emoji}</span>
+              {/* LIVE MINI PREVIEW CARD WITH SELECTED LANTERN */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#12203A] to-[#0a1222] border border-[#fac775]/40 text-[#faeeda] shadow-inner relative overflow-hidden flex items-center gap-3">
+                <div className="shrink-0 flex flex-col items-center">
+                  <LanternSVG shape={lanternShape} size={42} glow={true} className="animate-glow" />
+                  <div className="w-0.5 h-3 bg-[#fac775]" />
+                  <div className="w-2 h-2 rounded-full bg-[#993c1d] border border-[#fac775]" />
                 </div>
-                <p className="text-xs text-white/90 italic font-medium line-clamp-3 whitespace-pre-line">
-                  &ldquo;{content || "Nội dung ước mơ của bạn sẽ xuất hiện lung linh tại đây..."}&rdquo;
-                </p>
-                {generatedPoem && (
-                  <div className="mt-1 text-[10px] text-amber-300 font-bold">
-                    🏮 {generatedPoem.badge}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between text-[11px] text-[#fac775] font-bold mb-0.5">
+                    <span className="truncate">Thẻ treo đèn: {name || "Ẩn danh K22"}</span>
+                    <span>{DREAM_CATEGORIES.find((c) => c.id === tag)?.emoji}</span>
                   </div>
-                )}
+                  <p className="text-xs text-white/90 italic font-medium line-clamp-2 whitespace-pre-line leading-tight">
+                    &ldquo;{content || "Nội dung ước mơ của bạn sẽ xuất hiện lung linh tại đây..."}&rdquo;
+                  </p>
+                  {generatedPoem && (
+                    <div className="mt-1 text-[10px] text-amber-300 font-bold">
+                      🏮 {generatedPoem.badge}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Customizer: Mascot & Theme */}
@@ -540,17 +580,14 @@ export default function WishSubmissionPage() {
         {/* STEP 3: THANK YOU & CELEBRATION SCREEN */}
         {step === "thankyou" && createdDream && (
           <div className="bg-white/95 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(153,60,29,0.08)] border border-[#fac775]/50 backdrop-blur-xl text-center animate-in zoom-in-95 duration-300">
-            {/* Success Mascot */}
-            <div className="relative mx-auto w-20 h-20 mb-3 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-[#faeeda] border-2 border-[#fac775] text-[#993c1d] flex items-center justify-center shadow-lg">
-                <Image
-                  src={`/assets/buggy/${createdDream.mascotIndex || 1}.png`}
-                  alt="Buggy Happy"
-                  width={48}
-                  height={48}
-                  className="object-contain animate-bounce"
-                />
-              </div>
+            {/* Selected Lantern SVG Floating in Victory */}
+            <div className="relative mx-auto mb-2 flex items-center justify-center">
+              <LanternSVG
+                shape={(createdDream.lanternShape as LanternShape) || lanternShape}
+                size={72}
+                glow={true}
+                className="animate-float"
+              />
             </div>
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fac775]/30 text-[#712b13] text-xs font-black uppercase tracking-wider mb-2">
