@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dream, CardTheme } from "@/types/dream";
-import { DREAM_CATEGORIES, getBuggyMascotUrl, DEVER_STAMPS, getDeverStampInfo } from "@/lib/constants";
+import { getBuggyMascotUrl, DEVER_STAMPS, getDeverStampInfo } from "@/lib/constants";
 import { downloadDreamCard, renderDreamCardToDataUrl, renderBoardingPassCardToDataUrl } from "@/lib/dream-card-canvas";
-import { LanternSVG, LanternShape } from "@/components/LanternSVG";
 import { playTactileClick } from "@/lib/audio-synthesizer";
-import { Download, Share2, X, Sparkles, Check, Palette, Ticket, Layers, Stamp } from "lucide-react";
+import { Download, Share2, X, Sparkles, Check, Palette, Ticket, Layers, Stamp, Eye } from "lucide-react";
 import Image from "next/image";
 
 interface DreamCardModalProps {
@@ -37,14 +36,47 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
     dream.mascotIndex || "11"
   );
   const [selectedStamp, setSelectedStamp] = useState<string>(dream.stampVariant || "lantern");
+  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  if (!isOpen || !dream) return null;
+  // Live Canvas 9:16 Preview Generator
+  useEffect(() => {
+    if (!isOpen || !dream) return;
+    let active = true;
+    setIsLoadingPreview(true);
 
-  const categoryInfo = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
-  const shape = (dream.lanternShape as LanternShape) || "hoian_lotus";
-  const currentStamp = getDeverStampInfo(selectedStamp, selectedTheme);
+    const customizedDream: Dream = {
+      ...dream,
+      theme: selectedTheme,
+      mascotIndex: selectedMascot,
+      stampVariant: selectedStamp,
+    };
+
+    const generatePreview = async () => {
+      try {
+        const url =
+          cardFormat === "boarding_pass"
+            ? await renderBoardingPassCardToDataUrl(customizedDream, { width: 540, height: 960 })
+            : await renderDreamCardToDataUrl(customizedDream, { width: 540, height: 960 });
+        if (active) {
+          setPreviewDataUrl(url);
+          setIsLoadingPreview(false);
+        }
+      } catch (err) {
+        console.error("Preview render failed:", err);
+        if (active) setIsLoadingPreview(false);
+      }
+    };
+
+    generatePreview();
+    return () => {
+      active = false;
+    };
+  }, [isOpen, dream, cardFormat, selectedTheme, selectedMascot, selectedStamp]);
+
+  if (!isOpen || !dream) return null;
 
   const handleDownload = async () => {
     playTactileClick();
@@ -298,321 +330,26 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
           </div>
         </div>
 
-        {/* CRISP REAL-TIME LIVE 9:16 DREAM CARD / BOARDING PASS PREVIEW */}
-        <div className="relative flex-1 min-h-[380px] max-h-[470px] overflow-hidden rounded-2xl border-2 border-[#fac775]/40 bg-[#060c18] flex items-center justify-center p-3 shadow-2xl">
-          {cardFormat === "boarding_pass" ? (
-            /* BOARDING PASS LIVE PREVIEW */
-            <div className="relative w-full max-w-[260px] aspect-[9/16] rounded-2xl bg-white text-slate-900 flex flex-col justify-between overflow-hidden shadow-2xl border-2 border-amber-300 select-none">
-              {/* Top Airline Header */}
-              <div
-                className={`p-2.5 text-white ${
-                  selectedTheme === "tech"
-                    ? "bg-gradient-to-r from-[#0091ea] to-[#00f5d4]"
-                    : selectedTheme === "gold"
-                    ? "bg-gradient-to-r from-[#b87c12] to-[#ffd166]"
-                    : "bg-gradient-to-r from-[#993c1d] to-[#e63946]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-wider uppercase font-mono">
-                    FU-DEVER SPACEWAYS
-                  </span>
-                  <span className="text-[8px] font-extrabold px-1.5 py-0.2 rounded bg-white/20 uppercase font-mono">
-                    FIRST CLASS
-                  </span>
-                </div>
-                <div className="text-[8px] font-bold text-white/90 font-mono">
-                  BOARDING PASS · VÉ LÊN TÀU K22
-                </div>
-              </div>
-
-              {/* Flight Parameter Grid */}
-              <div className="p-2.5 space-y-1.5 text-left text-[9px]">
-                <div className="grid grid-cols-3 gap-1 pb-1 border-b border-slate-200">
-                  <div>
-                    <span className="text-[7px] text-slate-400 font-bold block">FLIGHT</span>
-                    <span className="font-mono font-black text-slate-900">DEVER-K22</span>
-                  </div>
-                  <div>
-                    <span className="text-[7px] text-slate-400 font-bold block">GATE</span>
-                    <span className="font-mono font-black text-slate-900">01 (FPTU)</span>
-                  </div>
-                  <div>
-                    <span className="text-[7px] text-slate-400 font-bold block">SEAT</span>
-                    <span className="font-mono font-black text-slate-900">22A VIP</span>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[7px] text-slate-400 font-bold block">PASSENGER</span>
-                  <span className="font-black text-[11px] text-slate-900 truncate block">
-                    {dream.name || "TÂN SINH VIÊN K22"}
-                  </span>
-                </div>
-
-                {/* Route Banner */}
-                <div className="p-1 rounded bg-slate-50 border border-slate-200 flex items-center justify-between text-[8px] font-black font-mono">
-                  <span>FPTU DAD</span>
-                  <span className="text-[#993c1d]">✈ ── 🚀 ── 🏮</span>
-                  <span className="text-[#0091ea]">DEVER DEV</span>
-                </div>
-
-                {/* Wish Content Snippet & Stamp */}
-                <div className="p-1.5 rounded bg-amber-50/70 border border-amber-200/80 relative">
-                  <span className="text-[7px] text-[#993c1d] font-bold block uppercase mb-0.5">
-                    📜 Lời nguyện cất cánh:
-                  </span>
-                  <p className="text-[9px] italic text-slate-800 line-clamp-2 leading-tight font-serif">
-                    &ldquo;{dream.content}&rdquo;
-                  </p>
-
-                  <div className="flex items-center justify-between mt-1 pt-1 border-t border-amber-200/60">
-                    {/* DEVER Stamp on Ticket */}
-                    <div className="flex items-center gap-1 p-0.5 px-1 rounded border border-rose-500/50 bg-rose-50/90 rotate-[-4deg] max-w-[120px] shadow-xs">
-                      <Image
-                        src={currentStamp.image}
-                        alt={currentStamp.label}
-                        width={16}
-                        height={16}
-                        className="object-contain shrink-0"
-                      />
-                      <span className="text-[6px] font-black text-rose-700 truncate">
-                        {currentStamp.label}
-                      </span>
-                    </div>
-
-                    {/* Mascot sticker */}
-                    <div className="w-6 h-6 rounded-full bg-white border border-amber-300 p-0.5 shadow-xs shrink-0">
-                      <Image
-                        src={getBuggyMascotUrl(selectedMascot)}
-                        alt="Buggy"
-                        width={20}
-                        height={20}
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Perforated Divider */}
-              <div className="relative border-b-2 border-dashed border-slate-300 my-0.5">
-                <div className="absolute -left-2 -top-2 w-4 h-4 rounded-full bg-[#060c18]" />
-                <div className="absolute -right-2 -top-2 w-4 h-4 rounded-full bg-[#060c18]" />
-              </div>
-
-              {/* Bottom Barcode Stub */}
-              <div className="p-2 text-center">
-                {/* Barcode representation */}
-                <div className="h-6 flex items-center justify-center gap-0.5 bg-slate-100 p-1 rounded">
-                  {[4, 2, 6, 1, 3, 5, 2, 4, 1, 6, 3, 2, 5, 2, 4, 2, 6, 1, 4, 3].map((w, i) => (
-                    <div key={i} className="h-full bg-slate-900" style={{ width: `${w}px` }} />
-                  ))}
-                </div>
-                <div className="text-[7px] font-mono font-bold text-slate-500 mt-1">
-                  SN: DEVER-K22-FPTU
-                </div>
-                <div className="text-[7px] font-extrabold text-[#993c1d] mt-0.5">
-                  #FUDEVER #DeployUocMo
-                </div>
-              </div>
+        {/* 100% WYSIWYG PIXEL-PERFECT 9:16 STORY CARD PREVIEW CONTAINER */}
+        <div className="relative flex-1 min-h-[380px] max-h-[480px] overflow-hidden rounded-2xl border-2 border-[#fac775]/40 bg-[#060c18] flex items-center justify-center p-3 shadow-2xl">
+          {isLoadingPreview && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/60 z-10 backdrop-blur-xs">
+              <Sparkles className="w-6 h-6 text-amber-400 animate-spin" />
+              <span className="text-xs text-amber-200 font-bold">Đang kiến tạo thiệp 9:16...</span>
             </div>
+          )}
+
+          {previewDataUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={previewDataUrl}
+              alt="Story Card Preview"
+              className="w-auto h-full max-h-[440px] aspect-[9/16] object-contain rounded-xl shadow-2xl transition-all duration-300 animate-in zoom-in-95 fade-in"
+            />
           ) : (
-            /* CLASSIC POSTCARD LIVE PREVIEW */
-            <div
-              className={`relative w-full max-w-[260px] aspect-[9/16] rounded-2xl p-4 flex flex-col justify-between text-center overflow-hidden shadow-2xl border ${
-                selectedTheme === "tech"
-                  ? "bg-gradient-to-b from-[#030814] via-[#091a38] to-[#0c2856] border-[#00f5d4] text-[#00f5d4]"
-                  : selectedTheme === "gold"
-                  ? "bg-gradient-to-b from-[#2c1800] via-[#593404] to-[#8c5408] border-[#ffd166] text-[#ffd166] shadow-[0_0_30px_rgba(255,209,102,0.25)]"
-                  : "bg-gradient-to-b from-[#280505] via-[#61100b] to-[#993c1d] border-[#fac775] text-[#faeeda]"
-              }`}
-            >
-              {/* Background Ambient Glow & Star Orbs */}
-              <div
-                className={`absolute top-0 right-0 w-36 h-36 rounded-full blur-2xl pointer-events-none ${
-                  selectedTheme === "tech"
-                    ? "bg-cyan-500/25"
-                    : selectedTheme === "gold"
-                    ? "bg-amber-300/35"
-                    : "bg-amber-400/20"
-                }`}
-              />
-              <div
-                className={`absolute bottom-0 left-0 w-32 h-32 rounded-full blur-2xl pointer-events-none ${
-                  selectedTheme === "tech"
-                    ? "bg-blue-600/20"
-                    : selectedTheme === "gold"
-                    ? "bg-yellow-600/30"
-                    : "bg-red-600/20"
-                }`}
-              />
-
-              {/* Inner Border Trim */}
-              <div
-                className={`absolute inset-1.5 border rounded-xl pointer-events-none ${
-                  selectedTheme === "tech"
-                    ? "border-[#00f5d4]/40"
-                    : selectedTheme === "gold"
-                    ? "border-[#ffd166]/60"
-                    : "border-white/20"
-                }`}
-              />
-
-              {/* 1. Header: Lantern & Event Tag */}
-              <div className="relative z-10 flex flex-col items-center">
-                {/* Top Right DEVER Stamp Emblem */}
-                <div className="absolute right-0 top-0 w-8 h-8 rounded-full border-2 border-[#fac775] p-0.5 bg-black/40 rotate-[8deg] shadow-xs flex items-center justify-center">
-                  <Image
-                    src={currentStamp.image}
-                    alt={currentStamp.label}
-                    width={24}
-                    height={24}
-                    className="object-contain"
-                  />
-                </div>
-
-                <div className="relative mb-1">
-                  <LanternSVG shape={shape} size={42} glow={true} />
-                </div>
-                <span
-                  className={`text-[9px] font-black tracking-widest uppercase drop-shadow-sm ${
-                    selectedTheme === "tech"
-                      ? "text-[#00f5d4]"
-                      : selectedTheme === "gold"
-                      ? "text-[#ffd166]"
-                      : "text-amber-300"
-                  }`}
-                >
-                  DEPLOY ƯỚC MƠ 2026
-                </span>
-                <div
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold mt-0.5 border ${
-                    selectedTheme === "tech"
-                      ? "bg-[#00f5d4]/15 border-[#00f5d4]/40 text-[#00f5d4]"
-                      : selectedTheme === "gold"
-                      ? "bg-[#ffd166]/20 border-[#ffd166]/50 text-[#fff3d1]"
-                      : "bg-white/10 border-white/10 text-white/90"
-                  }`}
-                >
-                  <span>{categoryInfo?.emoji || "🏮"}</span>
-                  <span>{categoryInfo?.shortLabel || "Ước mơ"}</span>
-                </div>
-              </div>
-
-              {/* 2. Middle: Content Box with Buggy Mascot */}
-              <div
-                className={`relative z-10 my-auto rounded-xl p-3 border backdrop-blur-sm ${
-                  selectedTheme === "tech"
-                    ? "bg-[#030c1a]/85 border-[#00f5d4]/40"
-                    : selectedTheme === "gold"
-                    ? "bg-[#241402]/90 border-[#ffd166]/60"
-                    : "bg-black/40 border-white/15"
-                }`}
-              >
-                <h4
-                  className={`text-xs font-black mb-1 truncate ${
-                    selectedTheme === "gold" ? "text-[#ffd166]" : "text-white"
-                  }`}
-                >
-                  {dream.name ? `Ước Mơ Của ${dream.name}` : "Ước Nguyện K22"}
-                </h4>
-                <div className="relative">
-                  <span
-                    className={`text-xs font-serif opacity-70 ${
-                      selectedTheme === "tech"
-                        ? "text-[#00f5d4]"
-                        : selectedTheme === "gold"
-                        ? "text-[#ffd166]"
-                        : "text-amber-300"
-                    }`}
-                  >
-                    “
-                  </span>
-                  <p
-                    className={`text-[10px] italic font-medium line-clamp-3 leading-relaxed whitespace-pre-line px-1 ${
-                      selectedTheme === "gold" ? "text-[#fff8e7]" : "text-white/95"
-                    }`}
-                  >
-                    {dream.content}
-                  </p>
-                  <span
-                    className={`text-xs font-serif opacity-70 float-right ${
-                      selectedTheme === "tech"
-                        ? "text-[#00f5d4]"
-                        : selectedTheme === "gold"
-                        ? "text-[#ffd166]"
-                        : "text-amber-300"
-                    }`}
-                  >
-                    ”
-                  </span>
-                </div>
-
-                {/* Traditional Seal & Buggy Mascot Stamp */}
-                <div className="flex items-center justify-between mt-2 px-1">
-                  <div
-                    className={`px-2 py-0.5 rounded-md border text-[10px] font-black tracking-wider transform -rotate-6 ${
-                      selectedTheme === "tech"
-                        ? "border-[#00f5d4] bg-[#00f5d4]/20 text-[#00f5d4]"
-                        : selectedTheme === "gold"
-                        ? "border-[#ffd166] bg-[#ffd166]/20 text-[#ffd166]"
-                        : "border-red-400 bg-red-900/60 text-red-300"
-                    }`}
-                  >
-                    {selectedTheme === "tech" ? "DEVER" : selectedTheme === "gold" ? "HOÀNG KIM" : "ĐỖ ĐẠT"}
-                  </div>
-                  <div
-                    className={`w-8 h-8 rounded-full border p-0.5 shadow-md flex items-center justify-center ${
-                      selectedTheme === "gold"
-                        ? "bg-[#2c1800] border-[#ffd166]"
-                        : "bg-[#12203A] border-[#fac775]"
-                    }`}
-                  >
-                    <Image
-                      src={getBuggyMascotUrl(selectedMascot)}
-                      alt="Buggy Mascot"
-                      width={28}
-                      height={28}
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Footer: Brand Logo & Hashtags */}
-              <div
-                className={`relative z-10 border-t pt-1.5 ${
-                  selectedTheme === "tech"
-                    ? "border-[#00f5d4]/30"
-                    : selectedTheme === "gold"
-                    ? "border-[#ffd166]/40"
-                    : "border-white/15"
-                }`}
-              >
-                <div
-                  className={`text-[10px] font-bold ${
-                    selectedTheme === "tech"
-                      ? "text-[#85b7eb]"
-                      : selectedTheme === "gold"
-                      ? "text-[#ffeaa7]"
-                      : "text-white/80"
-                  }`}
-                >
-                  CLB LẬP TRÌNH FU-DEVER · FPTU
-                </div>
-                <div
-                  className={`text-[9px] font-mono ${
-                    selectedTheme === "tech"
-                      ? "text-[#00f5d4]"
-                      : selectedTheme === "gold"
-                      ? "text-[#ffd166]"
-                      : "text-amber-300"
-                  }`}
-                >
-                  #FUDEVER #DeployUocMo
-                </div>
-              </div>
+            <div className="flex flex-col items-center gap-2 text-slate-400">
+              <Eye className="w-8 h-8 opacity-40" />
+              <span className="text-xs">Đang tải bản xem trước...</span>
             </div>
           )}
         </div>
