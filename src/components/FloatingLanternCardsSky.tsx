@@ -37,6 +37,8 @@ interface SingleLanternCardProps {
   dream: Dream;
   flightMode: FlightMode;
   onSelect: (dream: Dream) => void;
+  onHoverStart: (id: string) => void;
+  onHoverEnd: (id: string) => void;
   setRef: (id: string, el: HTMLDivElement | null) => void;
   setSwayRef: (id: string, el: HTMLDivElement | null) => void;
 }
@@ -44,6 +46,8 @@ interface SingleLanternCardProps {
 const SingleLanternCard = memo(function SingleLanternCard({
   dream,
   onSelect,
+  onHoverStart,
+  onHoverEnd,
   setRef,
   setSwayRef,
 }: SingleLanternCardProps) {
@@ -69,13 +73,21 @@ const SingleLanternCard = memo(function SingleLanternCard({
 
   const handleMouseEnter = useCallback(() => {
     playTactileClick();
-  }, []);
+    onHoverStart(dream.id);
+  }, [dream.id, onHoverStart]);
+
+  const handleMouseLeave = useCallback(() => {
+    onHoverEnd(dream.id);
+  }, [dream.id, onHoverEnd]);
 
   return (
     <div
       ref={(el) => setRef(dream.id, el)}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleMouseEnter}
+      onTouchEnd={handleMouseLeave}
       className="absolute top-0 left-0 pointer-events-auto cursor-pointer will-change-transform select-none"
       style={{
         transform: "translate3d(-1000px, -1000px, 0)",
@@ -177,10 +189,25 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
   const swayElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const physicsMapRef = useRef<Map<string, LanternPhysicsItem>>(new Map());
 
+  const isHoveredRef = useRef(false);
+  const hoveredDreamIdRef = useRef<string | null>(null);
+
   const animFrameRef = useRef<number | null>(null);
   const orbitBaseAngleRef = useRef(0);
   const flightModeRef = useRef<FlightMode>(flightMode);
   flightModeRef.current = flightMode;
+
+  const handleHoverStart = useCallback((id: string) => {
+    isHoveredRef.current = true;
+    hoveredDreamIdRef.current = id;
+  }, []);
+
+  const handleHoverEnd = useCallback((id: string) => {
+    if (hoveredDreamIdRef.current === id) {
+      isHoveredRef.current = false;
+      hoveredDreamIdRef.current = null;
+    }
+  }, []);
 
   const setCardRef = useCallback((id: string, el: HTMLDivElement | null) => {
     if (el) {
@@ -266,8 +293,14 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
       const cardElements = cardElementsRef.current;
       const swayElements = swayElementsRef.current;
 
+      const isHovered = isHoveredRef.current;
+      const hoveredId = hoveredDreamIdRef.current;
+
       if (mode === "carousel") {
-        orbitBaseAngleRef.current += 0.00035 * delta;
+        // Reduced rotation speed to x0.8 of original: 0.00035 * 0.8 = 0.00028
+        if (!isHovered) {
+          orbitBaseAngleRef.current += 0.00028 * delta;
+        }
         const baseAngle = orbitBaseAngleRef.current;
         const total = physicsMap.size;
         let idx = 0;
@@ -293,18 +326,23 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
           const depthMultiplier = 0.72 + (sinT + 1) * 0.26;
           item.currentScale = depthMultiplier;
 
-          item.swayOffset += item.swaySpeed * delta;
-          item.bobOffset += item.bobSpeed * delta;
+          if (!isHovered) {
+            item.swayOffset += item.swaySpeed * delta * 0.8;
+            item.bobOffset += item.bobSpeed * delta * 0.8;
+          }
 
           const bobPx = Math.sin(item.bobOffset) * 5;
           const swayDeg = Math.sin(item.swayOffset) * 4;
 
           const el = cardElements.get(item.id);
           if (el) {
-            const zIndex = Math.floor((sinT + 1) * 25) + 10;
-            const opacity = Math.max(0.65, Math.min(1, (sinT + 1.25) / 2.25));
+            const isThisHovered = item.id === hoveredId;
+            const zIndex = isThisHovered ? 999 : Math.floor((sinT + 1) * 25) + 10;
+            const opacity = isThisHovered ? 1 : Math.max(0.65, Math.min(1, (sinT + 1.25) / 2.25));
 
-            el.style.transform = `translate3d(${posX}px, ${posY + bobPx}px, 0) translate(-50%, -50%) scale(${depthMultiplier})`;
+            el.style.transform = `translate3d(${posX}px, ${posY + bobPx}px, 0) translate(-50%, -50%) scale(${
+              isThisHovered ? depthMultiplier * 1.08 : depthMultiplier
+            })`;
             el.style.zIndex = `${zIndex}`;
             el.style.opacity = `${opacity}`;
           }
@@ -317,18 +355,20 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
       } else {
         // DRIFT MODE
         physicsMap.forEach((item) => {
-          item.swayOffset += item.swaySpeed * delta;
-          item.bobOffset += item.bobSpeed * delta;
+          if (!isHovered) {
+            item.swayOffset += item.swaySpeed * delta * 0.8;
+            item.bobOffset += item.bobSpeed * delta * 0.8;
 
-          item.x += item.vx * (delta / 16);
-          item.y += item.vy * (delta / 16);
+            item.x += item.vx * (delta / 16) * 0.8;
+            item.y += item.vy * (delta / 16) * 0.8;
 
-          if (item.y < -12) {
-            item.y = 104;
-            item.x = Math.random() * 80 + 10;
+            if (item.y < -12) {
+              item.y = 104;
+              item.x = Math.random() * 80 + 10;
+            }
+            if (item.x < -8) item.x = 104;
+            if (item.x > 104) item.x = -8;
           }
-          if (item.x < -8) item.x = 104;
-          if (item.x > 104) item.x = -8;
 
           const posX = (item.x / 100) * width;
           const posY = (item.y / 100) * height;
@@ -337,10 +377,13 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
 
           const el = cardElements.get(item.id);
           if (el) {
-            const zIndex = item.depth === "foreground" ? 35 : item.depth === "midground" ? 25 : 15;
-            const opacity = item.depth === "foreground" ? 1 : item.depth === "midground" ? 0.88 : 0.72;
+            const isThisHovered = item.id === hoveredId;
+            const zIndex = isThisHovered ? 999 : item.depth === "foreground" ? 35 : item.depth === "midground" ? 25 : 15;
+            const opacity = isThisHovered ? 1 : item.depth === "foreground" ? 1 : item.depth === "midground" ? 0.88 : 0.72;
 
-            el.style.transform = `translate3d(${posX}px, ${posY + bobPx}px, 0) translate(-50%, -50%) scale(${item.baseScale})`;
+            el.style.transform = `translate3d(${posX}px, ${posY + bobPx}px, 0) translate(-50%, -50%) scale(${
+              isThisHovered ? item.baseScale * 1.08 : item.baseScale
+            })`;
             el.style.zIndex = `${zIndex}`;
             el.style.opacity = `${opacity}`;
           }
@@ -376,6 +419,8 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
           dream={dream}
           flightMode={flightMode}
           onSelect={onSelectDream}
+          onHoverStart={handleHoverStart}
+          onHoverEnd={handleHoverEnd}
           setRef={setCardRef}
           setSwayRef={setSwayRef}
         />
