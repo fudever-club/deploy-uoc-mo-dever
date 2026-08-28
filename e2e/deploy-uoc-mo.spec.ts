@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Deploy Ước Mơ — End to End User Flows", () => {
-  test("1. Full Wish Submission, Poetry Generation, and Dream Card flow", async ({ page }) => {
+  test("1. Full Wish Submission, Poetry Generation, and Dream Card Studio flow", async ({ page }) => {
     // 1. Visit Main Page
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
@@ -40,17 +40,23 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     await submitBtn.click();
 
     // 5. Verify Thank You Screen
-    await expect(page.locator("h2")).toContainText(/ước mơ đã bay lên/i);
+    await expect(page.locator("h2")).toContainText(/đèn lồng đã cất cánh|ước mơ đã bay lên/i);
     const viewCardBtn = page.locator("#btn-view-card");
     await expect(viewCardBtn).toBeVisible();
 
     // 6. Open Dream Card Modal
     await viewCardBtn.click();
-    await expect(page.locator("text=Thiệp Ước Mơ Cá Nhân Hoá")).toBeVisible();
-    await expect(page.locator("button:has-text('Tải Ảnh Về Máy')")).toBeVisible();
+    await expect(page.locator("text=Thiệp Ước Mơ & Vé Lên Tàu Vũ Trụ K22")).toBeVisible();
+    await expect(page.locator("button:has-text('Lưu Ảnh Story')")).toBeVisible();
+
+    // Close modal
+    const closeBtn = page.locator("button[aria-label='Đóng']");
+    if (await closeBtn.isVisible()) {
+      await closeBtn.click();
+    }
   });
 
-  test("2. Public Lantern Sky Display & Constellation Mode (/display)", async ({ page }) => {
+  test("2. Public Lantern Sky Display & Flight Modes (/display)", async ({ page }) => {
     await page.goto("/display");
     await expect(page.locator("text=Deploy Ước Mơ · Club Day 2026")).toBeVisible();
     await expect(page.locator("text=CLB LẬP TRÌNH FU-DEVER").first()).toBeVisible();
@@ -61,6 +67,12 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     if (await galaxyBtn.isVisible()) {
       await galaxyBtn.click();
       await expect(page.locator("button:has-text('Toàn Vũ Trụ')")).toBeVisible();
+    }
+
+    // Switch back to Carousel Mode
+    const carouselBtn = page.locator("button:has-text('Bay Xoay Vòng')");
+    if (await carouselBtn.isVisible()) {
+      await carouselBtn.click();
     }
   });
 
@@ -95,5 +107,11 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     await expect(spinBtn).toBeVisible();
     await spinBtn.click();
     await expect(page.locator("text=Đang quay số...")).toBeVisible();
+  });
+
+  test("6. Mystery Drop Gift Claim Screen (/claim)", async ({ page }) => {
+    await page.goto("/claim");
+    await expect(page.locator("h1")).toContainText("Săn Đèn Lồng Bí Ẩn");
+    await expect(page.locator("text=CLB Lập Trình FU-DEVER")).toBeVisible();
   });
 });
