@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://deploy-uoc-mo-dever.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-deploy--uoc--mo--dever.vercel.app-0091EA?style=for-the-badge&logo=vercel" alt="Live Demo" /></a>
+  <a href="https://deployuocmodever.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-deployuocmodever.vercel.app-0091EA?style=for-the-badge&logo=vercel" alt="Live Demo" /></a>
   <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-15.2.1-black?style=for-the-badge&logo=next.js" alt="Next.js 15" /></a>
   <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react" alt="React 19" /></a>
   <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript" /></a>
@@ -23,13 +23,13 @@
 
 ## 🌐 Trải Nghiệm Trực Tiếp (Live Deployment)
 
-Bạn có thể trải nghiệm toàn bộ hệ thống đã được triển khai sẵn sàng trên Vercel:
+Hệ thống đã được triển khai chính thức trên nền tảng Vercel:
 
-* 📱 **Trang Gửi Ước Mơ (Mobile)**: [https://deploy-uoc-mo-dever.vercel.app](https://deploy-uoc-mo-dever.vercel.app)
-* 🌌 **Màn Hình Bầu Trời Trình Chiếu (Sky Display)**: [https://deploy-uoc-mo-dever.vercel.app/display](https://deploy-uoc-mo-dever.vercel.app/display)
-* 🖨️ **Poster Standee Chuẩn In Ấn**: [https://deploy-uoc-mo-dever.vercel.app/standee](https://deploy-uoc-mo-dever.vercel.app/standee)
-* 🎁 **Minigame Vòng Quay May Mắn**: [https://deploy-uoc-mo-dever.vercel.app/admin/lucky-draw](https://deploy-uoc-mo-dever.vercel.app/admin/lucky-draw)
-* 🛡️ **Bảng Điều Hành Gian Hàng (Admin)**: [https://deploy-uoc-mo-dever.vercel.app/admin](https://deploy-uoc-mo-dever.vercel.app/admin) *(Mật khẩu: `dever2026`)*
+* 📱 **Trang Gửi Ước Mơ (Mobile)**: [https://deployuocmodever.vercel.app](https://deployuocmodever.vercel.app)
+* 🌌 **Màn Hình Bầu Trời Trình Chiếu (Sky Display)**: [https://deployuocmodever.vercel.app/display](https://deployuocmodever.vercel.app/display)
+* 🖨️ **Poster Standee Chuẩn In Ấn**: [https://deployuocmodever.vercel.app/standee](https://deployuocmodever.vercel.app/standee)
+* 🎁 **Minigame Vòng Quay May Mắn**: [https://deployuocmodever.vercel.app/admin/lucky-draw](https://deployuocmodever.vercel.app/admin/lucky-draw)
+* 🛡️ **Bảng Điều Hành Gian Hàng (Admin)**: [https://deployuocmodever.vercel.app/admin](https://deployuocmodever.vercel.app/admin) *(Mật khẩu: `dever2026`)*
 
 ---
 
@@ -53,7 +53,7 @@ Sinh viên chỉ cần quét mã QR tại gian hàng để gửi gắm những h
 
 ### 🌌 2. Bầu Trời Đèn Lồng Trình Chiếu Display (`/display`)
 * **Hiệu năng cực đại 60–120 FPS**: Ứng dụng kỹ thuật **Direct DOM Transform & GPU Hardware Acceleration**, giải phóng 100% CPU của Server và trình duyệt.
-* **3 Chế Độ Chuyển Độc Đáo**:
+* **3 Chế Độ Chuyển Động Độc Đáo**:
   * 🔄 **Bay Xoay Vòng 3D (Carousel Orbit)**: Quỹ đạo elip nghiêng 3D đảm bảo 100% ước mơ đều lần lượt xuất hiện rõ nét ở tiền cảnh.
   * 🍃 **Trôi Tự Do (Organic Drift)**: Đèn lồng nảy nổi bồng bềnh tự nhiên theo ngọn gió thu.
   * 🌐 **Chòm Sao Thiên Hà (Constellation Galaxy)**: Kết nối các ước mơ cùng chủ đề thành mạng lưới chòm sao lấp lánh.
