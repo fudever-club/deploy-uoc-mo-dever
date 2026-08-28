@@ -50,6 +50,10 @@ const FIREWORK_COLORS = [
   "#8B5CF6", // Purple Neon
 ];
 
+const MAX_SPARKS = 160;
+const MAX_ROCKETS = 4;
+const MAX_EMOJIS = 22;
+
 export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
   latestReaction,
   soundEnabled = true,
@@ -58,13 +62,26 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
   const rocketsRef = useRef<FireworkRocket[]>([]);
   const sparksRef = useRef<FireworkSpark[]>([]);
   const emojiParticlesRef = useRef<FloatingEmojiParticle[]>([]);
+  const lastSoundTimeRef = useRef<number>(0);
 
   const [crowdCombo, setCrowdCombo] = useState<number>(0);
   const [showSupernovaBanner, setShowSupernovaBanner] = useState<boolean>(false);
   const animFrameRef = useRef<number | null>(null);
 
-  // Spawn firework rocket from bottom
+  // Throttled sound player (prevents audio buffer congestion & CPU spikes)
+  const playThrottledBurstSound = useCallback(() => {
+    if (!soundEnabled) return;
+    const now = Date.now();
+    if (now - lastSoundTimeRef.current > 110) {
+      playFireworkBurstSound();
+      lastSoundTimeRef.current = now;
+    }
+  }, [soundEnabled]);
+
+  // Spawn firework rocket from bottom (capped by MAX_ROCKETS)
   const launchFirework = useCallback((targetX?: number, targetY?: number, emoji?: string) => {
+    if (rocketsRef.current.length >= MAX_ROCKETS) return;
+
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -76,22 +93,28 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
       x: startX,
       y: height,
       targetY: endY,
-      vy: -14 - Math.random() * 4,
+      vy: -15 - Math.random() * 3,
       color,
       emoji,
     });
   }, []);
 
-  // Trigger explosion at target
+  // Trigger explosion with Dynamic Level of Detail (LOD)
   const explodeFirework = useCallback((x: number, y: number, color: string) => {
-    if (soundEnabled) {
-      playFireworkBurstSound();
+    playThrottledBurstSound();
+
+    const currentSparks = sparksRef.current.length;
+    // Dynamic LOD: Fewer sparks if canvas is already busy
+    const sparkCount = currentSparks > 90 ? 12 : currentSparks > 45 ? 20 : 32;
+
+    // Prune oldest if near limit
+    if (currentSparks + sparkCount > MAX_SPARKS) {
+      sparksRef.current.splice(0, currentSparks + sparkCount - MAX_SPARKS);
     }
 
-    const sparkCount = 45 + Math.floor(Math.random() * 25);
     for (let i = 0; i < sparkCount; i++) {
-      const angle = (i / sparkCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.2;
-      const speed = Math.random() * 5.5 + 2.5;
+      const angle = (i / sparkCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+      const speed = Math.random() * 4.5 + 2.0;
 
       sparksRef.current.push({
         x,
@@ -99,14 +122,14 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         alpha: 1.0,
-        decay: Math.random() * 0.018 + 0.012,
+        decay: Math.random() * 0.022 + 0.016, // quick fade to avoid lingering
         color,
-        size: Math.random() * 2.5 + 1.5,
+        size: Math.random() * 2.0 + 1.2,
       });
     }
-  }, [soundEnabled]);
+  }, [playThrottledBurstSound]);
 
-  // Trigger Supernova Celebration (10+ simultaneous fireworks)
+  // Trigger Supernova Celebration (Spaced out to prevent frame drops)
   const triggerSupernova = useCallback(() => {
     playCelebrationFanfare();
     setShowSupernovaBanner(true);
@@ -114,27 +137,28 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 8; i++) {
       setTimeout(() => {
-        const x = Math.random() * (width * 0.85) + width * 0.075;
-        const y = Math.random() * (height * 0.45) + height * 0.15;
+        const x = Math.random() * (width * 0.8) + width * 0.1;
+        const y = Math.random() * (height * 0.4) + height * 0.15;
         launchFirework(x, y);
-      }, i * 160);
+      }, i * 220);
     }
 
     setTimeout(() => {
       setShowSupernovaBanner(false);
-    }, 6500);
+    }, 6000);
   }, [launchFirework]);
 
-  // Respond to new reaction events
+  // Respond to new reaction events with batched count
   useEffect(() => {
     if (!latestReaction) return;
+    const count = latestReaction.count || 1;
 
-    // Increment crowd combo
+    // Increment crowd combo with count
     setCrowdCombo((prev) => {
-      const next = prev + 1;
-      if (next % 30 === 0) {
+      const next = prev + count;
+      if (Math.floor(next / 30) > Math.floor(prev / 30)) {
         triggerSupernova();
       }
       return next;
@@ -143,23 +167,30 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
     const width = window.innerWidth;
     const startX = (latestReaction.x / 100) * width || Math.random() * width * 0.8 + width * 0.1;
 
-    // Spawn floating emoji particle
-    emojiParticlesRef.current.push({
-      x: startX,
-      y: window.innerHeight - 40,
-      vy: -Math.random() * 3.5 - 2.5,
-      vx: (Math.random() - 0.5) * 1.5,
-      size: Math.random() * 14 + 28,
-      alpha: 1.0,
-      emoji: latestReaction.emoji,
-    });
+    // Spawn floating emoji particle (capped by MAX_EMOJIS)
+    const currentEmojis = emojiParticlesRef.current.length;
+    if (currentEmojis < MAX_EMOJIS) {
+      emojiParticlesRef.current.push({
+        x: startX,
+        y: window.innerHeight - 40,
+        vy: -Math.random() * 3.2 - 2.2,
+        vx: (Math.random() - 0.5) * 1.2,
+        size: Math.random() * 10 + 26,
+        alpha: 1.0,
+        emoji: latestReaction.emoji,
+      });
+    }
 
-    // Launch matching firework rocket
-    if (latestReaction.emoji === "🎆" || latestReaction.emoji === "🚀" || Math.random() > 0.4) {
+    // Launch rocket (if reaction count is high, launch 1 rocket instead of spamming 10)
+    if (latestReaction.emoji === "🎆" || latestReaction.emoji === "🚀" || Math.random() > 0.45) {
       launchFirework(startX, undefined, latestReaction.emoji);
     } else {
       if (soundEnabled) {
-        playReactionSound(latestReaction.emoji);
+        const now = Date.now();
+        if (now - lastSoundTimeRef.current > 100) {
+          playReactionSound(latestReaction.emoji);
+          lastSoundTimeRef.current = now;
+        }
       }
     }
   }, [latestReaction, launchFirework, triggerSupernova, soundEnabled]);
@@ -168,15 +199,15 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
   useEffect(() => {
     const timer = setInterval(() => {
       setCrowdCombo((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 4500);
+    }, 5000);
     return () => clearInterval(timer);
   }, []);
 
-  // Main Canvas Render Loop
+  // Main High-Performance Canvas Render Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     let width = (canvas.width = window.innerWidth);
@@ -187,7 +218,7 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize, { passive: true });
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
@@ -197,12 +228,9 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
         const rocket = rocketsRef.current[i];
         rocket.y += rocket.vy;
 
-        // Spark trail
         ctx.fillStyle = rocket.color;
-        ctx.shadowColor = rocket.color;
-        ctx.shadowBlur = 8;
         ctx.beginPath();
-        ctx.arc(rocket.x, rocket.y, 3, 0, Math.PI * 2);
+        ctx.arc(rocket.x, rocket.y, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
         if (rocket.y <= rocket.targetY || rocket.vy >= 0) {
@@ -211,19 +239,18 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
         }
       }
 
-      ctx.shadowBlur = 0;
-
-      // 2. Render & Update Sparks
-      for (let i = sparksRef.current.length - 1; i >= 0; i--) {
-        const s = sparksRef.current[i];
+      // 2. Render & Update Sparks (Batch optimized)
+      const sparks = sparksRef.current;
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
         s.x += s.vx;
         s.y += s.vy;
-        s.vy += 0.08; // gravity
-        s.vx *= 0.98; // air drag
+        s.vy += 0.07; // gravity
+        s.vx *= 0.97; // drag
         s.alpha -= s.decay;
 
         if (s.alpha <= 0) {
-          sparksRef.current.splice(i, 1);
+          sparks.splice(i, 1);
           continue;
         }
 
@@ -235,19 +262,20 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
       }
 
       // 3. Render & Update Floating Emoji Particles
-      for (let i = emojiParticlesRef.current.length - 1; i >= 0; i--) {
-        const p = emojiParticlesRef.current[i];
+      const emojis = emojiParticlesRef.current;
+      for (let i = emojis.length - 1; i >= 0; i--) {
+        const p = emojis[i];
         p.y += p.vy;
         p.x += p.vx;
-        p.alpha -= 0.009;
+        p.alpha -= 0.012;
 
-        if (p.alpha <= 0 || p.y < -50) {
-          emojiParticlesRef.current.splice(i, 1);
+        if (p.alpha <= 0 || p.y < -40) {
+          emojis.splice(i, 1);
           continue;
         }
 
         ctx.globalAlpha = Math.max(0, p.alpha);
-        ctx.font = `${p.size}px sans-serif`;
+        ctx.font = `${p.size}px -apple-system, sans-serif`;
         ctx.textAlign = "center";
         ctx.fillText(p.emoji, p.x, p.y);
       }

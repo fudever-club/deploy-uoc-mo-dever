@@ -86,10 +86,11 @@ describe("Storage Engine", () => {
     expect(all.find((d) => d.id === created.id)).toBeUndefined();
   });
 
-  it("should broadcast reactions", () => {
-    const reaction = broadcastReaction("🚀");
+  it("should broadcast reactions with count option", () => {
+    const reaction = broadcastReaction("🚀", 5);
     expect(reaction.id).toBeDefined();
     expect(reaction.emoji).toBe("🚀");
+    expect(reaction.count).toBe(5);
     expect(reaction.timestamp).toBeGreaterThan(0);
   });
 

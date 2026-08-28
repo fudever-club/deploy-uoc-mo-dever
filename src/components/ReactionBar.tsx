@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Sparkles } from "lucide-react";
 import { playReactionSound } from "@/lib/audio-synthesizer";
 
 export const ReactionBar: React.FC = () => {
   const [lastSent, setLastSent] = useState<string | null>(null);
+  const queueRef = useRef<{ [emoji: string]: number }>({});
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSoundTimeRef = useRef<number>(0);
 
   const emojis = [
     { emoji: "🏮", label: "Đèn lồng" },
@@ -16,21 +19,56 @@ export const ReactionBar: React.FC = () => {
     { emoji: "🔥", label: "Nhiệt huyết" },
   ];
 
-  const handleSendReaction = async (emoji: string) => {
-    playReactionSound(emoji);
-    setLastSent(emoji);
-    setTimeout(() => setLastSent(null), 1000);
+  // Flush batched reactions to server (max 4 network requests/sec)
+  const flushQueue = useCallback(async () => {
+    const queue = { ...queueRef.current };
+    queueRef.current = {};
+    timerRef.current = null;
 
-    try {
-      await fetch("/api/reactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emoji }),
-      });
-    } catch {
-      // ignore
+    const entries = Object.entries(queue);
+    if (entries.length === 0) return;
+
+    for (const [emoji, count] of entries) {
+      try {
+        await fetch("/api/reactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ emoji, count }),
+        });
+      } catch {
+        // ignore network error
+      }
+    }
+  }, []);
+
+  const handleSendReaction = (emoji: string) => {
+    // Instant local audio throttle (max 1 sound per 90ms)
+    const now = Date.now();
+    if (now - lastSoundTimeRef.current > 90) {
+      playReactionSound(emoji);
+      lastSoundTimeRef.current = now;
+    }
+
+    // Instant local visual feedback
+    setLastSent(emoji);
+    setTimeout(() => setLastSent(null), 300);
+
+    // Queue for network batching
+    queueRef.current[emoji] = (queueRef.current[emoji] || 0) + 1;
+
+    // Schedule flush if not already scheduled
+    if (!timerRef.current) {
+      timerRef.current = setTimeout(flushQueue, 220);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="w-full max-w-sm mx-auto mt-4 p-2.5 rounded-2xl bg-white/90 border border-[#fac775]/50 backdrop-blur-md shadow-xs text-center">
@@ -44,8 +82,8 @@ export const ReactionBar: React.FC = () => {
           <button
             key={item.emoji}
             onClick={() => handleSendReaction(item.emoji)}
-            className={`p-2 rounded-xl text-xl hover:bg-[#faeeda] active:scale-130 transition-all cursor-pointer select-none ${
-              lastSent === item.emoji ? "scale-130 bg-[#fac775]/40 shadow-xs" : ""
+            className={`p-2 rounded-xl text-xl hover:bg-[#faeeda] active:scale-135 transition-transform cursor-pointer select-none ${
+              lastSent === item.emoji ? "scale-135 bg-[#fac775]/40 shadow-xs" : ""
             }`}
             title={item.label}
           >

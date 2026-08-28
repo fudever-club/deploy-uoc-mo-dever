@@ -338,12 +338,13 @@ export async function deleteDream(id: string): Promise<boolean> {
   return false;
 }
 
-export function broadcastReaction(emoji: string): LiveReaction {
+export function broadcastReaction(emoji: string, count = 1): LiveReaction {
   const reaction: LiveReaction = {
     id: `react-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
     emoji,
     x: Math.random() * 80 + 10,
     timestamp: Date.now(),
+    count: Math.max(1, Math.min(20, count)),
   };
 
   const supabase = getSupabaseClient();

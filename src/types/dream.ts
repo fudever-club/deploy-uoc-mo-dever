@@ -68,6 +68,7 @@ export interface LiveReaction {
   emoji: string;
   x: number; // random percentage
   timestamp: number;
+  count?: number;
 }
 
 export interface MysteryDrop {
