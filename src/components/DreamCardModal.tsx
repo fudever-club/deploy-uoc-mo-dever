@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Dream, CardTheme } from "@/types/dream";
 import { BUGGY_MOODS } from "@/lib/constants";
 import { downloadDreamCard, renderDreamCardToDataUrl } from "@/lib/dream-card-canvas";
-import { Download, Share2, X, Sparkles, Check, Palette } from "lucide-react";
+import { Download, Share2, X, Sparkles, Check, Palette, Smartphone } from "lucide-react";
 import Image from "next/image";
 
 interface DreamCardModalProps {
@@ -50,7 +50,28 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
     }
   };
 
-  const handleCopyHashtags = () => {
+  const handleShare = async () => {
+    if (!imageUrl) return;
+
+    if (navigator.share) {
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], "Dream_Card_FU_DEVER_2026.png", { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: "Ước mơ của tôi tại FU-DEVER Club Day 2026",
+            text: "Tôi vừa thả đèn lồng ước mơ cùng CLB Lập trình FU-DEVER! #FUDEVER #DeployUocMo",
+            files: [file],
+          });
+          return;
+        }
+      } catch {
+        // fallback to copy
+      }
+    }
+
     navigator.clipboard.writeText("#FUDEVER #ClubDay2026 #DeployUocMo");
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -58,7 +79,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#12203A] border border-[#fac775]/40 rounded-3xl shadow-2xl p-4 sm:p-6 text-[#faeeda] max-h-[96vh] flex flex-col overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-[#12203A] border-2 border-[#fac775]/50 rounded-3xl shadow-2xl p-4 sm:p-6 text-[#faeeda] max-h-[96vh] flex flex-col overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -70,11 +91,11 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
 
         {/* Modal Header */}
         <div className="text-center mb-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#fac775]/20 text-[#fac775] text-[11px] font-bold uppercase tracking-wider mb-1">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#fac775]/20 text-[#fac775] text-[11px] font-bold uppercase tracking-wider mb-1 border border-[#fac775]/30">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>Story Card Studio (9:16)</span>
           </div>
-          <h3 className="text-lg font-extrabold text-white">Thiệp Ước Mơ Cá Nhân Hoá</h3>
+          <h3 className="text-xl font-black text-white font-display">Thiệp Ước Mơ Cá Nhân Hoá</h3>
           <p className="text-xs text-[#faeeda]/80">Tùy biến phong cách và lưu ảnh chất lượng cao</p>
         </div>
 
@@ -90,7 +111,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
               <button
                 type="button"
                 onClick={() => setSelectedTheme("classic")}
-                className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                className={`py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   selectedTheme === "classic"
                     ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
                     : "bg-white/5 text-white/70 hover:bg-white/10"
@@ -103,7 +124,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
               <button
                 type="button"
                 onClick={() => setSelectedTheme("tech")}
-                className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                className={`py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   selectedTheme === "tech"
                     ? "bg-[#0091ea] text-white border border-[#00f5d4] shadow-xs"
                     : "bg-white/5 text-white/70 hover:bg-white/10"
@@ -116,7 +137,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
               <button
                 type="button"
                 onClick={() => setSelectedTheme("gold")}
-                className={`py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                className={`py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   selectedTheme === "gold"
                     ? "bg-[#712b13] text-[#fac775] border border-[#fac775] shadow-xs"
                     : "bg-white/5 text-white/70 hover:bg-white/10"
@@ -186,7 +207,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
           <button
             onClick={handleDownload}
             disabled={loading || !imageUrl}
-            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#993c1d] via-[#0091ea] to-[#fac775] hover:opacity-90 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#993c1d] via-[#0091ea] to-[#fac775] hover:opacity-95 text-white font-black text-sm flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Tải Ảnh Về Máy (Chuẩn HD Story 9:16)</span>
@@ -194,11 +215,11 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
 
           <div className="flex items-center justify-between gap-2 pt-1">
             <button
-              onClick={handleCopyHashtags}
-              className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-[#fac775] font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              onClick={handleShare}
+              className="flex-1 py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-[#fac775] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Share2 className="w-3.5 h-3.5" />}
-              <span>{copied ? "Đã copy Hashtags!" : "Copy Hashtags Story"}</span>
+              <span>{copied ? "Đã copy Hashtags!" : "Chia sẻ Story / Mạng xã hội"}</span>
             </button>
             <button
               onClick={onClose}
