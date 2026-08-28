@@ -10,6 +10,7 @@ import { generatePoem } from "@/lib/poem-generator";
 import { LanternSVG, LANTERN_SHAPES, LanternShape } from "@/components/LanternSVG";
 import { playLanternAscendChime, playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
 import { ReactionBar } from "@/components/ReactionBar";
+import { useRealtimeDreams } from "@/lib/use-realtime-dreams";
 import {
   Sparkles,
   Send,
@@ -60,24 +61,15 @@ export default function WishSubmissionPage() {
   const [showCardModal, setShowCardModal] = useState(false);
   const [showPhotoBooth, setShowPhotoBooth] = useState(false);
   const [showBuggyGame, setShowBuggyGame] = useState(false);
-  const [totalCount, setTotalCount] = useState<number>(24);
+
+  // Live Realtime Dream Count synchronized with Supabase / SSE / Polling
+  const { totalCount, setTotalCount } = useRealtimeDreams();
 
   // Easter Egg tap counter
   const [buggyTapCount, setBuggyTapCount] = useState(0);
 
   // AI Poem Generator state
   const [generatedPoem, setGeneratedPoem] = useState<{ title: string; lines: string[]; badge: string } | null>(null);
-
-  useEffect(() => {
-    fetch("/api/dreams")
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.success && Array.isArray(json.data)) {
-          setTotalCount(Math.max(24, json.data.length));
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const handleBuggyTap = () => {
     playTactileClick();
@@ -138,6 +130,7 @@ export default function WishSubmissionPage() {
       }
 
       setCreatedDream(json.data);
+      setTotalCount((prev) => (prev !== null ? prev + 1 : 1));
       setStep("thankyou");
 
       // Ascending audio chime
@@ -258,7 +251,7 @@ export default function WishSubmissionPage() {
             {/* Live Count Pill */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold mb-6 shadow-xs">
               <Flame className="w-4 h-4 text-orange-500 animate-pulse" />
-              <span>Đã có <strong>{totalCount}</strong> ngọn đèn ước mơ cùng hội tụ!</span>
+              <span>Đã có <strong>{totalCount !== null ? totalCount : "..."}</strong> ngọn đèn ước mơ cùng hội tụ!</span>
             </div>
 
             {/* Highlight Feature Cards */}

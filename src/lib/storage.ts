@@ -127,8 +127,11 @@ function saveLocalDreams(dreams: Dream[]) {
 }
 
 // Supabase client instance if configured
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_ANON_KEY;
 
 function getSupabaseClient(): SupabaseClient | null {
   if (global.__supabaseServerClient) {
@@ -176,6 +179,32 @@ export async function getDreams(includeHidden = false, limit = 150): Promise<Dre
   // Local fallback
   const dreams = loadLocalDreams();
   return includeHidden ? [...dreams] : dreams.filter((d) => !d.hidden);
+}
+
+export async function getDreamsCount(includeHidden = false): Promise<number> {
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    try {
+      let query = supabase
+        .from("dreams")
+        .select("*", { count: "exact", head: true });
+
+      if (!includeHidden) {
+        query = query.eq("hidden", false);
+      }
+      const { count, error } = await query;
+      if (!error && typeof count === "number") {
+        return count;
+      }
+      console.warn("Supabase getDreamsCount error, falling back to local:", error);
+    } catch (err) {
+      console.warn("Supabase getDreamsCount failed:", err);
+    }
+  }
+
+  // Local fallback
+  const list = loadLocalDreams();
+  return includeHidden ? list.length : list.filter((d) => !d.hidden).length;
 }
 
 export async function createDream(input: DreamInput): Promise<Dream> {

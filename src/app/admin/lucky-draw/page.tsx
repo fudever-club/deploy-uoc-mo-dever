@@ -7,6 +7,7 @@ import confetti from "canvas-confetti";
 import { Dream } from "@/types/dream";
 import { DREAM_CATEGORIES, MID_AUTUMN_BUGGY_REWARDS, MidAutumnBuggyReward } from "@/lib/constants";
 import { playSlotTickSound, playCelebrationFanfare, playTactileClick } from "@/lib/audio-synthesizer";
+import { useRealtimeDreams } from "@/lib/use-realtime-dreams";
 import {
   Trophy,
   Sparkles,
@@ -29,8 +30,7 @@ interface WinnerRecord {
 }
 
 export default function LuckyDrawPage() {
-  const [dreams, setDreams] = useState<Dream[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { dreams, isLoaded, refetch } = useRealtimeDreams();
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentDisplayDream, setCurrentDisplayDream] = useState<Dream | null>(null);
   const [currentReward, setCurrentReward] = useState<MidAutumnBuggyReward | null>(null);
@@ -42,23 +42,13 @@ export default function LuckyDrawPage() {
   const spinInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    fetch("/api/dreams")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.data)) {
-          setDreams(data.data);
-          if (data.data.length > 0) {
-            setCurrentDisplayDream(data.data[0]);
-            setCurrentReward(MID_AUTUMN_BUGGY_REWARDS[0]);
-          }
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Load dreams for lucky draw error:", err);
-        setLoading(false);
-      });
+    if (dreams.length > 0 && !currentDisplayDream) {
+      setCurrentDisplayDream(dreams[0]);
+      setCurrentReward(MID_AUTUMN_BUGGY_REWARDS[0]);
+    }
+  }, [dreams, currentDisplayDream]);
 
+  useEffect(() => {
     return () => {
       if (spinInterval.current) {
         clearTimeout(spinInterval.current);
@@ -198,7 +188,7 @@ export default function LuckyDrawPage() {
               : "bg-black/35 border-white/20"
           }`}
         >
-          {loading ? (
+          {!isLoaded ? (
             <div className="flex flex-col items-center gap-2">
               <div className="w-8 h-8 border-3 border-[#fac775] border-t-transparent rounded-full animate-spin" />
               <span className="text-xs text-[#fac775]">Đang tải danh sách ước mơ...</span>

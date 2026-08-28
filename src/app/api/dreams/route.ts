@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createDream, getDreams } from "@/lib/storage";
+import { createDream, getDreams, getDreamsCount } from "@/lib/storage";
 import { DreamInput } from "@/types/dream";
 
 export const dynamic = "force-dynamic";
@@ -9,13 +9,26 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const includeHidden = searchParams.get("includeHidden") === "true";
     const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : 150;
-    const dreams = await getDreams(includeHidden, limit);
+    
+    const [dreams, totalVisible, totalAll] = await Promise.all([
+      getDreams(includeHidden, limit),
+      getDreamsCount(false),
+      getDreamsCount(true),
+    ]);
 
     return NextResponse.json(
-      { success: true, data: dreams },
+      {
+        success: true,
+        data: dreams,
+        total: includeHidden ? totalAll : totalVisible,
+        totalVisible,
+        totalAll,
+      },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=1, stale-while-revalidate=4",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
         },
       }
     );

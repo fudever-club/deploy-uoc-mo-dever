@@ -89,7 +89,10 @@ export default function AdminPage() {
   const fetchAllDreams = async () => {
     setLoadingDreams(true);
     try {
-      const res = await fetch("/api/dreams?includeHidden=true");
+      const res = await fetch("/api/dreams?includeHidden=true", {
+        headers: { "Cache-Control": "no-cache" },
+        cache: "no-store",
+      });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setDreams(json.data);

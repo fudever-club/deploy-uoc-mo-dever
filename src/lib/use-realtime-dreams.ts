@@ -14,6 +14,8 @@ interface UseRealtimeDreamsOptions {
 
 export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
   const [dreams, setDreams] = useState<Dream[]>([]);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
+  const [totalAll, setTotalAll] = useState<number | null>(null);
   const [activeAnnouncement, setActiveAnnouncement] = useState<BroadcastAnnouncement | null>(null);
   const [reactions, setReactions] = useState<LiveReaction[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "supabase" | "sse" | "polling">("connecting");
@@ -27,15 +29,31 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
   const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastFetchedTimeRef = useRef<number>(0);
 
-  // Fetch initial dreams
+  // Fetch initial dreams & counts
   const fetchDreams = useCallback(async () => {
     try {
       const res = await fetch("/api/dreams", {
         headers: { "Cache-Control": "no-cache" },
+        cache: "no-store",
       });
       const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        setDreams(json.data);
+      if (json.success) {
+        if (Array.isArray(json.data)) {
+          setDreams(json.data);
+        }
+        const count =
+          typeof json.totalVisible === "number"
+            ? json.totalVisible
+            : typeof json.total === "number"
+            ? json.total
+            : Array.isArray(json.data)
+            ? json.data.length
+            : 0;
+        setTotalCount(count);
+
+        const countAll = typeof json.totalAll === "number" ? json.totalAll : count;
+        setTotalAll(countAll);
+
         lastFetchedTimeRef.current = Date.now();
       }
     } catch (err) {
@@ -93,9 +111,13 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
             { event: "INSERT", schema: "public", table: "dreams" },
             (payload) => {
               const newDream = payload.new as Dream;
-              if (newDream && !newDream.hidden) {
-                setDreams((prev) => [newDream, ...prev.filter((d) => d.id !== newDream.id)]);
-                optionsRef.current.onInsert?.(newDream);
+              if (newDream) {
+                setTotalAll((prev) => (prev !== null ? prev + 1 : 1));
+                if (!newDream.hidden) {
+                  setDreams((prev) => [newDream, ...prev.filter((d) => d.id !== newDream.id)]);
+                  setTotalCount((prev) => (prev !== null ? prev + 1 : 1));
+                  optionsRef.current.onInsert?.(newDream);
+                }
               }
             }
           )
@@ -105,11 +127,20 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
             (payload) => {
               const updated = payload.new as Dream;
               if (updated) {
-                setDreams((prev) =>
-                  updated.hidden
-                    ? prev.filter((d) => d.id !== updated.id)
-                    : prev.map((d) => (d.id === updated.id ? updated : d))
-                );
+                setDreams((prev) => {
+                  const wasInList = prev.some((d) => d.id === updated.id);
+                  if (updated.hidden) {
+                    if (wasInList) {
+                      setTotalCount((c) => (c !== null && c > 0 ? c - 1 : 0));
+                    }
+                    return prev.filter((d) => d.id !== updated.id);
+                  } else {
+                    if (!wasInList) {
+                      setTotalCount((c) => (c !== null ? c + 1 : 1));
+                    }
+                    return prev.map((d) => (d.id === updated.id ? updated : d));
+                  }
+                });
                 optionsRef.current.onUpdate?.(updated);
               }
             }
@@ -120,7 +151,14 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
             (payload) => {
               const id = payload.old?.id;
               if (id) {
-                setDreams((prev) => prev.filter((d) => d.id !== id));
+                setDreams((prev) => {
+                  const wasInList = prev.some((d) => d.id === id);
+                  if (wasInList) {
+                    setTotalCount((c) => (c !== null && c > 0 ? c - 1 : 0));
+                  }
+                  return prev.filter((d) => d.id !== id);
+                });
+                setTotalAll((c) => (c !== null && c > 0 ? c - 1 : 0));
                 optionsRef.current.onDelete?.(id);
               }
             }
@@ -175,8 +213,10 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
         es.addEventListener("insert", (event) => {
           try {
             const newDream = JSON.parse(event.data) as Dream;
+            setTotalAll((prev) => (prev !== null ? prev + 1 : 1));
             if (!newDream.hidden) {
               setDreams((prev) => [newDream, ...prev.filter((d) => d.id !== newDream.id)]);
+              setTotalCount((prev) => (prev !== null ? prev + 1 : 1));
               optionsRef.current.onInsert?.(newDream);
             }
           } catch (e) {
@@ -187,11 +227,20 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
         es.addEventListener("update", (event) => {
           try {
             const updated = JSON.parse(event.data) as Dream;
-            setDreams((prev) =>
-              updated.hidden
-                ? prev.filter((d) => d.id !== updated.id)
-                : prev.map((d) => (d.id === updated.id ? updated : d))
-            );
+            setDreams((prev) => {
+              const wasInList = prev.some((d) => d.id === updated.id);
+              if (updated.hidden) {
+                if (wasInList) {
+                  setTotalCount((c) => (c !== null && c > 0 ? c - 1 : 0));
+                }
+                return prev.filter((d) => d.id !== updated.id);
+              } else {
+                if (!wasInList) {
+                  setTotalCount((c) => (c !== null ? c + 1 : 1));
+                }
+                return prev.map((d) => (d.id === updated.id ? updated : d));
+              }
+            });
             optionsRef.current.onUpdate?.(updated);
           } catch (e) {
             console.error("SSE parse update error:", e);
@@ -201,7 +250,14 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
         es.addEventListener("delete", (event) => {
           try {
             const { id } = JSON.parse(event.data) as { id: string };
-            setDreams((prev) => prev.filter((d) => d.id !== id));
+            setDreams((prev) => {
+              const wasInList = prev.some((d) => d.id === id);
+              if (wasInList) {
+                setTotalCount((c) => (c !== null && c > 0 ? c - 1 : 0));
+              }
+              return prev.filter((d) => d.id !== id);
+            });
+            setTotalAll((c) => (c !== null && c > 0 ? c - 1 : 0));
             optionsRef.current.onDelete?.(id);
           } catch (e) {
             console.error("SSE parse delete error:", e);
@@ -253,6 +309,9 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
   return {
     dreams,
     setDreams,
+    totalCount,
+    setTotalCount,
+    totalAll,
     activeAnnouncement,
     reactions,
     connectionStatus,

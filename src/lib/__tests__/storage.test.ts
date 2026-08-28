@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   createDream,
   getDreams,
+  getDreamsCount,
   updateDreamVisibility,
   deleteDream,
   broadcastReaction,
@@ -10,6 +11,26 @@ import {
 } from "../storage";
 
 describe("Storage Engine", () => {
+  it("should get dream count accurately", async () => {
+    const initialVisibleCount = await getDreamsCount(false);
+    const initialTotalCount = await getDreamsCount(true);
+
+    const created = await createDream({
+      name: "Count Test User",
+      content: "Testing accurate count calculation",
+      tag: "tech" as any,
+      consent: true,
+    });
+
+    const newVisibleCount = await getDreamsCount(false);
+    expect(newVisibleCount).toBe(initialVisibleCount + 1);
+
+    await updateDreamVisibility(created.id, true);
+    const hiddenVisibleCount = await getDreamsCount(false);
+    const hiddenTotalCount = await getDreamsCount(true);
+    expect(hiddenVisibleCount).toBe(initialVisibleCount);
+    expect(hiddenTotalCount).toBe(initialTotalCount + 1);
+  });
   it("should create and retrieve dreams", async () => {
     const created = await createDream({
       name: "Tân Sinh Viên K22",
