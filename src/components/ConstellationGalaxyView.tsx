@@ -23,12 +23,12 @@ interface StarNode {
 }
 
 const CATEGORY_COLORS: Record<DreamCategory, string> = {
-  career: "#FAC775", // Amber Gold
-  tech: "#00F5D4",   // Cyan Neon
-  friendship: "#85B7EB", // Sky Blue
-  academic: "#FFD166", // Golden Yellow
-  club: "#FF7B54",   // Orange
-  love: "#FF6B8B",   // Rose Pink
+  career: "#0091EA",   // DEVER Blue
+  study: "#FAC775",    // Amber Gold
+  travel: "#10B981",   // Emerald Green
+  family: "#E63946",   // Crimson Red
+  big_dream: "#8B5CF6",// Cyber Purple
+  other: "#FFD166",    // Golden Warm
 };
 
 export const ConstellationGalaxyView: React.FC<ConstellationGalaxyViewProps> = ({
