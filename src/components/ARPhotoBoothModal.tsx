@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { X, Camera, RefreshCw, Download, Sparkles, AlertCircle } from "lucide-react";
+import { X, Camera, RefreshCw, Download, Sparkles, AlertCircle, SwitchCamera } from "lucide-react";
 import { playCelebrationFanfare, playTactileClick } from "@/lib/audio-synthesizer";
 
 interface ARPhotoBoothModalProps {
@@ -10,6 +10,13 @@ interface ARPhotoBoothModalProps {
   onClose: () => void;
   dreamName?: string;
   dreamContent?: string;
+}
+
+const FONT_SANS = "-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif";
+
+function cleanText(str?: string): string {
+  if (!str) return "";
+  return str.normalize("NFC").trim();
 }
 
 export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
@@ -23,11 +30,45 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
   const [isCounting, setIsCounting] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [camError, setCamError] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Initialize WebRTC Camera
+  // Initialize and maintain camera stream
+  const startCamera = useCallback(async (mode: "user" | "environment") => {
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      setCamError("Trình duyệt không hỗ trợ camera hoặc cần kết nối HTTPS an toàn.");
+      return;
+    }
+
+    try {
+      if (stream) {
+        stream.getTracks().forEach((t) => t.stop());
+      }
+      setCamError(null);
+
+      const s = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1920, min: 640 },
+          height: { ideal: 1080, min: 480 },
+          facingMode: mode,
+        },
+        audio: false,
+      });
+
+      setStream(s);
+      if (videoRef.current) {
+        videoRef.current.srcObject = s;
+        videoRef.current.play().catch(() => {});
+      }
+    } catch (err) {
+      console.error("Camera access error:", err);
+      setCamError("Không thể mở camera. Vui lòng cấp quyền truy cập camera trên thiết bị của bạn nhé!");
+    }
+  }, [stream]);
+
+  // Handle open / close
   useEffect(() => {
     if (!isOpen) {
       if (stream) {
@@ -39,34 +80,35 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
       return;
     }
 
-    if (!navigator?.mediaDevices?.getUserMedia) {
-      setCamError("Trình duyệt không hỗ trợ truy cập camera hoặc cần kết nối HTTPS an toàn.");
-      return;
-    }
-
-    navigator.mediaDevices
-      .getUserMedia({
-        video: { width: { ideal: 1080 }, height: { ideal: 1080 }, facingMode: "user" },
-        audio: false,
-      })
-      .then((s) => {
-        setStream(s);
-        if (videoRef.current) {
-          videoRef.current.srcObject = s;
-          videoRef.current.play().catch(() => {});
-        }
-      })
-      .catch((err) => {
-        console.error("Camera access error:", err);
-        setCamError("Không thể truy cập camera. Vui lòng cấp quyền truy cập camera trên trình duyệt của bạn nhé!");
-      });
+    startCamera(facingMode);
 
     return () => {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [isOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, facingMode]);
+
+  // Re-attach stream whenever video element is re-mounted (e.g. after clicking 'Chụp Lại')
+  useEffect(() => {
+    if (videoRef.current && stream && !capturedUrl) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [stream, capturedUrl]);
+
+  // Flip camera between front (selfie) and back
+  const handleToggleFacingMode = () => {
+    playTactileClick();
+    const nextMode = facingMode === "user" ? "environment" : "user";
+    setFacingMode(nextMode);
+  };
+
+  const handleRetake = () => {
+    playTactileClick();
+    setCapturedUrl(null);
+  };
 
   const handleStartCapture = () => {
     playTactileClick();
@@ -98,63 +140,84 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // 1. Draw Camera Frame (mirrored for selfie)
+    // 1. CENTER CROP (Object-fit: cover) to prevent aspect ratio distortion/stretching
+    const vw = video.videoWidth || 1280;
+    const vh = video.videoHeight || 720;
+    const minDim = Math.min(vw, vh);
+    const sx = (vw - minDim) / 2;
+    const sy = (vh - minDim) / 2;
+
     ctx.save();
-    ctx.translate(size, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, 0, 0, size, size);
+    // Mirror only for front-facing selfie camera
+    if (facingMode === "user") {
+      ctx.translate(size, 0);
+      ctx.scale(-1, 1);
+    }
+
+    // Draw pristine undistorted camera center square
+    ctx.drawImage(video, sx, sy, minDim, minDim, 0, 0, size, size);
     ctx.restore();
 
-    // 2. Draw Vignette & Festival Overlay Frame
-    const grad = ctx.createLinearGradient(0, size * 0.65, 0, size);
+    // 2. VIGNETTE & FESTIVAL GRADIENT OVERLAY
+    const grad = ctx.createLinearGradient(0, size * 0.55, 0, size);
     grad.addColorStop(0, "transparent");
-    grad.addColorStop(1, "rgba(18, 32, 58, 0.92)");
+    grad.addColorStop(0.7, "rgba(18, 32, 58, 0.75)");
+    grad.addColorStop(1, "rgba(18, 32, 58, 0.96)");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
 
-    // 3. Golden Festival Border Frame
+    // Top subtle vignette
+    const topGrad = ctx.createLinearGradient(0, 0, 0, 140);
+    topGrad.addColorStop(0, "rgba(18, 32, 58, 0.75)");
+    topGrad.addColorStop(1, "transparent");
+    ctx.fillStyle = topGrad;
+    ctx.fillRect(0, 0, size, 140);
+
+    // 3. GOLDEN FESTIVAL BORDER FRAME
     ctx.strokeStyle = "#FAC775";
     ctx.lineWidth = 14;
-    ctx.strokeRect(20, 20, size - 40, size - 40);
+    ctx.strokeRect(18, 18, size - 36, size - 36);
 
-    // Inner subtle crimson rim
     ctx.strokeStyle = "#993C1D";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(34, 34, size - 68, size - 68);
+    ctx.lineWidth = 3.5;
+    ctx.strokeRect(32, 32, size - 64, size - 64);
 
-    // 4. Header Badge
-    ctx.fillStyle = "rgba(18, 32, 58, 0.85)";
+    // 4. HEADER BADGE (FU-DEVER CLUB DAY 2026)
+    ctx.fillStyle = "rgba(18, 32, 58, 0.90)";
     ctx.beginPath();
-    ctx.roundRect(60, 50, 420, 70, 24);
+    ctx.roundRect(50, 48, 440, 68, 20);
     ctx.fill();
     ctx.strokeStyle = "#FAC775";
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
     ctx.fillStyle = "#FAC775";
-    ctx.font = "bold 26px 'Plus Jakarta Sans', sans-serif";
-    ctx.fillText("🏮 FU-DEVER · Club Day 2026", 80, 95);
+    ctx.font = `bold 24px ${FONT_SANS}`;
+    ctx.fillText("🏮 FU-DEVER · CLUB DAY 2026", 75, 90);
 
-    // 5. Wish Text Box at Bottom
+    // 5. WISH & PARTICIPANT TEXT AT BOTTOM
+    const cleanPassenger = cleanText(dreamName || "TÂN SINH VIÊN K22");
+    const cleanWish = cleanText(dreamContent || "Deploy Ước Mơ cùng CLB Lập trình FU-DEVER!");
+
     ctx.fillStyle = "#FAC775";
-    ctx.font = "bold 32px 'Plus Jakarta Sans', sans-serif";
-    ctx.fillText(dreamName ? `✨ ${dreamName}` : "✨ Tân Sinh Viên K22", 60, size - 140);
+    ctx.font = `900 32px ${FONT_SANS}`;
+    ctx.fillText(`✨ ${cleanPassenger}`, 60, size - 145);
 
     ctx.fillStyle = "#FAEEDA";
-    ctx.font = "italic 24px 'Plus Jakarta Sans', sans-serif";
-    const content = dreamContent || "Deploy Ước Mơ cùng CLB Lập trình FU-DEVER!";
-    ctx.fillText(`“${content.length > 55 ? content.substring(0, 52) + "..." : content}”`, 60, size - 95);
+    ctx.font = `600 24px ${FONT_SANS}`;
+    const displayWish = cleanWish.length > 50 ? `${cleanWish.substring(0, 47)}...` : cleanWish;
+    ctx.fillText(`“${displayWish}”`, 60, size - 100);
 
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-    ctx.font = "bold 18px 'Plus Jakarta Sans', sans-serif";
-    ctx.fillText("#FUDEVER #DeployUocMo #FPTUDaNang", 60, size - 55);
+    ctx.fillStyle = "#00F5D4";
+    ctx.font = `bold 18px ${FONT_SANS}`;
+    ctx.fillText("#FUDEVER   #DeployUocMo   #FPTUDaNang", 60, size - 58);
 
-    // 6. Draw Mid-Autumn Buggy Mascot Sticker on bottom right
+    // 6. DRAW BUGGY MASCOT STICKER ON BOTTOM RIGHT
     const stickerImg = new window.Image();
     stickerImg.crossOrigin = "anonymous";
     stickerImg.src = "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png";
     stickerImg.onload = () => {
-      ctx.drawImage(stickerImg, size - 200, size - 200, 160, 160);
+      ctx.drawImage(stickerImg, size - 220, size - 220, 175, 175);
       const dataUrl = canvas.toDataURL("image/png");
       setCapturedUrl(dataUrl);
       playCelebrationFanfare();
@@ -169,7 +232,7 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
   const handleDownload = () => {
     if (!capturedUrl) return;
     const link = document.createElement("a");
-    link.download = `FU_DEVER_PhotoBooth_${Date.now()}.png`;
+    link.download = `FU_DEVER_Polaroid_${Date.now()}.png`;
     link.href = capturedUrl;
     link.click();
   };
@@ -183,6 +246,7 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-[#fac775] transition-colors cursor-pointer z-20"
+          aria-label="Đóng"
         >
           <X className="w-5 h-5" />
         </button>
@@ -194,14 +258,22 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
             <span>Booth Dream Photo Cam</span>
           </div>
           <h3 className="text-xl font-black text-white font-display">Chụp Ảnh Kỷ Niệm Polaroid</h3>
+          <p className="text-xs text-[#faeeda]/80">Cắt ảnh tỷ lệ chuẩn không méo mặt · Lưu khoảnh khắc rực rỡ</p>
         </div>
 
-        {/* Cam Viewport */}
-        <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-[#fac775]/40 bg-black flex items-center justify-center shadow-inner">
+        {/* Cam Viewport (1:1 Ratio) */}
+        <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-[#fac775]/50 bg-black flex items-center justify-center shadow-2xl">
           {camError ? (
             <div className="p-6 text-center text-xs text-red-300 flex flex-col items-center gap-2">
               <AlertCircle className="w-8 h-8 text-red-400" />
               <span>{camError}</span>
+              <button
+                onClick={() => startCamera(facingMode)}
+                className="mt-2 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Thử lại</span>
+              </button>
             </div>
           ) : capturedUrl ? (
             <Image
@@ -218,18 +290,28 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
                 autoPlay
                 playsInline
                 muted
-                className="w-full h-full object-cover -scale-x-100"
+                className={`w-full h-full object-cover ${facingMode === "user" ? "-scale-x-100" : ""}`}
               />
 
               {/* Decorative Camera Overlay Frame */}
-              <div className="absolute inset-4 border-2 border-dashed border-[#fac775]/40 rounded-xl pointer-events-none flex flex-col justify-between p-3">
-                <div className="flex items-center justify-between text-[11px] text-[#fac775] font-bold bg-black/40 px-2 py-0.5 rounded-md backdrop-blur-xs w-fit">
-                  <span>🏮 DEVER Live Cam</span>
+              <div className="absolute inset-3 border-2 border-dashed border-[#fac775]/40 rounded-xl pointer-events-none flex flex-col justify-between p-3">
+                <div className="flex items-center justify-between text-[11px] text-[#fac775] font-bold bg-black/50 px-2.5 py-1 rounded-lg backdrop-blur-xs w-fit">
+                  <span>🏮 DEVER HD Live Cam</span>
                 </div>
-                <div className="text-center text-xs text-amber-200 font-bold bg-black/40 px-3 py-1 rounded-md backdrop-blur-xs">
+                <div className="text-center text-xs text-amber-200 font-bold bg-black/50 px-3 py-1 rounded-lg backdrop-blur-xs">
                   {dreamName ? `✨ ${dreamName}` : "✨ Tân Sinh Viên K22"}
                 </div>
               </div>
+
+              {/* Camera Switch Button (Mobile / Laptop) */}
+              <button
+                type="button"
+                onClick={handleToggleFacingMode}
+                className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-amber-300 border border-amber-300/40 backdrop-blur-md transition-transform active:scale-90 cursor-pointer"
+                title="Đổi camera trước/sau"
+              >
+                <SwitchCamera className="w-4 h-4" />
+              </button>
 
               {/* Countdown Overlay */}
               {isCounting && (
@@ -258,8 +340,8 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
               </button>
 
               <button
-                onClick={() => setCapturedUrl(null)}
-                className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-slate-300 font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                onClick={handleRetake}
+                className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-slate-200 font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-white/10"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Chụp Lại Bức Khác</span>
