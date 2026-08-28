@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, memo, useCallback } from "react";
+import React, { useEffect, useRef, memo, useCallback, useState } from "react";
 import Image from "next/image";
 import { Dream } from "@/types/dream";
 import { DREAM_CATEGORIES, getBuggyMascotUrl } from "@/lib/constants";
@@ -31,11 +31,13 @@ interface FloatingLanternCardsSkyProps {
   flightMode?: FlightMode;
   selectedTagFilter?: string;
   onSelectDream: (dream: Dream) => void;
+  onIdleChange?: (isIdle: boolean) => void;
 }
 
 interface SingleLanternCardProps {
   dream: Dream;
   flightMode: FlightMode;
+  isIdle: boolean;
   onSelect: (dream: Dream) => void;
   onHoverStart: (id: string) => void;
   onHoverEnd: (id: string) => void;
@@ -45,6 +47,7 @@ interface SingleLanternCardProps {
 
 const SingleLanternCard = memo(function SingleLanternCard({
   dream,
+  isIdle,
   onSelect,
   onHoverStart,
   onHoverEnd,
@@ -72,9 +75,10 @@ const SingleLanternCard = memo(function SingleLanternCard({
   }, [dream, onSelect]);
 
   const handleMouseEnter = useCallback(() => {
+    if (isIdle) return;
     playTactileClick();
     onHoverStart(dream.id);
-  }, [dream.id, onHoverStart]);
+  }, [dream.id, onHoverStart, isIdle]);
 
   const handleMouseLeave = useCallback(() => {
     onHoverEnd(dream.id);
@@ -88,7 +92,9 @@ const SingleLanternCard = memo(function SingleLanternCard({
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleMouseEnter}
       onTouchEnd={handleMouseLeave}
-      className="absolute top-0 left-0 pointer-events-auto cursor-pointer will-change-transform select-none"
+      className={`absolute top-0 left-0 ${
+        isIdle ? "pointer-events-none" : "pointer-events-auto"
+      } cursor-pointer will-change-transform select-none`}
       style={{
         transform: "translate3d(-1000px, -1000px, 0)",
         transformOrigin: "center center",
@@ -183,11 +189,16 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
   flightMode = "carousel",
   selectedTagFilter = "all",
   onSelectDream,
+  onIdleChange,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const cardElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const swayElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const physicsMapRef = useRef<Map<string, LanternPhysicsItem>>(new Map());
+
+  const [isIdle, setIsIdle] = useState(false);
+  const isMouseActiveRef = useRef(true);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isHoveredRef = useRef(false);
   const hoveredDreamIdRef = useRef<string | null>(null);
@@ -198,7 +209,54 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
   const flightModeRef = useRef<FlightMode>(flightMode);
   flightModeRef.current = flightMode;
 
+  // 8.5s Idle Detection (Booth Screen-Saver Protection)
+  useEffect(() => {
+    const handleActivity = () => {
+      isMouseActiveRef.current = true;
+      setIsIdle(false);
+      onIdleChange?.(false);
+
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+
+      idleTimerRef.current = setTimeout(() => {
+        // Idle for 8.5 seconds: lock hover interactions so passing lanterns don't trigger
+        isMouseActiveRef.current = false;
+        setIsIdle(true);
+        onIdleChange?.(true);
+        isHoveredRef.current = false;
+        hoveredDreamIdRef.current = null;
+      }, 8500);
+    };
+
+    // Initial 8.5s idle timer
+    idleTimerRef.current = setTimeout(() => {
+      isMouseActiveRef.current = false;
+      setIsIdle(true);
+      onIdleChange?.(true);
+      isHoveredRef.current = false;
+      hoveredDreamIdRef.current = null;
+    }, 8500);
+
+    window.addEventListener("mousemove", handleActivity, { passive: true });
+    window.addEventListener("mousedown", handleActivity, { passive: true });
+    window.addEventListener("touchstart", handleActivity, { passive: true });
+    window.addEventListener("keydown", handleActivity, { passive: true });
+
+    return () => {
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("mousedown", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+    };
+  }, [onIdleChange]);
+
   const handleHoverStart = useCallback((id: string) => {
+    if (!isMouseActiveRef.current) return;
     isHoveredRef.current = true;
     hoveredDreamIdRef.current = id;
   }, []);
@@ -444,6 +502,7 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
           key={dream.id}
           dream={dream}
           flightMode={flightMode}
+          isIdle={isIdle}
           onSelect={onSelectDream}
           onHoverStart={handleHoverStart}
           onHoverEnd={handleHoverEnd}

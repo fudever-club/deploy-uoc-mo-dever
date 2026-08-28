@@ -109,6 +109,8 @@ export default function DisplaySkyPage() {
 
   const visibleDreams = useMemo(() => dreams.filter((d) => !d.hidden), [dreams]);
 
+  const [isDisplayIdle, setIsDisplayIdle] = useState(false);
+
   // Auto-spotlight rotation every 12 seconds
   useEffect(() => {
     if (!isAutoSpotlight || visibleDreams.length === 0) return;
@@ -123,7 +125,11 @@ export default function DisplaySkyPage() {
   const currentSpotlightDream = visibleDreams[spotlightIndex] || null;
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden select-none bg-[#12203A] text-[#faeeda]">
+    <div
+      className={`relative w-screen h-screen overflow-hidden select-none bg-[#12203A] text-[#faeeda] ${
+        isDisplayIdle ? "cursor-none" : ""
+      }`}
+    >
       {/* 1. BACKGROUND PARTICLES & SKY LAYER */}
       <LanternSkyCanvas />
 
@@ -134,6 +140,7 @@ export default function DisplaySkyPage() {
           flightMode={flightMode}
           selectedTagFilter={selectedTagFilter}
           onSelectDream={(d) => setSelectedDream(d)}
+          onIdleChange={setIsDisplayIdle}
         />
       ) : (
         <ConstellationGalaxyView
