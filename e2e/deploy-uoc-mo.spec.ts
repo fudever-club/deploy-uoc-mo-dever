@@ -33,7 +33,7 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     await submitBtn.click();
 
     // 5. Verify Thank You Screen
-    await expect(page.locator("h2")).toContainText("Ước mơ đã bay lên");
+    await expect(page.locator("h2")).toContainText(/ước mơ đã bay lên/i);
     const viewCardBtn = page.locator("#btn-view-card");
     await expect(viewCardBtn).toBeVisible();
 
