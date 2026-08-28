@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { X, Sparkles, Heart, Code2, Users, Rocket, ExternalLink, Github, Facebook, Globe, Mail } from "lucide-react";
+import { X, Sparkles, Heart, Code2, Users, Rocket, ExternalLink, Globe, Mail } from "lucide-react";
 import { playTactileClick } from "@/lib/audio-synthesizer";
 
 interface AboutModalProps {
@@ -56,7 +56,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         {/* Live Vercel App Link Pill */}
         <div className="mb-4">
           <a
-            href="https://deploy-uoc-mo-dever.vercel.app"
+            href="https://deployuocmodever-euejrts5o-dangquangnhat1504-4288s-projects.vercel.app"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#0091ea]/25 via-emerald-500/20 to-[#0091ea]/25 hover:from-[#0091ea]/35 hover:to-emerald-500/30 border border-emerald-400/50 text-xs font-bold text-white transition-all shadow-md group"
@@ -64,7 +64,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               <Globe className="w-4 h-4 text-emerald-400" />
-              <span>Live App: deploy-uoc-mo-dever.vercel.app</span>
+              <span>Live App: deploy-uoc-mo-dever</span>
             </div>
             <ExternalLink className="w-3.5 h-3.5 text-emerald-300 group-hover:translate-x-0.5 transition-transform" />
           </a>
@@ -117,7 +117,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all group"
           >
             <div className="flex items-center gap-2">
-              <Facebook className="w-3.5 h-3.5 text-[#0091ea]" />
+              <svg className="w-3.5 h-3.5 fill-[#0091ea]" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
               <span className="text-[11px]">facebook.com/fudever.club</span>
             </div>
             <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-white" />
@@ -130,7 +132,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all group"
           >
             <div className="flex items-center gap-2">
-              <Github className="w-3.5 h-3.5 text-[#fac775]" />
+              <svg className="w-3.5 h-3.5 fill-[#fac775]" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
               <span className="text-[11px]">github.com/fudever-club</span>
             </div>
             <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-white" />
