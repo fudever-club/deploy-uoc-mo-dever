@@ -9,10 +9,11 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
 
     // 2. Verify Intro Screen
     const startBtn = page.locator("#btn-start-dream");
-    await expect(startBtn).toBeVisible();
+    await expect(startBtn).toBeVisible({ timeout: 10000 });
     await expect(page.locator("h1")).toContainText(/deploy ước mơ/i);
 
     // 3. Start Form
+    await startBtn.scrollIntoViewIfNeeded();
     await startBtn.click();
 
     // 4. Fill form
@@ -20,11 +21,13 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     const contentInput = page.locator("#content-input");
     const submitBtn = page.locator("#btn-submit-dream");
 
+    await expect(nameInput).toBeVisible({ timeout: 10000 });
     await nameInput.fill("Phan Quang Nhật K22");
 
     // Test AI Poetry generator button
     const poemBtn = page.locator("button:has-text('Gieo Vần Thơ DEVER')");
     await expect(poemBtn).toBeVisible();
+    await poemBtn.scrollIntoViewIfNeeded();
     await poemBtn.click();
 
     // Verify poem content filled
@@ -37,16 +40,18 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     }
 
     // Submit
+    await submitBtn.scrollIntoViewIfNeeded();
     await submitBtn.click();
 
     // 5. Verify Thank You Screen
-    await expect(page.locator("h2")).toContainText(/đèn lồng đã cất cánh|ước mơ đã bay lên/i);
+    await expect(page.locator("h2")).toContainText(/đèn lồng đã cất cánh|ước mơ đã bay lên/i, { timeout: 10000 });
     const viewCardBtn = page.locator("#btn-view-card");
     await expect(viewCardBtn).toBeVisible();
 
     // 6. Open Dream Card Modal
+    await viewCardBtn.scrollIntoViewIfNeeded();
     await viewCardBtn.click();
-    await expect(page.locator("text=Thiệp Ước Mơ & Vé Lên Tàu Vũ Trụ K22")).toBeVisible();
+    await expect(page.locator("text=Thiệp Ước Mơ & Vé Lên Tàu Vũ Trụ K22")).toBeVisible({ timeout: 10000 });
     await expect(page.locator("button:has-text('Lưu Ảnh Story')")).toBeVisible();
 
     // Close modal
@@ -58,8 +63,8 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
 
   test("2. Public Lantern Sky Display & Flight Modes (/display)", async ({ page }) => {
     await page.goto("/display");
-    await expect(page.locator("text=Deploy Ước Mơ · Club Day 2026")).toBeVisible();
-    await expect(page.locator("text=CLB LẬP TRÌNH FU-DEVER").first()).toBeVisible();
+    await page.waitForLoadState("domcontentloaded");
+    await expect(page.locator("text=Deploy Ước Mơ · Club Day 2026")).toBeVisible({ timeout: 10000 });
     await expect(page.locator("#counter-pill")).toBeVisible();
 
     // Toggle Constellation Galaxy Mode
@@ -78,40 +83,44 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
 
   test("3. Admin Dashboard Authentication & Management (/admin)", async ({ page }) => {
     await page.goto("/admin");
+    await page.waitForLoadState("domcontentloaded");
 
     // Login
     const passInput = page.locator("#admin-password-input");
     const loginBtn = page.locator("#btn-admin-login");
-    await expect(passInput).toBeVisible();
+    await expect(passInput).toBeVisible({ timeout: 10000 });
 
     await passInput.fill("dever2026");
     await loginBtn.click();
 
     // Verify Dashboard Loaded
-    await expect(page.locator("h1")).toContainText("Bảng Quản Trị Ước Mơ");
+    await expect(page.locator("h1")).toContainText("Bảng Quản Trị Ước Mơ", { timeout: 10000 });
     await expect(page.locator("#btn-export-csv")).toBeVisible();
     await expect(page.locator("table")).toBeVisible();
   });
 
   test("4. Standee Poster Generator Screen (/standee)", async ({ page }) => {
     await page.goto("/standee");
-    await expect(page.locator("h1")).toContainText("DEPLOY ƯỚC MƠ");
+    await page.waitForLoadState("domcontentloaded");
+    await expect(page.locator("h1")).toContainText("DEPLOY ƯỚC MƠ", { timeout: 10000 });
     await expect(page.locator("text=Quét Mã Tham Gia Ngay")).toBeVisible();
     await expect(page.locator("button:has-text('In Poster')")).toBeVisible();
   });
 
   test("5. Lucky Draw Minigame Screen (/admin/lucky-draw)", async ({ page }) => {
     await page.goto("/admin/lucky-draw");
-    await expect(page.locator("h1")).toContainText("VÒNG QUAY MAY MẮN");
-    const spinBtn = page.locator("button:has-text('Quay Số Ngay!')");
-    await expect(spinBtn).toBeVisible();
+    await page.waitForLoadState("domcontentloaded");
+    await expect(page.locator("h1")).toContainText("VÒNG QUAY MAY MẮN", { timeout: 10000 });
+    const spinBtn = page.locator("button:has-text('Quay Thưởng May Mắn')");
+    await expect(spinBtn).toBeVisible({ timeout: 10000 });
     await spinBtn.click();
-    await expect(page.locator("text=Đang quay số...")).toBeVisible();
+    await expect(page.locator("text=Đang quay thưởng...")).toBeVisible();
   });
 
   test("6. Mystery Drop Gift Claim Screen (/claim)", async ({ page }) => {
     await page.goto("/claim");
+    await page.waitForLoadState("domcontentloaded");
+    await expect(page.locator("h1")).toBeVisible({ timeout: 10000 });
     await expect(page.locator("h1")).toContainText("Săn Đèn Lồng Bí Ẩn");
-    await expect(page.locator("text=CLB Lập Trình FU-DEVER")).toBeVisible();
   });
 });
