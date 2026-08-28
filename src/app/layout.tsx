@@ -1,6 +1,21 @@
 import type { Metadata, Viewport } from "next";
+import { Be_Vietnam_Pro, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
+
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-be-vietnam",
+  display: "swap",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
@@ -44,10 +59,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className="h-full">
-      <body className="min-h-screen flex flex-col bg-[#fffdfa] text-[#2c2c2a] antialiased selection:bg-[#fac775] selection:text-[#712b13]">
+    <html
+      lang="vi"
+      className={`h-full ${beVietnamPro.variable} ${plusJakartaSans.variable}`}
+      suppressHydrationWarning
+    >
+      <body
+        className="min-h-screen flex flex-col bg-[#fffdfa] text-[#2c2c2a] antialiased selection:bg-[#fac775] selection:text-[#712b13] font-sans"
+        suppressHydrationWarning
+      >
         <Navbar />
-        <main className="flex-1 flex flex-col">{children}</main>
+        <main suppressHydrationWarning className="flex-1 flex flex-col">{children}</main>
       </body>
     </html>
   );

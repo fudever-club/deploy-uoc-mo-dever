@@ -39,8 +39,13 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
       return;
     }
 
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      setCamError("Trình duyệt không hỗ trợ truy cập camera hoặc cần kết nối HTTPS an toàn.");
+      return;
+    }
+
     navigator.mediaDevices
-      ?.getUserMedia({
+      .getUserMedia({
         video: { width: { ideal: 1080 }, height: { ideal: 1080 }, facingMode: "user" },
         audio: false,
       })
@@ -48,7 +53,7 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
         setStream(s);
         if (videoRef.current) {
           videoRef.current.srcObject = s;
-          videoRef.current.play();
+          videoRef.current.play().catch(() => {});
         }
       })
       .catch((err) => {

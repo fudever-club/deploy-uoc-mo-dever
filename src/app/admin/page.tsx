@@ -332,7 +332,7 @@ export default function AdminPage() {
 
             <button
               onClick={handleLogout}
-              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-500 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Đăng xuất"
             >
               <LogOut className="w-4 h-4" />

@@ -145,11 +145,11 @@ export const BuggyCatcherModal: React.FC<BuggyCatcherModalProps> = ({ isOpen, on
           <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
             <div className="w-20 h-20 rounded-full bg-[#fac775]/20 border-2 border-[#fac775] flex items-center justify-center p-2 mb-3 shadow-xl">
               <Image
-                src="/assets/buggy/1.png"
+                src="/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png"
                 alt="Buggy Mascot"
                 width={56}
                 height={56}
-                className="object-contain animate-bounce"
+                className="object-contain animate-float"
               />
             </div>
 
@@ -236,7 +236,7 @@ export const BuggyCatcherModal: React.FC<BuggyCatcherModalProps> = ({ isOpen, on
         {/* GAMEOVER SCREEN */}
         {gameState === "gameover" && (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-4 animate-in zoom-in-95 duration-200">
-            <Trophy className="w-16 h-16 text-[#fac775] mb-2 animate-bounce" />
+            <Trophy className="w-16 h-16 text-[#fac775] mb-2 animate-pulse" />
 
             <h3 className="text-2xl font-black text-[#fac775] mb-1 font-display">
               Chúc Mừng Chiến Binh DEVER!

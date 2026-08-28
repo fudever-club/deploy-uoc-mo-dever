@@ -154,7 +154,7 @@ export default function StandeeGeneratorPage() {
           </h1>
 
           <p className={`text-xs font-medium max-w-xs mx-auto ${isDaylight ? "text-slate-600" : "text-white/90"}`}>
-            Thả đèn lồng ước mơ lên màn hình ngày hội và nhận ngay thiệp Story 9:16 độc quyền!
+            Thắp sáng ước mơ lên bầu trời đêm và nhận ngay tấm thiệp Dream Card mang dấu ấn riêng!
           </p>
         </div>
 
@@ -174,7 +174,7 @@ export default function StandeeGeneratorPage() {
 
             <div className="relative w-7 h-7">
               <Image
-                src="/assets/buggy/1.png"
+                src="/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png"
                 alt="Buggy Happy"
                 fill
                 className="object-contain"

@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, memo, useCallback } from "react";
 import Image from "next/image";
 import { Dream } from "@/types/dream";
-import { DREAM_CATEGORIES } from "@/lib/constants";
+import { DREAM_CATEGORIES, getBuggyMascotUrl } from "@/lib/constants";
 import { LanternSVG, LanternShape } from "@/components/LanternSVG";
 import { playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
 
@@ -106,7 +106,7 @@ const SingleLanternCard = memo(function SingleLanternCard({
           {/* Buggy Mascot Sticker Badge */}
           <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#12203A] border border-[#fac775] p-0.5 shadow-md">
             <Image
-              src={`/assets/buggy/${dream.mascotIndex || 1}.png`}
+              src={getBuggyMascotUrl(dream.mascotIndex)}
               alt="Buggy Sticker"
               width={20}
               height={20}
@@ -128,7 +128,7 @@ const SingleLanternCard = memo(function SingleLanternCard({
           } backdrop-blur-md group-hover:shadow-[0_10px_35px_rgba(250,199,117,0.5)] group-hover:scale-105`}
         >
           {/* Traditional Tag Hanging Ringlet Top */}
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3.5 h-2 rounded-t-full border-t-2 border-x-2 border-[#fac775] bg-transparent" />
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3.5 h-2 rounded-t-full border-2 border-b-0 border-[#fac775] bg-transparent" />
 
           {/* Tag Header: Name + Emoji */}
           <div className="flex items-center justify-between text-[11px] font-black mb-1 pb-1 border-b border-amber-200/50">

@@ -58,6 +58,12 @@ export default function LuckyDrawPage() {
         console.error("Load dreams for lucky draw error:", err);
         setLoading(false);
       });
+
+    return () => {
+      if (spinInterval.current) {
+        clearTimeout(spinInterval.current);
+      }
+    };
   }, []);
 
   const handleStartSpin = () => {
@@ -171,7 +177,7 @@ export default function LuckyDrawPage() {
               alt="Buggy Chu Cuoi"
               width={64}
               height={64}
-              className="object-contain animate-bounce"
+              className="object-contain animate-float"
             />
           </div>
           <h1 className="text-2xl sm:text-4xl font-black text-[#fac775] tracking-tight mb-1 font-display">
@@ -200,7 +206,7 @@ export default function LuckyDrawPage() {
           ) : currentDisplayDream ? (
             <div className="space-y-4 max-w-xl w-full">
               {winner && (
-                <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#fac775] text-[#12203a] text-xs sm:text-sm font-black uppercase tracking-wider animate-bounce shadow-lg">
+                <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#fac775] text-[#12203a] text-xs sm:text-sm font-black uppercase tracking-wider animate-pulse shadow-lg">
                   <Crown className="w-4 h-4" />
                   <span>XIN CHÚC MỪNG BẠN ĐÃ TRÚNG THƯỞNG!</span>
                 </div>

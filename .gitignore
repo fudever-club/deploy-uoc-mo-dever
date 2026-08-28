@@ -38,4 +38,6 @@ next-env.d.ts
 # local persistent data
 data/dreams.json
 
-.vercel
+# ide & tool configs
+.codex/
+.impeccable/

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Dream, CardTheme } from "@/types/dream";
-import { DREAM_CATEGORIES } from "@/lib/constants";
+import { DREAM_CATEGORIES, getBuggyMascotUrl } from "@/lib/constants";
 import { downloadDreamCard, renderDreamCardToDataUrl } from "@/lib/dream-card-canvas";
 import { LanternSVG, LanternShape } from "@/components/LanternSVG";
 import { playTactileClick } from "@/lib/audio-synthesizer";
@@ -16,21 +16,24 @@ interface DreamCardModalProps {
 }
 
 const BUGGY_STICKER_OPTIONS = [
+  { id: "11", label: "Thả Tim ❤️", src: "/assets/buggy/11.png" },
+  { id: "19", label: "Bắn Tim 🥰", src: "/assets/buggy/19.png" },
   { id: "trung-thu/04_buggy_chu_cuoi_coder.png", label: "Chú Cuội Coder", src: "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png" },
   { id: "trung-thu/10_buggy_hang_nga_fairy.png", label: "Hằng Nga Tiên Nữ", src: "/assets/buggy/trung-thu/10_buggy_hang_nga_fairy.png" },
   { id: "trung-thu/01_buggy_lantern_parade.png", label: "Rước Đèn Ông Sao", src: "/assets/buggy/trung-thu/01_buggy_lantern_parade.png" },
   { id: "trung-thu/02_buggy_mooncake_feast.png", label: "Ăn Bánh Trung Thu", src: "/assets/buggy/trung-thu/02_buggy_mooncake_feast.png" },
   { id: "trung-thu/03_buggy_lion_dance.png", label: "Múa Lân Rộn Ràng", src: "/assets/buggy/trung-thu/03_buggy_lion_dance.png" },
   { id: "trung-thu/05_buggy_moon_rabbit_hug.png", label: "Ôm Thỏ Ngọc", src: "/assets/buggy/trung-thu/05_buggy_moon_rabbit_hug.png" },
-  { id: "1", label: "Thả Tim", src: "/assets/buggy/1.png" },
-  { id: "3", label: "Lập Trình", src: "/assets/buggy/3.png" },
-  { id: "5", label: "Chiến Thắng", src: "/assets/buggy/5.png" },
+  { id: "6", label: "Cool Ngầu 😎", src: "/assets/buggy/6.png" },
+  { id: "8", label: "Cà Phê Code ☕", src: "/assets/buggy/8.png" },
+  { id: "4", label: "Ý Tưởng 💡", src: "/assets/buggy/4.png" },
+  { id: "9", label: "Ăn Mừng 🎉", src: "/assets/buggy/9.png" },
 ];
 
 export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, onClose }) => {
   const [selectedTheme, setSelectedTheme] = useState<CardTheme>(dream.theme || "classic");
   const [selectedMascot, setSelectedMascot] = useState<number | string>(
-    dream.mascotIndex || "trung-thu/04_buggy_chu_cuoi_coder.png"
+    dream.mascotIndex || "11"
   );
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -39,15 +42,6 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
 
   const categoryInfo = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
   const shape = (dream.lanternShape as LanternShape) || "hoian_lotus";
-
-  const getMascotSrc = (m: number | string) => {
-    if (typeof m === "string") {
-      if (m.startsWith("/")) return m;
-      if (m.startsWith("trung-thu/")) return `/assets/buggy/${m}`;
-      return `/assets/buggy/${m}.png`;
-    }
-    return `/assets/buggy/${m}.png`;
-  };
 
   const handleDownload = async () => {
     playTactileClick();
@@ -137,7 +131,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                 }}
                 className={`py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   selectedTheme === "classic"
-                    ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
+                    ? "bg-gradient-to-r from-[#993c1d] to-[#712b13] text-white border border-[#fac775] shadow-xs"
                     : "bg-white/5 text-white/70 hover:bg-white/10"
                 }`}
               >
@@ -153,7 +147,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                 }}
                 className={`py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   selectedTheme === "tech"
-                    ? "bg-[#0091ea] text-white border border-[#00f5d4] shadow-xs"
+                    ? "bg-gradient-to-r from-[#0091ea] to-[#0055a5] text-white border border-[#00f5d4] shadow-xs"
                     : "bg-white/5 text-white/70 hover:bg-white/10"
                 }`}
               >
@@ -167,9 +161,9 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                   playTactileClick();
                   setSelectedTheme("gold");
                 }}
-                className={`py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                className={`py-1.5 px-2 rounded-xl text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   selectedTheme === "gold"
-                    ? "bg-[#712b13] text-[#fac775] border border-[#fac775] shadow-xs"
+                    ? "bg-gradient-to-r from-[#b8860b] via-[#ffd166] to-[#b8860b] text-[#2b1700] border border-[#fff3d1] shadow-[0_0_12px_rgba(255,209,102,0.5)] scale-[1.02]"
                     : "bg-white/5 text-white/70 hover:bg-white/10"
                 }`}
               >
@@ -221,54 +215,144 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
           <div
             className={`relative w-full max-w-[260px] aspect-[9/16] rounded-2xl p-4 flex flex-col justify-between text-center overflow-hidden shadow-2xl border ${
               selectedTheme === "tech"
-                ? "bg-gradient-to-b from-[#08101e] via-[#0f203c] to-[#002244] border-[#00f5d4] text-[#00f5d4]"
+                ? "bg-gradient-to-b from-[#030814] via-[#091a38] to-[#0c2856] border-[#00f5d4] text-[#00f5d4]"
                 : selectedTheme === "gold"
-                ? "bg-gradient-to-b from-[#3a1306] via-[#712b13] to-[#993c1d] border-[#fac775] text-[#fac775]"
-                : "bg-gradient-to-b from-[#4a1204] via-[#712b13] to-[#993c1d] border-[#fac775] text-[#faeeda]"
+                ? "bg-gradient-to-b from-[#2c1800] via-[#593404] to-[#8c5408] border-[#ffd166] text-[#ffd166] shadow-[0_0_30px_rgba(255,209,102,0.25)]"
+                : "bg-gradient-to-b from-[#280505] via-[#61100b] to-[#993c1d] border-[#fac775] text-[#faeeda]"
             }`}
           >
             {/* Background Ambient Glow & Star Orbs */}
-            <div className="absolute top-0 right-0 w-36 h-36 rounded-full bg-amber-400/20 blur-2xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-red-600/20 blur-2xl pointer-events-none" />
+            <div
+              className={`absolute top-0 right-0 w-36 h-36 rounded-full blur-2xl pointer-events-none ${
+                selectedTheme === "tech"
+                  ? "bg-cyan-500/25"
+                  : selectedTheme === "gold"
+                  ? "bg-amber-300/35"
+                  : "bg-amber-400/20"
+              }`}
+            />
+            <div
+              className={`absolute bottom-0 left-0 w-32 h-32 rounded-full blur-2xl pointer-events-none ${
+                selectedTheme === "tech"
+                  ? "bg-blue-600/20"
+                  : selectedTheme === "gold"
+                  ? "bg-yellow-600/30"
+                  : "bg-red-600/20"
+              }`}
+            />
 
             {/* Inner Border Trim */}
-            <div className="absolute inset-1.5 border border-white/20 rounded-xl pointer-events-none" />
+            <div
+              className={`absolute inset-1.5 border rounded-xl pointer-events-none ${
+                selectedTheme === "tech"
+                  ? "border-[#00f5d4]/40"
+                  : selectedTheme === "gold"
+                  ? "border-[#ffd166]/60"
+                  : "border-white/20"
+              }`}
+            />
 
             {/* 1. Header: Lantern & Event Tag */}
             <div className="relative z-10 flex flex-col items-center">
               <div className="relative mb-1">
                 <LanternSVG shape={shape} size={42} glow={true} />
               </div>
-              <span className="text-[9px] font-black tracking-widest uppercase text-amber-300 drop-shadow-sm">
+              <span
+                className={`text-[9px] font-black tracking-widest uppercase drop-shadow-sm ${
+                  selectedTheme === "tech"
+                    ? "text-[#00f5d4]"
+                    : selectedTheme === "gold"
+                    ? "text-[#ffd166]"
+                    : "text-amber-300"
+                }`}
+              >
                 DEPLOY ƯỚC MƠ 2026
               </span>
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-[8px] font-bold text-white/90 mt-0.5 border border-white/10">
+              <div
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold mt-0.5 border ${
+                  selectedTheme === "tech"
+                    ? "bg-[#00f5d4]/15 border-[#00f5d4]/40 text-[#00f5d4]"
+                    : selectedTheme === "gold"
+                    ? "bg-[#ffd166]/20 border-[#ffd166]/50 text-[#fff3d1]"
+                    : "bg-white/10 border-white/10 text-white/90"
+                }`}
+              >
                 <span>{categoryInfo?.emoji || "🏮"}</span>
                 <span>{categoryInfo?.shortLabel || "Ước mơ"}</span>
               </div>
             </div>
 
             {/* 2. Middle: Content Box with Buggy Mascot */}
-            <div className="relative z-10 my-auto bg-black/40 rounded-xl p-3 border border-white/15 backdrop-blur-sm">
-              <h4 className="text-xs font-black text-white mb-1 truncate">
+            <div
+              className={`relative z-10 my-auto rounded-xl p-3 border backdrop-blur-sm ${
+                selectedTheme === "tech"
+                  ? "bg-[#030c1a]/85 border-[#00f5d4]/40"
+                  : selectedTheme === "gold"
+                  ? "bg-[#241402]/90 border-[#ffd166]/60"
+                  : "bg-black/40 border-white/15"
+              }`}
+            >
+              <h4
+                className={`text-xs font-black mb-1 truncate ${
+                  selectedTheme === "gold" ? "text-[#ffd166]" : "text-white"
+                }`}
+              >
                 {dream.name ? `Ước Mơ Của ${dream.name}` : "Ước Nguyện K22"}
               </h4>
               <div className="relative">
-                <span className="text-xs text-amber-300 font-serif opacity-70">“</span>
-                <p className="text-[10px] text-white/95 italic font-medium line-clamp-3 leading-relaxed whitespace-pre-line px-1">
+                <span
+                  className={`text-xs font-serif opacity-70 ${
+                    selectedTheme === "tech"
+                      ? "text-[#00f5d4]"
+                      : selectedTheme === "gold"
+                      ? "text-[#ffd166]"
+                      : "text-amber-300"
+                  }`}
+                >
+                  “
+                </span>
+                <p
+                  className={`text-[10px] italic font-medium line-clamp-3 leading-relaxed whitespace-pre-line px-1 ${
+                    selectedTheme === "gold" ? "text-[#fff8e7]" : "text-white/95"
+                  }`}
+                >
                   {dream.content}
                 </p>
-                <span className="text-xs text-amber-300 font-serif opacity-70 float-right">”</span>
+                <span
+                  className={`text-xs font-serif opacity-70 float-right ${
+                    selectedTheme === "tech"
+                      ? "text-[#00f5d4]"
+                      : selectedTheme === "gold"
+                      ? "text-[#ffd166]"
+                      : "text-amber-300"
+                  }`}
+                >
+                  ”
+                </span>
               </div>
 
-              {/* Red Traditional Seal & Buggy Mascot Stamp */}
+              {/* Traditional Seal & Buggy Mascot Stamp */}
               <div className="flex items-center justify-between mt-2 px-1">
-                <div className="px-2 py-0.5 rounded-md border border-red-400 bg-red-900/60 text-red-300 text-[8px] font-black tracking-wider transform -rotate-6">
-                  {selectedTheme === "tech" ? "DEVER" : "ĐỖ ĐẠT"}
+                <div
+                  className={`px-2 py-0.5 rounded-md border text-[10px] font-black tracking-wider transform -rotate-6 ${
+                    selectedTheme === "tech"
+                      ? "border-[#00f5d4] bg-[#00f5d4]/20 text-[#00f5d4]"
+                      : selectedTheme === "gold"
+                      ? "border-[#ffd166] bg-[#ffd166]/20 text-[#ffd166]"
+                      : "border-red-400 bg-red-900/60 text-red-300"
+                  }`}
+                >
+                  {selectedTheme === "tech" ? "DEVER" : selectedTheme === "gold" ? "HOÀNG KIM" : "ĐỖ ĐẠT"}
                 </div>
-                <div className="w-8 h-8 rounded-full bg-[#12203A] border border-[#fac775] p-0.5 shadow-md flex items-center justify-center">
+                <div
+                  className={`w-8 h-8 rounded-full border p-0.5 shadow-md flex items-center justify-center ${
+                    selectedTheme === "gold"
+                      ? "bg-[#2c1800] border-[#ffd166]"
+                      : "bg-[#12203A] border-[#fac775]"
+                  }`}
+                >
                   <Image
-                    src={getMascotSrc(selectedMascot)}
+                    src={getBuggyMascotUrl(selectedMascot)}
                     alt="Buggy Mascot"
                     width={28}
                     height={28}
@@ -279,11 +363,35 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
             </div>
 
             {/* 3. Footer: Brand Logo & Hashtags */}
-            <div className="relative z-10 border-t border-white/15 pt-1.5">
-              <div className="text-[8px] font-bold text-white/80">
+            <div
+              className={`relative z-10 border-t pt-1.5 ${
+                selectedTheme === "tech"
+                  ? "border-[#00f5d4]/30"
+                  : selectedTheme === "gold"
+                  ? "border-[#ffd166]/40"
+                  : "border-white/15"
+              }`}
+            >
+              <div
+                className={`text-[10px] font-bold ${
+                  selectedTheme === "tech"
+                    ? "text-[#85b7eb]"
+                    : selectedTheme === "gold"
+                    ? "text-[#ffeaa7]"
+                    : "text-white/80"
+                }`}
+              >
                 CLB LẬP TRÌNH FU-DEVER · FPTU
               </div>
-              <div className="text-[7px] text-amber-300 font-mono">
+              <div
+                className={`text-[9px] font-mono ${
+                  selectedTheme === "tech"
+                    ? "text-[#00f5d4]"
+                    : selectedTheme === "gold"
+                    ? "text-[#ffd166]"
+                    : "text-amber-300"
+                }`}
+              >
                 #FUDEVER #DeployUocMo
               </div>
             </div>

@@ -86,7 +86,7 @@ const INITIAL_DREAMS: Dream[] = [
     consent: true,
     created_at: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
     hidden: false,
-    mascotIndex: 1,
+    mascotIndex: "11",
     theme: "classic",
     lanternShape: "carp_dragon",
   },
@@ -187,7 +187,7 @@ export async function createDream(input: DreamInput): Promise<Dream> {
     consent: input.consent,
     created_at: new Date().toISOString(),
     hidden: false,
-    mascotIndex: input.mascotIndex || 1,
+    mascotIndex: input.mascotIndex || "11",
     theme: input.theme || "classic",
     lanternShape: input.lanternShape || "hoian_lotus",
   };

@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Dream } from "@/types/dream";
-import { DREAM_CATEGORIES } from "@/lib/constants";
+import { DREAM_CATEGORIES, getBuggyMascotUrl } from "@/lib/constants";
 import { playLanternAscendChime, playReactionSound, playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
 import { ambientSound } from "@/lib/ambient-sound";
 import { useRealtimeDreams } from "@/lib/use-realtime-dreams";
@@ -22,6 +23,8 @@ import {
   Wind,
   Globe2,
   Wifi,
+  ArrowLeft,
+  Home,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
 import { LanternSkyCanvas } from "@/components/LanternSkyCanvas";
@@ -141,9 +144,14 @@ export default function DisplaySkyPage() {
 
       {/* 3. TOP FLOATING CONTROL DOCK */}
       <div className="absolute top-4 inset-x-4 z-40 flex items-center justify-between pointer-events-none">
-        {/* Brand Header */}
-        <div className="flex items-center gap-3 pointer-events-auto">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#993c1d] to-[#12203A] p-1 border-2 border-[#fac775] shadow-lg flex items-center justify-center">
+        {/* Brand Header & Home Link */}
+        <Link
+          href="/"
+          onClick={() => playTactileClick()}
+          className="flex items-center gap-3 pointer-events-auto group hover:opacity-95 transition-opacity select-none cursor-pointer"
+          title="Quay về trang chủ Deploy Ước Mơ"
+        >
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#993c1d] to-[#12203A] p-1 border-2 border-[#fac775] shadow-lg flex items-center justify-center group-hover:scale-105 transition-transform">
             <Image
               src="/assets/logo/logo-dever-white.png"
               alt="FU-DEVER Logo"
@@ -175,10 +183,21 @@ export default function DisplaySkyPage() {
               <span className="text-xs">🏮</span>
             </h1>
           </div>
-        </div>
+        </Link>
 
         {/* Action Controls Dock */}
         <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
+          {/* Back to Home Button */}
+          <Link
+            href="/"
+            onClick={() => playTactileClick()}
+            className="px-3 py-2 rounded-full bg-gradient-to-r from-[#993c1d] to-[#712b13] hover:opacity-95 border border-[#fac775]/50 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md group cursor-pointer"
+            title="Quay về trang gửi ước mơ K22"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-[#fac775] group-hover:-translate-x-0.5 transition-transform" />
+            <span className="hidden sm:inline">Trang Chủ</span>
+          </Link>
+
           {/* FLIGHT MOTION MODE SWITCHER */}
           <div className="flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg">
             <button
@@ -222,12 +241,12 @@ export default function DisplaySkyPage() {
               }}
               className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
                 viewMode === "galaxy"
-                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs"
+                  ? "bg-gradient-to-r from-[#0091ea] to-[#12203a] border border-[#85b7eb]/50 text-white shadow-xs"
                   : "text-white/70 hover:text-white"
               }`}
               title="Chế độ Chòm Sao Thiên Hà"
             >
-              <Globe2 className="w-3.5 h-3.5 text-purple-300" />
+              <Globe2 className="w-3.5 h-3.5 text-[#85b7eb]" />
               <span className="hidden md:inline">Chòm Sao</span>
             </button>
           </div>
@@ -296,7 +315,7 @@ export default function DisplaySkyPage() {
       {activeAnnouncement && activeAnnouncement.active && (
         <div className="absolute top-18 inset-x-6 z-30 pointer-events-none flex justify-center animate-in slide-in-from-top duration-300">
           <div className="max-w-2xl px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#993c1d]/95 via-[#0091ea]/90 to-[#993c1d]/95 border-2 border-[#fac775] shadow-2xl backdrop-blur-md flex items-center gap-3 text-white text-xs sm:text-sm font-bold">
-            <Megaphone className="w-5 h-5 text-[#fac775] shrink-0 animate-bounce" />
+            <Megaphone className="w-5 h-5 text-[#fac775] shrink-0 animate-pulse" />
             <span className="truncate">{activeAnnouncement.message}</span>
           </div>
         </div>
@@ -412,11 +431,11 @@ export default function DisplaySkyPage() {
             {/* Mascot */}
             <div className="w-16 h-16 rounded-full bg-[#faeeda] border-2 border-[#fac775] mx-auto mb-3 flex items-center justify-center p-1 shadow-lg">
               <Image
-                src={`/assets/buggy/${selectedDream.mascotIndex || 1}.png`}
+                src={getBuggyMascotUrl(selectedDream.mascotIndex)}
                 alt="Mascot"
                 width={48}
                 height={48}
-                className="object-contain animate-bounce"
+                className="object-contain animate-float"
               />
             </div>
 

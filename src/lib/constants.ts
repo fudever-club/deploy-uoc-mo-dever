@@ -46,15 +46,34 @@ export const DREAM_CATEGORIES: CategoryInfo[] = [
 ];
 
 export const BUGGY_MOODS: BuggyMood[] = [
-  { index: 1, label: "Thả tim", emoji: "❤️" },
-  { index: 2, label: "Hào hứng", emoji: "🔥" },
-  { index: 3, label: "Lập trình", emoji: "💻" },
-  { index: 5, label: "Chiến thắng", emoji: "🏆" },
-  { index: 8, label: "Bay lên", emoji: "🚀" },
-  { index: 10, label: "Tỏa sáng", emoji: "✨" },
-  { index: 12, label: "Đáng yêu", emoji: "🥰" },
-  { index: 15, label: "Học giỏi", emoji: "🎓" },
+  { index: "11", label: "Thả Tim", emoji: "❤️", image: "/assets/buggy/11.png" },
+  { index: "19", label: "Bắn Tim", emoji: "🥰", image: "/assets/buggy/19.png" },
+  { index: "trung-thu/04_buggy_chu_cuoi_coder.png", label: "Chú Cuội Coder", emoji: "🌙", image: "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png" },
+  { index: "trung-thu/10_buggy_hang_nga_fairy.png", label: "Hằng Nga Tiên Nữ", emoji: "🧝‍♀️", image: "/assets/buggy/trung-thu/10_buggy_hang_nga_fairy.png" },
+  { index: "trung-thu/01_buggy_lantern_parade.png", label: "Rước Đèn", emoji: "🏮", image: "/assets/buggy/trung-thu/01_buggy_lantern_parade.png" },
+  { index: "trung-thu/02_buggy_mooncake_feast.png", label: "Bánh Trung Thu", emoji: "🥮", image: "/assets/buggy/trung-thu/02_buggy_mooncake_feast.png" },
+  { index: "trung-thu/03_buggy_lion_dance.png", label: "Múa Lân", emoji: "🦁", image: "/assets/buggy/trung-thu/03_buggy_lion_dance.png" },
+  { index: "trung-thu/05_buggy_moon_rabbit_hug.png", label: "Ôm Thỏ Ngọc", emoji: "🐰", image: "/assets/buggy/trung-thu/05_buggy_moon_rabbit_hug.png" },
+  { index: "6", label: "Cool Ngầu", emoji: "😎", image: "/assets/buggy/6.png" },
+  { index: "8", label: "Cà Phê Code", emoji: "☕", image: "/assets/buggy/8.png" },
+  { index: "4", label: "Ý Tưởng", emoji: "💡", image: "/assets/buggy/4.png" },
+  { index: "9", label: "Ăn Mừng", emoji: "🎉", image: "/assets/buggy/9.png" },
 ];
+
+export function getBuggyMascotUrl(mascot: number | string | undefined): string {
+  if (!mascot) return "/assets/buggy/11.png";
+  const m = String(mascot).trim();
+  if (m.startsWith("/")) return m;
+  if (m.startsWith("trung-thu/")) return `/assets/buggy/${m}`;
+  if (m.includes("buggy_") || m.includes("dever_logo_")) {
+    const filename = m.endsWith(".png") ? m : `${m}.png`;
+    return `/assets/buggy/trung-thu/${filename}`;
+  }
+  // Check if it's the old invalid "1" sheet, map to 11
+  if (m === "1" || m === "1.png") return "/assets/buggy/11.png";
+  const numStr = m.endsWith(".png") ? m : `${m}.png`;
+  return `/assets/buggy/${numStr}`;
+}
 
 export interface MidAutumnBuggyReward {
   id: string;

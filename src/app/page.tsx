@@ -48,7 +48,7 @@ export default function WishSubmissionPage() {
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [tag, setTag] = useState<DreamCategory>("career");
-  const [mascotIndex, setMascotIndex] = useState<number | string>("04_buggy_chu_cuoi_coder.png");
+  const [mascotIndex, setMascotIndex] = useState<number | string>("11");
   const [theme, setTheme] = useState<CardTheme>("classic");
   const [lanternShape, setLanternShape] = useState<LanternShape>("hoian_lotus");
   const [consent, setConsent] = useState(true);
@@ -173,13 +173,16 @@ export default function WishSubmissionPage() {
   };
 
   return (
-    <div className="min-h-full flex-1 flex flex-col items-center justify-center px-4 py-6 sm:py-10 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative overflow-hidden">
+    <div
+      suppressHydrationWarning
+      className="min-h-full flex-1 flex flex-col items-center justify-center px-4 py-6 sm:py-10 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative overflow-hidden"
+    >
       {/* Decorative Warm Ambient Light Orbs */}
       <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-[#fac775]/25 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-[#993c1d]/15 blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 -right-20 w-60 h-60 rounded-full bg-[#0091ea]/10 blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-lg mx-auto relative z-10">
+      <div suppressHydrationWarning className="w-full max-w-lg mx-auto relative z-10">
         {/* STEP PROGRESS BAR */}
         <div className="flex items-center justify-center gap-2 mb-6">
           <div
@@ -228,10 +231,10 @@ export default function WishSubmissionPage() {
               <div className="absolute inset-0 bg-gradient-to-tr from-[#fac775]/50 via-[#0091ea]/30 to-[#993c1d]/30 rounded-full animate-pulse blur-xs group-hover:scale-110 transition-transform" />
               <div className="relative w-20 h-20 rounded-full bg-gradient-to-b from-[#993c1d] to-[#712b13] p-1.5 shadow-xl flex items-center justify-center border-2 border-[#fac775]">
                 <Image
-                  src="/assets/buggy/1.png"
-                  alt="Buggy Mascot"
-                  width={64}
-                  height={64}
+                  src="/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png"
+                  alt="Linh vật Buggy FU-DEVER"
+                  width={68}
+                  height={68}
                   className="object-contain drop-shadow-md animate-float"
                   priority
                 />
@@ -249,13 +252,13 @@ export default function WishSubmissionPage() {
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed">
-              Chào mừng tân sinh viên <strong>K22</strong> đến với gian hàng <strong>FU-DEVER</strong>! Hãy gửi gắm ước mơ của bạn bay lên bầu trời đêm và nhận ngay <strong>Dream Card Story</strong> độc quyền.
+              Chào mừng tân sinh viên <strong>K22</strong> đến với gian hàng <strong>FU-DEVER</strong>! Cùng thắp sáng hoài bão của bạn tại Club Day 2026, thả chiếc đèn lồng số hóa lên bầu trời đêm và nhận ngay thiệp <strong>Dream Card</strong> mang dấu ấn riêng.
             </p>
 
             {/* Live Count Pill */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold mb-6 shadow-xs">
-              <Flame className="w-4 h-4 text-orange-500 animate-bounce" />
-              <span>Đã có <strong>{totalCount}</strong> ước mơ đang thắp sáng bầu trời FPTU!</span>
+              <Flame className="w-4 h-4 text-orange-500 animate-pulse" />
+              <span>Đã có <strong>{totalCount}</strong> ngọn đèn ước mơ cùng hội tụ!</span>
             </div>
 
             {/* Highlight Feature Cards */}
@@ -263,16 +266,16 @@ export default function WishSubmissionPage() {
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-[#fac775]/40 text-xs text-[#712b13]">
                 <span className="text-xl">🌌</span>
                 <div>
-                  <strong className="block text-[#993c1d]">Đèn Lồng Thả Thẻ Ước Mơ Bay Lượn</strong>
-                  <span className="text-slate-600 text-[11px]">Đèn lồng gắn thẻ ước nguyện mang tên bạn trôi dạt trên bầu trời đêm gian hàng.</span>
+                  <strong className="block text-[#993c1d]">Bầu Trời Đèn Lồng Trực Tiếp</strong>
+                  <span className="text-slate-600 text-xs">Ước mơ của bạn sẽ lập tức bay lượn và tỏa sáng trên màn hình lớn của gian hàng.</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 text-xs text-[#0055a5]">
                 <span className="text-xl">🎨</span>
                 <div>
-                  <strong className="block text-[#0055a5]">Nhận Dream Card Story 9:16 & Polaroid</strong>
-                  <span className="text-slate-600 text-[11px]">Đóng dấu triện đỏ, chụp ảnh photo booth để chia sẻ lên Instagram/Facebook.</span>
+                  <strong className="block text-[#0055a5]">Tấm Thiệp Dream Card Story 9:16</strong>
+                  <span className="text-slate-600 text-xs">Thiệp phong cách hoàng kim, triện may mắn, sẵn sàng tải về khoe story.</span>
                 </div>
               </div>
             </div>
@@ -286,7 +289,7 @@ export default function WishSubmissionPage() {
               }}
               className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#993c1d] via-[#712b13] to-[#993c1d] hover:opacity-95 text-white font-black text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(153,60,29,0.35)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Thả Đèn Lồng Ước Mơ Ngay</span>
+              <span>Thắp Sáng Ước Mơ Ngay</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -296,12 +299,12 @@ export default function WishSubmissionPage() {
         {step === "form" && (
           <div className="bg-white/95 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(153,60,29,0.08)] border border-[#fac775]/50 backdrop-blur-xl animate-in fade-in duration-300">
             <div className="text-center mb-6">
-              <span className="text-2xl animate-bounce inline-block">✍️</span>
+              <span className="text-2xl animate-float inline-block">✍️</span>
               <h2 className="text-2xl font-black text-[#993c1d] tracking-tight font-display">
                 Gửi Gắm Ước Mơ K22
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Hãy viết những điều bạn mong muốn chinh phục cùng <strong>FU-DEVER</strong>
+                Gửi gắm mục tiêu, dự định hoặc điều bạn ấp ủ nhất thời sinh viên cùng <strong>FU-DEVER</strong>
               </p>
             </div>
 
@@ -473,14 +476,14 @@ export default function WishSubmissionPage() {
                   </label>
                   <div className="grid grid-cols-4 gap-1.5">
                     {[
-                      { id: "04_buggy_chu_cuoi_coder.png", label: "Chú Cuội Coder", src: "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png" },
-                      { id: "10_buggy_hang_nga_fairy.png", label: "Hằng Nga Tiên Nữ", src: "/assets/buggy/trung-thu/10_buggy_hang_nga_fairy.png" },
-                      { id: "01_buggy_lantern_parade.png", label: "Rước Đèn Ông Sao", src: "/assets/buggy/trung-thu/01_buggy_lantern_parade.png" },
-                      { id: "02_buggy_mooncake_feast.png", label: "Bánh Trung Thu", src: "/assets/buggy/trung-thu/02_buggy_mooncake_feast.png" },
-                      { id: "03_buggy_lion_dance.png", label: "Múa Lân Khai Hội", src: "/assets/buggy/trung-thu/03_buggy_lion_dance.png" },
-                      { id: "05_buggy_moon_rabbit_hug.png", label: "Ôm Thỏ Ngọc", src: "/assets/buggy/trung-thu/05_buggy_moon_rabbit_hug.png" },
-                      { id: "1", label: "Thả Tim", src: "/assets/buggy/1.png" },
-                      { id: "3", label: "Coder", src: "/assets/buggy/3.png" },
+                      { id: "11", label: "Thả Tim ❤️", src: "/assets/buggy/11.png" },
+                      { id: "19", label: "Bắn Tim 🥰", src: "/assets/buggy/19.png" },
+                      { id: "04_buggy_chu_cuoi_coder.png", label: "Chú Cuội", src: "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png" },
+                      { id: "10_buggy_hang_nga_fairy.png", label: "Hằng Nga", src: "/assets/buggy/trung-thu/10_buggy_hang_nga_fairy.png" },
+                      { id: "01_buggy_lantern_parade.png", label: "Rước Đèn", src: "/assets/buggy/trung-thu/01_buggy_lantern_parade.png" },
+                      { id: "02_buggy_mooncake_feast.png", label: "Bánh Trăng", src: "/assets/buggy/trung-thu/02_buggy_mooncake_feast.png" },
+                      { id: "03_buggy_lion_dance.png", label: "Múa Lân", src: "/assets/buggy/trung-thu/03_buggy_lion_dance.png" },
+                      { id: "05_buggy_moon_rabbit_hug.png", label: "Thỏ Ngọc", src: "/assets/buggy/trung-thu/05_buggy_moon_rabbit_hug.png" },
                     ].map((mood) => (
                       <button
                         key={mood.id}
@@ -503,7 +506,7 @@ export default function WishSubmissionPage() {
                           height={28}
                           className="object-contain"
                         />
-                        <span className="text-[8px] font-bold text-slate-700 truncate max-w-full">
+                        <span className="text-[10px] font-bold text-slate-700 truncate max-w-full">
                           {mood.label.split(" ")[0]}
                         </span>
                       </button>
@@ -517,17 +520,17 @@ export default function WishSubmissionPage() {
                     <Palette className="w-3.5 h-3.5 text-[#0091ea]" />
                     <span>Phong cách thiệp:</span>
                   </label>
-                  <div className="grid grid-cols-3 gap-1">
+                  <div className="grid grid-cols-3 gap-1.5">
                     <button
                       type="button"
                       onClick={() => {
                         playTactileClick();
                         setTheme("classic");
                       }}
-                      className={`py-1.5 px-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                      className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         theme === "classic"
-                          ? "bg-[#993c1d] text-white border border-[#fac775]"
-                          : "bg-slate-100 text-slate-600 border border-slate-200"
+                          ? "bg-gradient-to-r from-[#993c1d] to-[#712b13] text-white border border-[#fac775] shadow-xs"
+                          : "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200"
                       }`}
                     >
                       🏮 Cổ Điển
@@ -538,10 +541,10 @@ export default function WishSubmissionPage() {
                         playTactileClick();
                         setTheme("tech");
                       }}
-                      className={`py-1.5 px-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                      className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         theme === "tech"
-                          ? "bg-[#0091ea] text-white border border-[#00f5d4]"
-                          : "bg-slate-100 text-slate-600 border border-slate-200"
+                          ? "bg-gradient-to-r from-[#0091ea] to-[#0055a5] text-white border border-[#00f5d4] shadow-xs"
+                          : "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200"
                       }`}
                     >
                       🚀 Tech
@@ -552,10 +555,10 @@ export default function WishSubmissionPage() {
                         playTactileClick();
                         setTheme("gold");
                       }}
-                      className={`py-1.5 px-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                      className={`py-2 px-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                         theme === "gold"
-                          ? "bg-[#712b13] text-[#fac775] border border-[#fac775]"
-                          : "bg-slate-100 text-slate-600 border border-slate-200"
+                          ? "bg-gradient-to-r from-[#b8860b] via-[#ffd166] to-[#b8860b] text-[#2b1700] border border-[#fff3d1] shadow-[0_0_10px_rgba(255,209,102,0.5)]"
+                          : "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200"
                       }`}
                     >
                       👑 Hoàng Kim
@@ -618,15 +621,15 @@ export default function WishSubmissionPage() {
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fac775]/30 text-[#712b13] text-xs font-black uppercase tracking-wider mb-2">
               <Sparkles className="w-3.5 h-3.5 text-[#993c1d]" />
-              <span>Thành công rực rỡ</span>
+              <span>Đã cất cánh</span>
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-black text-[#993c1d] mb-2 font-display">
-              Ước Mơ Đã Bay Lên! 🏮
+              Đèn Lồng Đã Cất Cánh! 🏮
             </h2>
 
             <p className="text-xs text-slate-600 mb-5 leading-relaxed max-w-sm mx-auto">
-              Cảm ơn <strong>{createdDream.name || "bạn"}</strong> đã gửi gắm ước mơ. Hãy nhìn lên màn hình tại gian hàng để ngắm chiếc đèn lồng của mình nhé!
+              Đèn lồng mang tâm nguyện của <strong>{createdDream.name || "bạn"}</strong> đã bay lên bầu trời đêm. Hãy nhìn lên màn hình lớn tại gian hàng để đón chờ chiếc đèn của mình nhé!
             </p>
 
             {/* Snippet Card */}

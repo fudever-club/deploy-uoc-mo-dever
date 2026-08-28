@@ -48,15 +48,15 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <h2 className="text-xl sm:text-2xl font-black text-white font-display tracking-tight">
             CLB LẬP TRÌNH FU-DEVER 🏮
           </h2>
-          <p className="text-xs text-[#faeeda]/85 mt-1 leading-relaxed max-w-sm mx-auto">
-            Sản phẩm <strong>Deploy Ước Mơ</strong> chào đón tân sinh viên <strong>K22</strong> tại Club Day 2026 — Thả đèn lồng số hóa &amp; nhận thiệp Story 9:16 độc quyền.
+          <p className="text-xs text-[#faeeda]/90 mt-1.5 leading-relaxed max-w-sm mx-auto">
+            Không gian kết nối đam mê lập trình &amp; gửi gắm ước mơ của các bạn tân sinh viên <strong>K22</strong> cùng <strong>FU-DEVER</strong> tại Club Day 2026.
           </p>
         </div>
 
         {/* Live Vercel App Link Pill */}
         <div className="mb-4">
           <a
-            href="https://deployuocmodever-euejrts5o-dangquangnhat1504-4288s-projects.vercel.app"
+            href="https://fu-dever-landingpage-v2.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#0091ea]/25 via-emerald-500/20 to-[#0091ea]/25 hover:from-[#0091ea]/35 hover:to-emerald-500/30 border border-emerald-400/50 text-xs font-bold text-white transition-all shadow-md group"
@@ -64,7 +64,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               <Globe className="w-4 h-4 text-emerald-400" />
-              <span>Live App: deploy-uoc-mo-dever</span>
+              <span>Khám phá Website chính thức của FU-DEVER</span>
             </div>
             <ExternalLink className="w-3.5 h-3.5 text-emerald-300 group-hover:translate-x-0.5 transition-transform" />
           </a>
@@ -75,17 +75,17 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
             <Code2 className="w-4 h-4 mx-auto text-[#00f5d4] mb-0.5" />
             <span className="block text-[11px] font-bold text-white">Chuyên Môn</span>
-            <span className="text-[9px] text-slate-400">Web, AI, Mobile</span>
+            <span className="text-[9px] text-slate-300">Web · Mobile · AI</span>
           </div>
           <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
             <Rocket className="w-4 h-4 mx-auto text-[#fac775] mb-0.5" />
             <span className="block text-[11px] font-bold text-white">Thực Chiến</span>
-            <span className="text-[9px] text-slate-400">Hackathon &amp; ICPC</span>
+            <span className="text-[9px] text-slate-300">Hackathon &amp; ICPC</span>
           </div>
           <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
             <Users className="w-4 h-4 mx-auto text-[#85b7eb] mb-0.5" />
-            <span className="block text-[11px] font-bold text-white">Gia Đình</span>
-            <span className="text-[9px] text-slate-400">Đồng đội gắn kết</span>
+            <span className="block text-[11px] font-bold text-white">Đồng Đội</span>
+            <span className="text-[9px] text-slate-300">Gắn kết &amp; Sẻ chia</span>
           </div>
         </div>
 
@@ -93,17 +93,17 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         <div className="p-3 rounded-2xl bg-gradient-to-r from-[#993c1d]/35 to-[#712b13]/35 border border-[#fac775]/30 mb-3.5 flex items-center gap-2.5">
           <div className="shrink-0 w-10 h-10 rounded-full bg-[#12203A] border border-[#fac775] p-1 flex items-center justify-center">
             <Image
-              src="/assets/buggy/1.png"
-              alt="Buggy Mascot"
-              width={32}
-              height={32}
+              src="/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png"
+              alt="Linh vật Buggy"
+              width={34}
+              height={34}
               className="object-contain"
             />
           </div>
           <div className="text-[11px]">
-            <span className="font-extrabold text-amber-300">Linh vật Buggy Cánh Cam: </span>
+            <span className="font-extrabold text-amber-300">Linh vật Buggy: </span>
             <span className="text-slate-300">
-              Sứ giả diệt bug và chắp cánh hoài bão cho các bạn tân sinh viên K22!
+              Người bạn đồng hành gánh team, bắt bug và tiếp lửa đam mê lập trình cho các thế hệ DEVER!
             </span>
           </div>
         </div>
@@ -111,7 +111,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         {/* Social & Contact links */}
         <div className="space-y-1.5 mb-3.5">
           <a
-            href="https://www.facebook.com/fudever.club"
+            href="https://www.facebook.com/FPTUDever"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all group"
@@ -120,7 +120,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <svg className="w-3.5 h-3.5 fill-[#0091ea]" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
-              <span className="text-[11px]">facebook.com/fudever.club</span>
+              <span className="text-[11px]">facebook.com/FPTUDever</span>
             </div>
             <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-white" />
           </a>

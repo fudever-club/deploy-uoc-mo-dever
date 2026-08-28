@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       content: body.content.trim(),
       tag: body.tag || "other",
       consent: true,
-      mascotIndex: body.mascotIndex || 1,
+      mascotIndex: body.mascotIndex || "11",
       theme: body.theme || "classic",
       lanternShape: body.lanternShape || "hoian_lotus",
     });
