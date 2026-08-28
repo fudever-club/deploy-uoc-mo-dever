@@ -151,7 +151,7 @@ function getSupabaseClient(): SupabaseClient | null {
   return null;
 }
 
-export const DREAM_COLUMNS = "id, name, content, tag, consent, created_at, hidden, mascotIndex, theme, lanternShape";
+export const DREAM_COLUMNS = "*";
 
 export async function getDreams(includeHidden = false, limit = 150): Promise<Dream[]> {
   const supabase = getSupabaseClient();
@@ -159,7 +159,7 @@ export async function getDreams(includeHidden = false, limit = 150): Promise<Dre
     try {
       let query = supabase
         .from("dreams")
-        .select(DREAM_COLUMNS)
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(limit);
 
@@ -167,8 +167,13 @@ export async function getDreams(includeHidden = false, limit = 150): Promise<Dre
         query = query.eq("hidden", false);
       }
       const { data, error } = await query;
-      if (!error && data) {
-        return data as Dream[];
+      if (!error && Array.isArray(data)) {
+        return data.map((d) => ({
+          ...d,
+          mascotIndex: d.mascotIndex || "11",
+          theme: d.theme || "classic",
+          lanternShape: d.lanternShape || "hoian_lotus",
+        })) as Dream[];
       }
       console.warn("Supabase getDreams error, falling back to local:", error);
     } catch (err) {
@@ -224,15 +229,33 @@ export async function createDream(input: DreamInput): Promise<Dream> {
   const supabase = getSupabaseClient();
   if (supabase) {
     try {
+      // Build safe payload matching Supabase schema
+      const dbPayload: Record<string, unknown> = {
+        id: newDream.id,
+        name: newDream.name,
+        content: newDream.content,
+        tag: newDream.tag,
+        consent: newDream.consent,
+        created_at: newDream.created_at,
+        hidden: newDream.hidden,
+        mascotIndex: newDream.mascotIndex,
+        theme: newDream.theme,
+      };
+
       const { data, error } = await supabase
         .from("dreams")
-        .insert([newDream])
-        .select(DREAM_COLUMNS)
+        .insert([dbPayload])
+        .select("*")
         .single();
 
       if (!error && data) {
-        realtimeBus.emit("dream:inserted", data);
-        return data as Dream;
+        const fullDream: Dream = {
+          ...newDream,
+          ...data,
+          lanternShape: newDream.lanternShape,
+        };
+        realtimeBus.emit("dream:inserted", fullDream);
+        return fullDream;
       }
       console.warn("Supabase insert error, falling back to local:", error);
     } catch (err) {
@@ -258,11 +281,17 @@ export async function updateDreamVisibility(id: string, hidden: boolean): Promis
         .from("dreams")
         .update({ hidden })
         .eq("id", id)
-        .select(DREAM_COLUMNS)
+        .select("*")
         .single();
       if (!error && data) {
-        realtimeBus.emit("dream:updated", data);
-        return data as Dream;
+        const fullDream: Dream = {
+          ...data,
+          mascotIndex: data.mascotIndex || "11",
+          theme: data.theme || "classic",
+          lanternShape: data.lanternShape || "hoian_lotus",
+        };
+        realtimeBus.emit("dream:updated", fullDream);
+        return fullDream;
       }
       console.warn("Supabase update error:", error);
     } catch (err) {
