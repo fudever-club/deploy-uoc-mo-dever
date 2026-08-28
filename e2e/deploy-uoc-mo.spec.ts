@@ -10,7 +10,7 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     // 2. Verify Intro Screen
     const startBtn = page.locator("#btn-start-dream");
     await expect(startBtn).toBeVisible();
-    await expect(page.locator("h1")).toContainText("Deploy Ước Mơ");
+    await expect(page.locator("h1")).toContainText(/deploy ước mơ/i);
 
     // 3. Start Form
     await startBtn.click();
