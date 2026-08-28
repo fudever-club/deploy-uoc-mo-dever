@@ -374,14 +374,14 @@ export default function DisplaySkyPage() {
         ))}
       </div>
 
-      {/* 6. SPOTLIGHT CAROUSEL BANNER (Bottom-left card) */}
+      {/* 6. SPOTLIGHT CAROUSEL BANNER (Bottom-left card on desktop, floating above filter bar on mobile) */}
       {currentSpotlightDream && isAutoSpotlight && (
         <div
           onClick={() => {
             playPoemMagicSound();
             setSelectedDream(currentSpotlightDream);
           }}
-          className="absolute bottom-6 left-6 z-30 max-w-sm p-4 rounded-3xl bg-[#12203A]/90 border border-[#fac775] backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all animate-in slide-in-from-bottom duration-500 pointer-events-auto"
+          className="absolute bottom-20 left-4 right-4 sm:right-auto sm:bottom-6 sm:left-6 z-30 sm:max-w-sm p-3.5 sm:p-4 rounded-3xl bg-[#12203A]/90 border border-[#fac775] backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all animate-in slide-in-from-bottom duration-500 pointer-events-auto"
         >
           <div className="flex items-center justify-between text-xs font-bold text-[#fac775] mb-1.5">
             <div className="flex items-center gap-1.5">
@@ -394,31 +394,31 @@ export default function DisplaySkyPage() {
             </span>
           </div>
 
-          <h4 className="text-sm font-extrabold text-white mb-1">
+          <h4 className="text-sm font-extrabold text-white mb-1 truncate">
             {currentSpotlightDream.name || "Tân Sinh Viên K22"}
           </h4>
 
-          <p className="text-xs text-[#faeeda]/90 italic line-clamp-3 leading-relaxed whitespace-pre-line">
+          <p className="text-xs text-[#faeeda]/90 italic line-clamp-2 sm:line-clamp-3 leading-relaxed whitespace-pre-line">
             &ldquo;{currentSpotlightDream.content}&rdquo;
           </p>
 
           <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-[#fac775]">
             <span>✨ Chạm để xem Dream Card Story</span>
-            <span>#FUDEVER2026</span>
+            <span className="hidden sm:inline">#FUDEVER2026</span>
           </div>
         </div>
       )}
 
       {/* 7. CATEGORY FILTER BAR (Bottom Center) */}
       {viewMode === "lanterns" && (
-        <div className="absolute bottom-6 inset-x-0 z-30 flex justify-center pointer-events-none px-4">
-          <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 rounded-full bg-[#12203A]/85 backdrop-blur-xl border border-[#fac775]/40 shadow-2xl pointer-events-auto overflow-x-auto max-w-full">
+        <div className="absolute bottom-4 sm:bottom-6 inset-x-0 z-30 flex justify-center pointer-events-none px-3 sm:px-4">
+          <div className="flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-[#12203A]/90 backdrop-blur-xl border border-[#fac775]/40 shadow-2xl pointer-events-auto overflow-x-auto max-w-full scrollbar-none">
             <button
               onClick={() => {
                 playTactileClick();
                 setSelectedTagFilter("all");
               }}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 selectedTagFilter === "all"
                   ? "bg-[#fac775] text-[#12203a] shadow-xs"
                   : "text-[#faeeda]/80 hover:text-white hover:bg-white/10"
@@ -436,7 +436,7 @@ export default function DisplaySkyPage() {
                     playTactileClick();
                     setSelectedTagFilter(cat.id);
                   }}
-                  className={`px-2.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all shrink-0 cursor-pointer ${
                     selectedTagFilter === cat.id
                       ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
                       : "text-[#faeeda]/70 hover:text-white hover:bg-white/10"

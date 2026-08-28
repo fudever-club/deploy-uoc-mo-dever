@@ -39,7 +39,7 @@ export const Navbar: React.FC = () => {
                 <span className="font-extrabold text-xs tracking-wider text-[#993c1d] font-display">FU-DEVER</span>
                 <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#fac775] text-[#712b13]">K22</span>
               </div>
-              <span className="text-[10px] font-medium text-slate-500 tracking-tight">Deploy Ước Mơ</span>
+              <span className="hidden sm:inline-block text-[10px] font-medium text-slate-500 tracking-tight">Deploy Ước Mơ</span>
             </div>
           </Link>
 
