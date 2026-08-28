@@ -398,10 +398,10 @@ export default function WishSubmissionPage() {
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => handleApplyPrompt(p.text)}
+                      onClick={() => handleApplyPrompt(p)}
                       className="px-2.5 py-1 rounded-full bg-amber-50/80 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-medium transition-all text-left truncate max-w-full cursor-pointer active:scale-95"
                     >
-                      {p.label}
+                      {p}
                     </button>
                   ))}
                 </div>
@@ -670,8 +670,8 @@ export default function WishSubmissionPage() {
       <ARPhotoBoothModal
         isOpen={showPhotoBooth}
         onClose={() => setShowPhotoBooth(false)}
-        dreamName={createdDream?.name}
-        dreamContent={createdDream?.content}
+        dreamName={createdDream?.name || undefined}
+        dreamContent={createdDream?.content || undefined}
       />
 
       {/* Buggy Catcher Minigame Easter Egg Modal */}

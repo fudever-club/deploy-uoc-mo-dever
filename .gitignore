@@ -37,3 +37,5 @@ next-env.d.ts
 
 # local persistent data
 data/dreams.json
+
+.vercel
