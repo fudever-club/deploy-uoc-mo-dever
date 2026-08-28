@@ -144,9 +144,21 @@ export const ARPhotoBoothModal: React.FC<ARPhotoBoothModalProps> = ({
     ctx.font = "bold 18px 'Plus Jakarta Sans', sans-serif";
     ctx.fillText("#FUDEVER #DeployUocMo #FPTUDaNang", 60, size - 55);
 
-    const dataUrl = canvas.toDataURL("image/png");
-    setCapturedUrl(dataUrl);
-    playCelebrationFanfare();
+    // 6. Draw Mid-Autumn Buggy Mascot Sticker on bottom right
+    const stickerImg = new window.Image();
+    stickerImg.crossOrigin = "anonymous";
+    stickerImg.src = "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png";
+    stickerImg.onload = () => {
+      ctx.drawImage(stickerImg, size - 200, size - 200, 160, 160);
+      const dataUrl = canvas.toDataURL("image/png");
+      setCapturedUrl(dataUrl);
+      playCelebrationFanfare();
+    };
+    stickerImg.onerror = () => {
+      const dataUrl = canvas.toDataURL("image/png");
+      setCapturedUrl(dataUrl);
+      playCelebrationFanfare();
+    };
   };
 
   const handleDownload = () => {

@@ -17,9 +17,10 @@ export interface CategoryInfo {
 }
 
 export interface BuggyMood {
-  index: number;
+  index: number | string;
   label: string;
   emoji: string;
+  image?: string;
 }
 
 export interface Dream {
@@ -30,7 +31,7 @@ export interface Dream {
   consent: boolean;
   created_at: string;
   hidden: boolean;
-  mascotIndex?: number;
+  mascotIndex?: number | string;
   theme?: CardTheme;
   lanternShape?: string;
 }
@@ -40,7 +41,7 @@ export interface DreamInput {
   content: string;
   tag?: DreamCategory;
   consent: boolean;
-  mascotIndex?: number;
+  mascotIndex?: number | string;
   theme?: CardTheme;
   lanternShape?: string;
 }

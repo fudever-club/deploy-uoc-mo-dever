@@ -188,7 +188,11 @@ export async function renderDreamCardToDataUrl(
   try {
     const mascotImg = new Image();
     mascotImg.crossOrigin = "anonymous";
-    mascotImg.src = `/assets/buggy/${mascotIndex}.png`;
+    if (typeof mascotIndex === "string") {
+      mascotImg.src = mascotIndex.startsWith("/") ? mascotIndex : `/assets/buggy/trung-thu/${mascotIndex}`;
+    } else {
+      mascotImg.src = `/assets/buggy/${mascotIndex}.png`;
+    }
     await new Promise<void>((resolve) => {
       mascotImg.onload = () => {
         const mW = 120;

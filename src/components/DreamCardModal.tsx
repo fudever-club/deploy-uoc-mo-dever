@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Dream, CardTheme } from "@/types/dream";
-import { BUGGY_MOODS, DREAM_CATEGORIES } from "@/lib/constants";
+import { DREAM_CATEGORIES } from "@/lib/constants";
 import { downloadDreamCard, renderDreamCardToDataUrl } from "@/lib/dream-card-canvas";
 import { LanternSVG, LanternShape } from "@/components/LanternSVG";
-import { playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
-import { Download, Share2, X, Sparkles, Check, Palette, Sparkle } from "lucide-react";
+import { playTactileClick } from "@/lib/audio-synthesizer";
+import { Download, Share2, X, Sparkles, Check, Palette } from "lucide-react";
 import Image from "next/image";
 
 interface DreamCardModalProps {
@@ -15,9 +15,23 @@ interface DreamCardModalProps {
   onClose: () => void;
 }
 
+const BUGGY_STICKER_OPTIONS = [
+  { id: "trung-thu/04_buggy_chu_cuoi_coder.png", label: "Chú Cuội Coder", src: "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png" },
+  { id: "trung-thu/10_buggy_hang_nga_fairy.png", label: "Hằng Nga Tiên Nữ", src: "/assets/buggy/trung-thu/10_buggy_hang_nga_fairy.png" },
+  { id: "trung-thu/01_buggy_lantern_parade.png", label: "Rước Đèn Ông Sao", src: "/assets/buggy/trung-thu/01_buggy_lantern_parade.png" },
+  { id: "trung-thu/02_buggy_mooncake_feast.png", label: "Ăn Bánh Trung Thu", src: "/assets/buggy/trung-thu/02_buggy_mooncake_feast.png" },
+  { id: "trung-thu/03_buggy_lion_dance.png", label: "Múa Lân Rộn Ràng", src: "/assets/buggy/trung-thu/03_buggy_lion_dance.png" },
+  { id: "trung-thu/05_buggy_moon_rabbit_hug.png", label: "Ôm Thỏ Ngọc", src: "/assets/buggy/trung-thu/05_buggy_moon_rabbit_hug.png" },
+  { id: "1", label: "Thả Tim", src: "/assets/buggy/1.png" },
+  { id: "3", label: "Lập Trình", src: "/assets/buggy/3.png" },
+  { id: "5", label: "Chiến Thắng", src: "/assets/buggy/5.png" },
+];
+
 export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, onClose }) => {
   const [selectedTheme, setSelectedTheme] = useState<CardTheme>(dream.theme || "classic");
-  const [selectedMascot, setSelectedMascot] = useState<number>(dream.mascotIndex || 1);
+  const [selectedMascot, setSelectedMascot] = useState<number | string>(
+    dream.mascotIndex || "trung-thu/04_buggy_chu_cuoi_coder.png"
+  );
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -25,6 +39,15 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
 
   const categoryInfo = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
   const shape = (dream.lanternShape as LanternShape) || "hoian_lotus";
+
+  const getMascotSrc = (m: number | string) => {
+    if (typeof m === "string") {
+      if (m.startsWith("/")) return m;
+      if (m.startsWith("trung-thu/")) return `/assets/buggy/${m}`;
+      return `/assets/buggy/${m}.png`;
+    }
+    return `/assets/buggy/${m}.png`;
+  };
 
   const handleDownload = async () => {
     playTactileClick();
@@ -94,7 +117,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
             <span>Story Card Studio (9:16)</span>
           </div>
           <h3 className="text-xl font-black text-white font-display">Thiệp Ước Mơ Cá Nhân Hoá</h3>
-          <p className="text-xs text-[#faeeda]/80">Tùy biến phong cách và lưu ảnh chất lượng cao</p>
+          <p className="text-xs text-[#faeeda]/80">Tùy biến phong cách & linh vật Buggy Trung Thu</p>
         </div>
 
         {/* Theme & Mascot Selectors */}
@@ -159,38 +182,41 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
           {/* Mascot Selector */}
           <div>
             <span className="block text-[11px] font-bold text-[#fac775] uppercase tracking-wider mb-1">
-              Sticker Buggy gắn kèm:
+              Sticker Buggy Trung Thu gắn kèm:
             </span>
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-              {BUGGY_MOODS.map((mood) => (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1.5">
+              {BUGGY_STICKER_OPTIONS.map((mood) => (
                 <button
-                  key={mood.index}
+                  key={mood.id}
                   type="button"
                   onClick={() => {
                     playTactileClick();
-                    setSelectedMascot(mood.index);
+                    setSelectedMascot(mood.id);
                   }}
-                  className={`p-1 rounded-xl shrink-0 transition-all cursor-pointer border ${
-                    selectedMascot === mood.index
-                      ? "bg-[#fac775]/25 border-[#fac775] scale-110 shadow-xs"
-                      : "bg-white/5 border-transparent hover:bg-white/10 opacity-70 hover:opacity-100"
+                  className={`p-1.5 rounded-xl shrink-0 transition-all cursor-pointer border flex flex-col items-center gap-0.5 ${
+                    String(selectedMascot) === String(mood.id)
+                      ? "bg-[#fac775]/25 border-[#fac775] scale-105 shadow-xs ring-1 ring-[#fac775]"
+                      : "bg-white/5 border-transparent hover:bg-white/10 opacity-75 hover:opacity-100"
                   }`}
                   title={mood.label}
                 >
                   <Image
-                    src={`/assets/buggy/${mood.index}.png`}
+                    src={mood.src}
                     alt={mood.label}
-                    width={28}
-                    height={28}
+                    width={32}
+                    height={32}
                     className="object-contain"
                   />
+                  <span className="text-[9px] text-[#faeeda] font-medium truncate max-w-[54px]">
+                    {mood.label}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* CRISP REAL-TIME LIVE 9:16 DREAM CARD PREVIEW (NO BLACK SCREEN) */}
+        {/* CRISP REAL-TIME LIVE 9:16 DREAM CARD PREVIEW */}
         <div className="relative flex-1 min-h-[380px] max-h-[460px] overflow-hidden rounded-2xl border-2 border-[#fac775]/40 bg-[#060c18] flex items-center justify-center p-3 shadow-2xl">
           <div
             className={`relative w-full max-w-[260px] aspect-[9/16] rounded-2xl p-4 flex flex-col justify-between text-center overflow-hidden shadow-2xl border ${
@@ -208,36 +234,31 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
             {/* Inner Border Trim */}
             <div className="absolute inset-1.5 border border-white/20 rounded-xl pointer-events-none" />
 
-            {/* 1. Header: Event Info */}
-            <div className="relative z-10">
-              <span className="text-[8px] tracking-widest font-black uppercase text-amber-300 block">
-                🏮 FU-DEVER CLUB DAY 2026 🏮
+            {/* 1. Header: Lantern & Event Tag */}
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="relative mb-1">
+                <LanternSVG shape={shape} size={42} glow={true} />
+              </div>
+              <span className="text-[9px] font-black tracking-widest uppercase text-amber-300 drop-shadow-sm">
+                DEPLOY ƯỚC MƠ 2026
               </span>
-              <h4 className="text-sm font-black text-white tracking-wider font-display drop-shadow-md">
-                DEPLOY ƯỚC MƠ
-              </h4>
-              <div className="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-white/10 text-[8px] font-bold text-amber-200">
-                {categoryInfo?.emoji} {categoryInfo?.shortLabel}
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-[8px] font-bold text-white/90 mt-0.5 border border-white/10">
+                <span>{categoryInfo?.emoji || "🏮"}</span>
+                <span>{categoryInfo?.shortLabel || "Ước mơ"}</span>
               </div>
             </div>
 
-            {/* 2. Middle: Selected Lantern + Name + Content + Seal */}
-            <div className="relative z-10 my-auto py-2">
-              {/* Floating Lantern SVG */}
-              <div className="flex justify-center mb-1.5">
-                <LanternSVG shape={shape} size={42} glow={true} className="animate-glow" />
-              </div>
-
-              {/* Dreamer Name */}
-              <div className="text-xs font-black text-white drop-shadow-sm mb-1">
-                ✨ {dream.name || "Tân Sinh Viên K22"} ✨
-              </div>
-
-              {/* Wish Content Box */}
-              <div className="p-2.5 rounded-xl bg-black/35 border border-white/15 backdrop-blur-md">
-                <p className="text-[10px] sm:text-[11px] italic font-medium text-white/95 line-clamp-4 leading-snug whitespace-pre-line">
-                  &ldquo;{dream.content}&rdquo;
+            {/* 2. Middle: Content Box with Buggy Mascot */}
+            <div className="relative z-10 my-auto bg-black/40 rounded-xl p-3 border border-white/15 backdrop-blur-sm">
+              <h4 className="text-xs font-black text-white mb-1 truncate">
+                {dream.name ? `Ước Mơ Của ${dream.name}` : "Ước Nguyện K22"}
+              </h4>
+              <div className="relative">
+                <span className="text-xs text-amber-300 font-serif opacity-70">“</span>
+                <p className="text-[10px] text-white/95 italic font-medium line-clamp-3 leading-relaxed whitespace-pre-line px-1">
+                  {dream.content}
                 </p>
+                <span className="text-xs text-amber-300 font-serif opacity-70 float-right">”</span>
               </div>
 
               {/* Red Traditional Seal & Buggy Mascot Stamp */}
@@ -245,10 +266,10 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                 <div className="px-2 py-0.5 rounded-md border border-red-400 bg-red-900/60 text-red-300 text-[8px] font-black tracking-wider transform -rotate-6">
                   {selectedTheme === "tech" ? "DEVER" : "ĐỖ ĐẠT"}
                 </div>
-                <div className="w-8 h-8 rounded-full bg-[#12203A] border border-[#fac775] p-0.5 shadow-md">
+                <div className="w-8 h-8 rounded-full bg-[#12203A] border border-[#fac775] p-0.5 shadow-md flex items-center justify-center">
                   <Image
-                    src={`/assets/buggy/${selectedMascot}.png`}
-                    alt="Buggy"
+                    src={getMascotSrc(selectedMascot)}
+                    alt="Buggy Mascot"
                     width={28}
                     height={28}
                     className="object-contain"
@@ -279,31 +300,32 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
             {isExporting ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Đang xuất ảnh HD 1080x1920...</span>
+                <span>Đang kết xuất ảnh Story 9:16 HD...</span>
               </>
             ) : (
               <>
                 <Download className="w-4 h-4" />
-                <span>Tải Ảnh Về Máy (Chuẩn HD Story 9:16)</span>
+                <span>Lưu Ảnh Dream Card (Story 9:16)</span>
               </>
             )}
           </button>
 
-          <div className="flex items-center justify-between gap-2 pt-1">
-            <button
-              onClick={handleShare}
-              className="flex-1 py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-[#fac775] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Share2 className="w-3.5 h-3.5" />}
-              <span>{copied ? "Đã copy Hashtags!" : "Chia sẻ Story / Mạng xã hội"}</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="py-2 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-white/70 hover:text-white transition-colors cursor-pointer"
-            >
-              Đóng
-            </button>
-          </div>
+          <button
+            onClick={handleShare}
+            className="w-full py-2.5 px-4 rounded-2xl bg-white/10 hover:bg-white/20 text-[#faeeda] font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-300">Đã sao chép hashtag #FUDEVER!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-4 h-4 text-[#fac775]" />
+                <span>Chia sẻ lên Instagram / Facebook Story</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>

@@ -48,7 +48,7 @@ export default function WishSubmissionPage() {
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [tag, setTag] = useState<DreamCategory>("career");
-  const [mascotIndex, setMascotIndex] = useState<number>(1);
+  const [mascotIndex, setMascotIndex] = useState<number | string>("04_buggy_chu_cuoi_coder.png");
   const [theme, setTheme] = useState<CardTheme>("classic");
   const [lanternShape, setLanternShape] = useState<LanternShape>("hoian_lotus");
   const [consent, setConsent] = useState(true);
@@ -469,31 +469,43 @@ export default function WishSubmissionPage() {
                 {/* Mascot Buggy Picker */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Biểu cảm Mascot Buggy:
+                    Sticker Buggy Trung Thu:
                   </label>
                   <div className="grid grid-cols-4 gap-1.5">
-                    {BUGGY_MOODS.map((mood) => (
+                    {[
+                      { id: "04_buggy_chu_cuoi_coder.png", label: "Chú Cuội Coder", src: "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png" },
+                      { id: "10_buggy_hang_nga_fairy.png", label: "Hằng Nga Tiên Nữ", src: "/assets/buggy/trung-thu/10_buggy_hang_nga_fairy.png" },
+                      { id: "01_buggy_lantern_parade.png", label: "Rước Đèn Ông Sao", src: "/assets/buggy/trung-thu/01_buggy_lantern_parade.png" },
+                      { id: "02_buggy_mooncake_feast.png", label: "Bánh Trung Thu", src: "/assets/buggy/trung-thu/02_buggy_mooncake_feast.png" },
+                      { id: "03_buggy_lion_dance.png", label: "Múa Lân Khai Hội", src: "/assets/buggy/trung-thu/03_buggy_lion_dance.png" },
+                      { id: "05_buggy_moon_rabbit_hug.png", label: "Ôm Thỏ Ngọc", src: "/assets/buggy/trung-thu/05_buggy_moon_rabbit_hug.png" },
+                      { id: "1", label: "Thả Tim", src: "/assets/buggy/1.png" },
+                      { id: "3", label: "Coder", src: "/assets/buggy/3.png" },
+                    ].map((mood) => (
                       <button
-                        key={mood.index}
+                        key={mood.id}
                         type="button"
                         onClick={() => {
                           playTactileClick();
-                          setMascotIndex(mood.index);
+                          setMascotIndex(mood.id);
                         }}
-                        className={`p-1 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
-                          mascotIndex === mood.index
+                        className={`p-1.5 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                          String(mascotIndex) === String(mood.id)
                             ? "bg-[#fac775]/40 border-2 border-[#993c1d] scale-105 shadow-xs"
                             : "bg-slate-100 hover:bg-slate-200 border border-slate-200"
                         }`}
                         title={mood.label}
                       >
                         <Image
-                          src={`/assets/buggy/${mood.index}.png`}
+                          src={mood.src}
                           alt={mood.label}
-                          width={26}
-                          height={26}
+                          width={28}
+                          height={28}
                           className="object-contain"
                         />
+                        <span className="text-[8px] font-bold text-slate-700 truncate max-w-full">
+                          {mood.label.split(" ")[0]}
+                        </span>
                       </button>
                     ))}
                   </div>
