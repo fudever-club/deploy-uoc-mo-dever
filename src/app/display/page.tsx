@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import Image from "next/image";
 import { Dream, LanternItem, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
 import { DREAM_CATEGORIES, EVENT_INFO } from "@/lib/constants";
-import { playLanternChime } from "@/lib/audio";
+import { playLanternAscendChime, playReactionSound, playPoemMagicSound } from "@/lib/audio-synthesizer";
 import { ambientSound } from "@/lib/ambient-sound";
 import {
   Sparkles,
@@ -18,13 +18,15 @@ import {
   Megaphone,
   Radio,
   Play,
-  Pause,
   Sun,
   Moon,
   Zap,
+  Layers,
+  Globe2,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
 import { LanternSkyCanvas, SkyTheme } from "@/components/LanternSkyCanvas";
+import { ConstellationGalaxyView } from "@/components/ConstellationGalaxyView";
 
 export default function DisplaySkyPage() {
   const [dreams, setDreams] = useState<Dream[]>([]);
@@ -40,6 +42,9 @@ export default function DisplaySkyPage() {
   const [isAutoSpotlight, setIsAutoSpotlight] = useState<boolean>(true);
   const [reactions, setReactions] = useState<LiveReaction[]>([]);
   const [skyTheme, setSkyTheme] = useState<SkyTheme>("midnight");
+
+  // View Mode: Classic Lantern Sky vs Constellation Galaxy
+  const [viewMode, setViewMode] = useState<"lanterns" | "galaxy">("lanterns");
 
   const audioUnlocked = useRef(false);
 
@@ -138,11 +143,11 @@ export default function DisplaySkyPage() {
           });
 
           if (soundEnabled && audioUnlocked.current) {
-            playLanternChime();
+            playLanternAscendChime();
           }
         }
       } catch (e) {
-        console.error("SSE insert parse error:", e);
+        console.error("SSE insert error:", e);
       }
     });
 
@@ -150,17 +155,12 @@ export default function DisplaySkyPage() {
       try {
         const updated = JSON.parse(event.data) as Dream;
         setDreams((prev) => {
-          let next;
-          if (updated.hidden) {
-            next = prev.filter((d) => d.id !== updated.id);
-          } else {
-            next = prev.map((d) => (d.id === updated.id ? updated : d));
-          }
+          const next = prev.map((d) => (d.id === updated.id ? updated : d));
           updateLanternsFromDreams(next);
           return next;
         });
       } catch (e) {
-        console.error("SSE update parse error:", e);
+        console.error("SSE update error:", e);
       }
     });
 
@@ -173,14 +173,14 @@ export default function DisplaySkyPage() {
           return next;
         });
       } catch (e) {
-        console.error("SSE delete parse error:", e);
+        console.error("SSE delete error:", e);
       }
     });
 
     eventSource.addEventListener("announcement", (event) => {
       try {
-        const ann = JSON.parse(event.data) as BroadcastAnnouncement | null;
-        setActiveAnnouncement(ann);
+        const announcement = JSON.parse(event.data) as BroadcastAnnouncement;
+        setActiveAnnouncement(announcement);
       } catch (e) {
         console.error("SSE announcement error:", e);
       }
@@ -190,9 +190,10 @@ export default function DisplaySkyPage() {
       try {
         const react = JSON.parse(event.data) as LiveReaction;
         setReactions((prev) => [...prev.slice(-15), react]);
-        setTimeout(() => {
-          setReactions((prev) => prev.filter((r) => r.id !== react.id));
-        }, 4000);
+
+        if (soundEnabled && audioUnlocked.current) {
+          playReactionSound(react.emoji);
+        }
       } catch (e) {
         console.error("SSE reaction error:", e);
       }
@@ -203,14 +204,35 @@ export default function DisplaySkyPage() {
     };
   }, [soundEnabled]);
 
-  // Spotlight Auto-Rotation
+  // Unlock procedural ambient audio on first user interaction
   useEffect(() => {
-    if (!isAutoSpotlight || lanterns.length === 0) return;
-    const interval = setInterval(() => {
-      setSpotlightIndex((prev) => (prev + 1) % lanterns.length);
-    }, 12000);
-    return () => clearInterval(interval);
-  }, [isAutoSpotlight, lanterns.length]);
+    const handleUnlockAudio = () => {
+      if (!audioUnlocked.current) {
+        audioUnlocked.current = true;
+        if (soundEnabled) {
+          ambientSound.start();
+        }
+      }
+    };
+
+    window.addEventListener("click", handleUnlockAudio, { once: true });
+    window.addEventListener("keydown", handleUnlockAudio, { once: true });
+
+    return () => {
+      window.removeEventListener("click", handleUnlockAudio);
+      window.removeEventListener("keydown", handleUnlockAudio);
+    };
+  }, [soundEnabled]);
+
+  const toggleSound = () => {
+    const nextState = !soundEnabled;
+    setSoundEnabled(nextState);
+    if (nextState) {
+      ambientSound.start();
+    } else {
+      ambientSound.stop();
+    }
+  };
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -222,131 +244,133 @@ export default function DisplaySkyPage() {
     }
   };
 
-  const handleUserGesture = () => {
-    audioUnlocked.current = true;
-    if (soundEnabled) {
-      ambientSound.start();
-    }
-  };
+  // Filter lanterns by category
+  const displayedLanterns = useMemo(() => {
+    if (selectedTagFilter === "all") return lanterns;
+    return lanterns.filter((l) => l.tag === selectedTagFilter);
+  }, [lanterns, selectedTagFilter]);
 
-  const toggleSound = () => {
-    const next = !soundEnabled;
-    setSoundEnabled(next);
-    if (next) {
-      ambientSound.start();
-    } else {
-      ambientSound.stop();
-    }
-  };
+  // Auto-spotlight rotation every 12 seconds
+  useEffect(() => {
+    if (!isAutoSpotlight || displayedLanterns.length === 0) return;
 
-  // Filtered lanterns
-  const displayedLanterns = lanterns.filter((item) => {
-    if (selectedTagFilter === "all") return true;
-    return item.tag === selectedTagFilter;
-  });
+    const timer = setInterval(() => {
+      setSpotlightIndex((prev) => (prev + 1) % displayedLanterns.length);
+    }, 12000);
 
-  const spotlightDream = lanterns[spotlightIndex] || null;
+    return () => clearInterval(timer);
+  }, [isAutoSpotlight, displayedLanterns.length]);
 
-  // Background style by sky theme
-  const getSkyBackgroundClass = () => {
-    switch (skyTheme) {
-      case "cyber":
-        return "from-[#050914] via-[#08101e] to-[#020408]";
-      case "dawn":
-        return "from-[#3a1306] via-[#1e0a04] to-[#0d0402]";
-      case "midnight":
-      default:
-        return "from-[#1e345e] via-[#12203A] to-[#0a1222]";
-    }
-  };
+  const currentSpotlightDream = displayedLanterns[spotlightIndex] || null;
 
   return (
-    <div
-      onClick={handleUserGesture}
-      className="relative w-screen h-screen overflow-hidden bg-[#12203A] text-[#faeeda] select-none font-sans"
-    >
-      {/* 1. DYNAMIC SKY BACKGROUND */}
-      <div className={`absolute inset-0 bg-radial ${getSkyBackgroundClass()} transition-colors duration-1000`} />
-      <LanternSkyCanvas theme={skyTheme} />
-
-      {/* Glowing Moon / Celestial Body */}
-      {skyTheme === "cyber" ? (
-        <div className="absolute top-6 right-16 w-32 h-32 rounded-full bg-gradient-to-br from-[#00f5d4] via-[#0091ea] to-[#12203a] shadow-[0_0_80px_rgba(0,245,212,0.5)] animate-moon opacity-85 pointer-events-none flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full border border-[#00f5d4]/40" />
-        </div>
-      ) : skyTheme === "dawn" ? (
-        <div className="absolute top-6 right-16 w-32 h-32 rounded-full bg-gradient-to-br from-[#ffb800] via-[#ff6b6b] to-[#712b13] shadow-[0_0_90px_rgba(255,184,0,0.6)] animate-moon opacity-90 pointer-events-none flex items-center justify-center" />
+    <div className="relative w-screen h-screen overflow-hidden select-none bg-[#12203A] text-[#faeeda]">
+      {/* 1. BACKGROUND CANVAS & STARS */}
+      {viewMode === "lanterns" ? (
+        <LanternSkyCanvas theme={skyTheme} />
       ) : (
-        <div className="absolute top-6 right-16 w-32 h-32 rounded-full bg-gradient-to-br from-[#fac775] via-[#faeeda] to-[#e5b360] shadow-[0_0_80px_rgba(250,199,117,0.6)] animate-moon opacity-90 pointer-events-none flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full bg-[#e0aa4e]/30 absolute top-6 left-8" />
-          <div className="w-10 h-10 rounded-full bg-[#e0aa4e]/20 absolute bottom-6 right-7" />
-          <div className="w-4 h-4 rounded-full bg-[#e0aa4e]/30 absolute bottom-12 left-10" />
-        </div>
-      )}
-
-      {/* Sparkling Stars */}
-      {staticStars.map((s) => (
-        <div
-          key={s.id}
-          className="absolute rounded-full bg-[#faeeda] animate-twinkle pointer-events-none"
-          style={{
-            left: `${s.x}%`,
-            top: `${s.y}%`,
-            width: `${s.size}px`,
-            height: `${s.size}px`,
-            animationDuration: `${s.duration}s`,
-            animationDelay: `${s.delay}s`,
+        <ConstellationGalaxyView
+          dreams={dreams}
+          onSelectDream={(d) => {
+            setSelectedDream(d);
+            playPoemMagicSound();
           }}
         />
-      ))}
+      )}
 
-      {/* 2. TOP BAR OVERLAY */}
-      <div className="absolute top-0 left-0 right-0 z-30 px-6 py-4 flex items-center justify-between pointer-events-none">
-        {/* Top-Left: Event Tag */}
-        <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/30 shadow-lg pointer-events-auto">
-          <span className="text-xl animate-bounce">🏮</span>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-[#fac775] uppercase tracking-wider">
-              Deploy Ước Mơ · Club Day 2026
-            </span>
-            <span className="text-[10px] text-white/80">CLB LẬP TRÌNH FU-DEVER · FPTU ĐÀ NẴNG</span>
+      {/* 2. TOP FLOATING CONTROL DOCK */}
+      <div className="absolute top-4 inset-x-4 z-30 flex items-center justify-between pointer-events-none">
+        {/* Brand Header */}
+        <div className="flex items-center gap-3 pointer-events-auto">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#993c1d] to-[#12203A] p-1 border-2 border-[#fac775] shadow-lg flex items-center justify-center">
+            <Image
+              src="/assets/logo/logo-dever-white.png"
+              alt="FU-DEVER Logo"
+              width={32}
+              height={32}
+              className="object-contain"
+            />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#fac775] text-[#712b13] uppercase tracking-wider">
+                CLB LẬP TRÌNH FU-DEVER
+              </span>
+              <span className="hidden sm:inline-block text-[11px] text-[#fac775]/90 font-semibold">
+                FPT University Da Nang
+              </span>
+            </div>
+            <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight drop-shadow-md flex items-center gap-1.5 font-display">
+              <span>Deploy Ước Mơ · Club Day 2026</span>
+              <span className="text-xs">🏮</span>
+            </h1>
           </div>
         </div>
 
-        {/* Top-Right: Controls & Sky Theme Switcher */}
-        <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
-          {/* Sky Theme Switcher */}
-          <div className="flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+        {/* Action Controls Dock */}
+        <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
+          {/* VIEW MODE SWITCHER (Lanterns vs Galaxy) */}
+          <div className="flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg">
             <button
-              onClick={() => setSkyTheme("midnight")}
-              className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                skyTheme === "midnight" ? "bg-[#fac775] text-[#12203a]" : "text-white/60 hover:text-white"
+              onClick={() => setViewMode("lanterns")}
+              className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                viewMode === "lanterns"
+                  ? "bg-[#993c1d] text-white shadow-xs"
+                  : "text-white/70 hover:text-white"
               }`}
-              title="Đêm Trăng Rằm"
+              title="Chế độ Bầu Trời Đèn Lồng"
             >
-              <Moon className="w-3.5 h-3.5" />
+              <Layers className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Đèn Lồng</span>
             </button>
             <button
-              onClick={() => setSkyTheme("cyber")}
-              className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                skyTheme === "cyber" ? "bg-[#00f5d4] text-[#050914]" : "text-white/60 hover:text-white"
+              onClick={() => setViewMode("galaxy")}
+              className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                viewMode === "galaxy"
+                  ? "bg-[#0091ea] text-white shadow-xs"
+                  : "text-white/70 hover:text-white"
               }`}
-              title="DEVER Cyber Neon"
+              title="Chế độ Chòm Sao Thiên Hà"
             >
-              <Zap className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setSkyTheme("dawn")}
-              className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                skyTheme === "dawn" ? "bg-[#ffb800] text-[#3a1306]" : "text-white/60 hover:text-white"
-              }`}
-              title="Bình Minh Rạng Rỡ"
-            >
-              <Sun className="w-3.5 h-3.5" />
+              <Globe2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Chòm Sao</span>
             </button>
           </div>
 
-          {/* Realtime Counter Pill */}
+          {/* SKY THEME SWITCHER */}
+          {viewMode === "lanterns" && (
+            <div className="hidden md:flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/30 shadow-lg">
+              <button
+                onClick={() => setSkyTheme("midnight")}
+                className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                  skyTheme === "midnight" ? "bg-[#fac775] text-[#12203A]" : "text-white/60 hover:text-white"
+                }`}
+                title="Trời đêm Trăng Rằm"
+              >
+                <Moon className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setSkyTheme("cyber")}
+                className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                  skyTheme === "cyber" ? "bg-[#00f5d4] text-[#050914]" : "text-white/60 hover:text-white"
+                }`}
+                title="DEVER Cyber Neon"
+              >
+                <Zap className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setSkyTheme("dawn")}
+                className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                  skyTheme === "dawn" ? "bg-[#ffb800] text-[#3a1306]" : "text-white/60 hover:text-white"
+                }`}
+                title="Bình Minh K22"
+              >
+                <Sun className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Dream Counter Badge */}
           <div id="counter-pill" className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg">
             <Sparkles className="w-4 h-4 text-[#fac775] animate-pulse" />
             <span className="text-sm font-extrabold text-white">
@@ -410,219 +434,182 @@ export default function DisplaySkyPage() {
         </div>
       )}
 
-      {/* 3. FLOATING LANTERNS SKY LAYER */}
-      <div className="absolute inset-0 z-10 p-4">
-        {lanterns.length === 0 ? (
-          /* Empty Initial State */
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 animate-in fade-in duration-700">
-            <div className="w-20 h-20 mb-4 rounded-full bg-[#fac775]/20 border border-[#fac775] flex items-center justify-center text-3xl animate-float shadow-[0_0_30px_rgba(250,199,117,0.4)]">
-              🏮
-            </div>
-            <h2 className="text-2xl font-extrabold text-[#fac775] mb-2 drop-shadow-md">
-              Bầu Trời Đèn Lồng Đang Chờ Đón K22
-            </h2>
-            <p className="text-sm text-[#faeeda]/80 max-w-md leading-relaxed mb-6">
-              Hãy là người đầu tiên quét mã QR tại gian hàng <strong>FU-DEVER</strong> để gửi ước mơ thắp sáng màn đêm!
-            </p>
-            <button
-              onClick={() => setShowQRModal(true)}
-              className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#993c1d] to-[#fac775] text-white font-bold text-xs flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
-            >
-              <QrCode className="w-4 h-4" />
-              <span>Quét mã gửi ước mơ ngay</span>
-            </button>
-          </div>
-        ) : (
-          /* Floating Lanterns Grid */
-          displayedLanterns.map((item) => {
-            const category = DREAM_CATEGORIES.find((c) => c.id === item.tag);
-            const isTech = item.theme === "tech" || skyTheme === "cyber";
-            return (
-              <div
-                key={item.id}
-                onClick={() => setSelectedDream(item)}
-                onMouseEnter={() => setHoveredDream(item)}
-                onMouseLeave={() => setHoveredDream(null)}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform duration-500 hover:scale-115 hover:z-40"
-                style={{
-                  left: `${item.x}%`,
-                  top: `${item.y}%`,
-                  transform: `scale(${item.scale})`,
-                  animation: `floatSlow 6s ease-in-out infinite`,
-                  animationDelay: `${item.delay}s`,
-                }}
+      {/* 3. FLOATING LANTERNS SKY LAYER (When in Lanterns view mode) */}
+      {viewMode === "lanterns" && (
+        <div className="absolute inset-0 z-10 p-4">
+          {lanterns.length === 0 ? (
+            /* Empty Initial State */
+            <div className="h-full flex flex-col items-center justify-center text-center p-6 animate-in fade-in duration-700">
+              <div className="w-20 h-20 mb-4 rounded-full bg-[#fac775]/20 border border-[#fac775] flex items-center justify-center text-3xl animate-float shadow-[0_0_30px_rgba(250,199,117,0.4)]">
+                🏮
+              </div>
+              <h2 className="text-2xl font-extrabold text-[#fac775] mb-2 drop-shadow-md font-display">
+                Bầu Trời Đèn Lồng Đang Chờ Đón K22
+              </h2>
+              <p className="text-sm text-[#faeeda]/80 max-w-md leading-relaxed mb-6">
+                Hãy là người đầu tiên quét mã QR tại gian hàng <strong>FU-DEVER</strong> để gửi ước mơ thắp sáng màn đêm!
+              </p>
+              <button
+                onClick={() => setShowQRModal(true)}
+                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#993c1d] to-[#fac775] text-white font-bold text-xs flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
               >
-                {/* Lantern Visual Container */}
-                <div className="relative group flex flex-col items-center">
-                  {/* Top Lantern Hanger String */}
-                  <div className="w-0.5 h-3 bg-[#fac775]/60 mb-0.5" />
-
-                  {/* Lantern Body Card */}
+                <QrCode className="w-4 h-4" />
+                <span>Quét mã gửi ước mơ ngay</span>
+              </button>
+            </div>
+          ) : (
+            /* Floating Lanterns Grid */
+            displayedLanterns.map((item) => {
+              const category = DREAM_CATEGORIES.find((c) => c.id === item.tag);
+              const isTech = item.theme === "tech" || skyTheme === "cyber";
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedDream(item);
+                    playPoemMagicSound();
+                  }}
+                  onMouseEnter={() => setHoveredDream(item)}
+                  onMouseLeave={() => setHoveredDream(null)}
+                  className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform duration-500 hover:scale-115 hover:z-40"
+                  style={{
+                    left: `${item.x}%`,
+                    top: `${item.y}%`,
+                    transform: `scale(${item.scale})`,
+                    animationDelay: `${item.delay}s`,
+                  }}
+                >
+                  {/* Glowing Lantern Card */}
                   <div
-                    className={`relative px-3.5 py-2.5 rounded-2xl border-2 shadow-[0_0_20px_rgba(250,199,117,0.35)] backdrop-blur-xs text-left min-w-[150px] max-w-[200px] transition-all group-hover:shadow-[0_0_30px_rgba(250,199,117,0.8)] ${
+                    className={`relative p-3 rounded-2xl transition-all duration-300 ${
                       isTech
-                        ? "bg-gradient-to-b from-[#08101e] to-[#0f203c] border-[#0091ea]/80 group-hover:border-[#00f5d4]"
-                        : "bg-gradient-to-b from-[#993c1d] to-[#712b13] border-[#fac775]/70 group-hover:border-[#fac775]"
-                    }`}
+                        ? "bg-[#002244]/90 border border-[#00f5d4] shadow-[0_0_20px_rgba(0,245,212,0.35)]"
+                        : "bg-gradient-to-b from-[#993c1d]/90 to-[#712b13]/90 border border-[#fac775]/70 shadow-[0_0_25px_rgba(250,199,117,0.4)]"
+                    } backdrop-blur-md max-w-[180px] sm:max-w-[220px] text-center`}
                   >
-                    {/* Glowing Candle Core */}
-                    <div
-                      className={`absolute inset-x-4 top-1 h-2 rounded-full blur-xs pointer-events-none ${
-                        isTech ? "bg-[#00f5d4]/40" : "bg-[#fac775]/40"
-                      }`}
-                    />
+                    {/* Lantern Top Ring */}
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-2 rounded-t-full border-t border-x border-[#fac775]/80 bg-transparent" />
 
                     {/* Sender Name & Category */}
-                    <div className="flex items-center justify-between gap-1 mb-1">
-                      <div className="flex items-center gap-1 truncate max-w-[125px]">
-                        <span className={`text-xs font-extrabold truncate ${isTech ? "text-[#00f5d4]" : "text-[#fac775]"}`}>
-                          {item.name || "Ẩn danh"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {item.mascotIndex && (
-                          <div className="relative w-4 h-4 shrink-0">
-                            <Image
-                              src={`/assets/buggy/${item.mascotIndex}.png`}
-                              alt="Buggy"
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                        )}
-                        <span className="text-xs">{category?.emoji || "✨"}</span>
-                      </div>
+                    <div className="flex items-center justify-between text-[10px] font-bold text-[#fac775] mb-1">
+                      <span className="truncate max-w-[100px]">{item.name || "Ẩn danh K22"}</span>
+                      <span>{category?.emoji}</span>
                     </div>
 
-                    {/* Truncated Wish Excerpt */}
-                    <p className="text-[11px] text-[#faeeda] font-medium leading-snug line-clamp-2 italic">
+                    {/* Wish Snippet */}
+                    <p className="text-xs text-white/95 line-clamp-2 italic font-medium leading-tight">
                       &ldquo;{item.content}&rdquo;
                     </p>
 
-                    {/* Bottom Lantern Fringe */}
-                    <div
-                      className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-2 rounded-b-md shadow-xs ${
-                        isTech ? "bg-[#0091ea]" : "bg-[#fac775]"
-                      }`}
-                    />
+                    {/* Mascot Sticker */}
+                    <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-[#12203A] border border-[#fac775] p-0.5 shadow-sm">
+                      <Image
+                        src={`/assets/buggy/${item.mascotIndex || 1}.png`}
+                        alt="Buggy"
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* 3.5 SPOTLIGHT SHOWCASE OVERLAY (BOTTOM CENTER) */}
-      {isAutoSpotlight && spotlightDream && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-25 max-w-lg w-full px-4 pointer-events-none">
-          <div className="bg-[#12203A]/90 border border-[#fac775]/50 rounded-2xl p-3.5 shadow-2xl backdrop-blur-md flex items-center gap-3 animate-in fade-in zoom-in-95 duration-500 pointer-events-auto">
-            <div className="w-10 h-10 rounded-full bg-[#fac775]/20 border border-[#fac775] flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 text-[#fac775]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between text-[11px] font-bold text-[#fac775] mb-0.5">
-                <span>🏮 Spotlight: {spotlightDream.name || "Ẩn danh"}</span>
-                <span className="text-white/60">
-                  {DREAM_CATEGORIES.find((c) => c.id === spotlightDream.tag)?.emoji}
-                </span>
-              </div>
-              <p className="text-xs text-white italic truncate font-medium">
-                &ldquo;{spotlightDream.content}&rdquo;
-              </p>
-            </div>
-          </div>
+              );
+            })
+          )}
         </div>
       )}
 
-      {/* 3.6 LIVE FLOATING REACTIONS STREAM */}
-      <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
-        {reactions.map((r) => (
+      {/* 4. LIVE REACTIONS RISING FLOAT STREAM */}
+      <div className="absolute inset-x-0 bottom-0 top-1/2 pointer-events-none z-25 overflow-hidden">
+        {reactions.map((react, idx) => (
           <div
-            key={r.id}
-            className="absolute text-4xl sm:text-5xl animate-in fade-in slide-in-from-bottom-12 duration-1000 transition-all drop-shadow-[0_0_15px_rgba(250,199,117,0.8)]"
+            key={react.id}
+            className="absolute bottom-4 text-3xl animate-in fade-in zoom-in-75 duration-300"
             style={{
-              left: `${r.x}%`,
-              bottom: "10%",
-              animation: "floatSlow 4s ease-out forwards",
+              left: `${(idx * 17 + 25) % 85}%`,
+              animation: "floatSlow 4.5s ease-out forwards",
             }}
           >
-            {r.emoji}
+            <span className="drop-shadow-[0_0_12px_rgba(250,199,117,0.8)] select-none">
+              {react.emoji}
+            </span>
           </div>
         ))}
       </div>
 
-      {/* 4. FOOTER OVERLAY (LOGO, CATEGORY FILTER & QR) */}
-      <div className="absolute bottom-4 left-6 right-6 z-30 flex items-end justify-between pointer-events-none">
-        {/* Left: FU-DEVER Official Logo */}
-        <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 shadow-lg pointer-events-auto">
-          <div className="relative w-9 h-9">
-            <Image
-              src="/assets/logo/logo-dever-white.png"
-              alt="FU-DEVER Logo"
-              fill
-              className="object-contain"
-            />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-extrabold text-[#85b7eb] tracking-wide">
-              CLB LẬP TRÌNH FU-DEVER
-            </span>
-            <span className="text-[10px] text-white/70">FPT University Da Nang</span>
-          </div>
-        </div>
-
-        {/* Center: Category Filter Pills */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 shadow-lg pointer-events-auto">
-          <button
-            onClick={() => setSelectedTagFilter("all")}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              selectedTagFilter === "all"
-                ? "bg-[#fac775] text-[#12203a] font-bold"
-                : "text-white/70 hover:text-white"
-            }`}
-          >
-            Tất cả ({lanterns.length})
-          </button>
-          {DREAM_CATEGORIES.map((c) => {
-            const count = lanterns.filter((l) => l.tag === c.id).length;
-            return (
-              <button
-                key={c.id}
-                onClick={() => setSelectedTagFilter(c.id)}
-                className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
-                  selectedTagFilter === c.id
-                    ? "bg-[#993c1d] text-white border border-[#fac775]"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                <span>{c.emoji}</span>
-                <span>{c.shortLabel}</span>
-                <span className="text-[10px] opacity-75">({count})</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Right: Scan QR Prompt */}
+      {/* 5. SPOTLIGHT CAROUSEL BANNER (Bottom-left card) */}
+      {currentSpotlightDream && isAutoSpotlight && (
         <div
-          onClick={() => setShowQRModal(true)}
-          className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-[#993c1d]/90 to-[#712b13]/90 border border-[#fac775]/50 shadow-xl backdrop-blur-md cursor-pointer pointer-events-auto hover:scale-105 transition-all"
+          onClick={() => setSelectedDream(currentSpotlightDream)}
+          className="absolute bottom-6 left-6 z-30 max-w-sm p-4 rounded-3xl bg-[#12203A]/90 border border-[#fac775] backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all animate-in slide-in-from-bottom duration-500"
         >
-          <div className="p-1 rounded-md bg-white text-[#12203a]">
-            <QrCode className="w-5 h-5" />
+          <div className="flex items-center justify-between text-xs font-bold text-[#fac775] mb-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span>Tiêu Điểm Ước Mơ</span>
+            </div>
+            <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">
+              {DREAM_CATEGORIES.find((c) => c.id === currentSpotlightDream.tag)?.emoji}{" "}
+              {DREAM_CATEGORIES.find((c) => c.id === currentSpotlightDream.tag)?.shortLabel}
+            </span>
           </div>
-          <div className="flex flex-col text-left">
-            <span className="text-xs font-bold text-[#fac775]">Quét QR tại gian hàng</span>
-            <span className="text-[10px] text-[#faeeda]/80">Gửi ước mơ của bạn bay lên</span>
+
+          <h4 className="text-sm font-extrabold text-white mb-1">
+            {currentSpotlightDream.name || "Tân Sinh Viên K22"}
+          </h4>
+
+          <p className="text-xs text-[#faeeda]/90 italic line-clamp-3 leading-relaxed whitespace-pre-line">
+            &ldquo;{currentSpotlightDream.content}&rdquo;
+          </p>
+
+          <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-[#fac775]">
+            <span>✨ Chạm để xem Dream Card Story</span>
+            <span>#FUDEVER2026</span>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* 5. MODAL: DETAILED LANTERN INSPECTION */}
+      {/* 6. CATEGORY FILTER BAR (Bottom Center) */}
+      {viewMode === "lanterns" && (
+        <div className="absolute bottom-6 inset-x-0 z-30 flex justify-center pointer-events-none px-4">
+          <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 rounded-full bg-[#12203A]/85 backdrop-blur-xl border border-[#fac775]/40 shadow-2xl pointer-events-auto overflow-x-auto max-w-full">
+            <button
+              onClick={() => setSelectedTagFilter("all")}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                selectedTagFilter === "all"
+                  ? "bg-[#fac775] text-[#12203a] shadow-xs"
+                  : "text-[#faeeda]/80 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              Tất cả ({lanterns.length})
+            </button>
+
+            {DREAM_CATEGORIES.map((cat) => {
+              const count = lanterns.filter((l) => l.tag === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedTagFilter(cat.id)}
+                  className={`px-2.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                    selectedTagFilter === cat.id
+                      ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
+                      : "text-[#faeeda]/70 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <span>{cat.emoji}</span>
+                  <span className="hidden md:inline">{cat.shortLabel}</span>
+                  <span className="text-[10px] opacity-75">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 7. SPOTLIGHT DREAM DETAIL MODAL */}
       {selectedDream && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md bg-gradient-to-b from-[#712b13] via-[#12203A] to-[#0a1222] border-2 border-[#fac775] rounded-3xl p-6 shadow-2xl text-[#faeeda]">
+          <div className="relative w-full max-w-md bg-[#12203A] border-2 border-[#fac775] rounded-3xl shadow-2xl p-6 text-[#faeeda] animate-in zoom-in-95 duration-200">
             <button
               onClick={() => setSelectedDream(null)}
               className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-[#fac775] transition-colors cursor-pointer"
@@ -630,59 +617,42 @@ export default function DisplaySkyPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="text-center mb-4">
-              <div className="relative w-16 h-16 mx-auto mb-2 rounded-full bg-[#fac775]/20 border-2 border-[#fac775] flex items-center justify-center shadow-[0_0_25px_rgba(250,199,117,0.5)]">
-                {selectedDream.mascotIndex ? (
-                  <Image
-                    src={`/assets/buggy/${selectedDream.mascotIndex}.png`}
-                    alt="Buggy Mascot"
-                    width={44}
-                    height={44}
-                    className="object-contain"
-                  />
-                ) : (
-                  <span className="text-2xl">🏮</span>
-                )}
-              </div>
-
-              <div className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-white/10 text-xs text-[#fac775] font-semibold mb-1">
-                <span>{DREAM_CATEGORIES.find((c) => c.id === selectedDream.tag)?.emoji}</span>
-                <span>{DREAM_CATEGORIES.find((c) => c.id === selectedDream.tag)?.label}</span>
-              </div>
-
-              <h3 className="text-xl font-extrabold text-[#fac775]">
-                {selectedDream.name || "Ẩn danh"}
-              </h3>
-              <p className="text-[11px] text-white/60">
-                {new Date(selectedDream.created_at).toLocaleString("vi-VN", {
-                  timeZone: "Asia/Ho_Chi_Minh",
-                })}
-              </p>
+            {/* Mascot */}
+            <div className="w-16 h-16 rounded-full bg-[#faeeda] border-2 border-[#fac775] mx-auto mb-3 flex items-center justify-center p-1 shadow-lg">
+              <Image
+                src={`/assets/buggy/${selectedDream.mascotIndex || 1}.png`}
+                alt="Mascot"
+                width={48}
+                height={48}
+                className="object-contain animate-bounce"
+              />
             </div>
 
-            <div className="bg-black/40 rounded-2xl p-5 border border-[#fac775]/30 mb-5 max-h-60 overflow-y-auto shadow-inner">
-              <p className="text-base text-white font-medium italic leading-relaxed text-center">
+            <div className="text-center mb-4">
+              <span className="inline-block text-[11px] font-bold px-3 py-0.5 rounded-full bg-[#fac775]/20 text-[#fac775] uppercase tracking-wider mb-1">
+                {DREAM_CATEGORIES.find((c) => c.id === selectedDream.tag)?.emoji}{" "}
+                {DREAM_CATEGORIES.find((c) => c.id === selectedDream.tag)?.label}
+              </span>
+              <h3 className="text-xl font-extrabold text-white">
+                {selectedDream.name || "Tân Sinh Viên K22"}
+              </h3>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-center mb-6">
+              <p className="text-base text-white italic font-medium leading-relaxed whitespace-pre-line">
                 &ldquo;{selectedDream.content}&rdquo;
               </p>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-[#fac775]/80 px-2">
-              <div className="flex items-center gap-1">
-                <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400" />
-                <span>FU-DEVER Club Day 2026</span>
-              </div>
-              <button
-                onClick={() => setSelectedDream(null)}
-                className="px-4 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold cursor-pointer"
-              >
-                Đóng
-              </button>
+            <div className="flex items-center justify-between text-xs text-[#fac775]/90 border-t border-white/10 pt-3">
+              <span>🏮 FU-DEVER Club Day 2026</span>
+              <span>FPT University Da Nang</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Standee QR Code Modal */}
+      {/* Standee QR Modal */}
       <StandeeQRModal isOpen={showQRModal} onClose={() => setShowQRModal(false)} />
     </div>
   );

@@ -6,6 +6,7 @@ import Image from "next/image";
 import confetti from "canvas-confetti";
 import { Dream } from "@/types/dream";
 import { DREAM_CATEGORIES } from "@/lib/constants";
+import { playSlotTickSound, playCelebrationFanfare, playTactileClick } from "@/lib/audio-synthesizer";
 import {
   Trophy,
   Sparkles,
@@ -14,6 +15,7 @@ import {
   Gift,
   PartyPopper,
   Crown,
+  Download,
 } from "lucide-react";
 
 export default function LuckyDrawPage() {
@@ -49,13 +51,14 @@ export default function LuckyDrawPage() {
     setIsSpinning(true);
     setWinner(null);
 
-    let speed = 50;
+    let speed = 45;
     let counter = 0;
     const totalSpins = 40 + Math.floor(Math.random() * 20);
 
     const spin = () => {
       const randomIndex = Math.floor(Math.random() * dreams.length);
       setCurrentDisplayDream(dreams[randomIndex]);
+      playSlotTickSound();
       counter++;
 
       if (counter < totalSpins) {
@@ -69,11 +72,12 @@ export default function LuckyDrawPage() {
         setWinner(selectedWinner);
         setWinnerHistory((prev) => [selectedWinner, ...prev]);
         setIsSpinning(false);
+        playCelebrationFanfare();
 
         // Confetti Celebration
         confetti({
-          particleCount: 120,
-          spread: 80,
+          particleCount: 140,
+          spread: 85,
           origin: { y: 0.5 },
           colors: ["#FAC775", "#993C1D", "#0091EA", "#00F5D4", "#FFD166"],
         });
@@ -84,40 +88,63 @@ export default function LuckyDrawPage() {
   };
 
   const handleReset = () => {
+    playTactileClick();
     setWinner(null);
     if (dreams.length > 0) {
       setCurrentDisplayDream(dreams[0]);
     }
   };
 
+  const handleExportWinnersCSV = () => {
+    if (winnerHistory.length === 0) return;
+    const headers = "STT,Tên người trúng,Nội dung ước mơ,Chủ đề\n";
+    const rows = winnerHistory
+      .map((w, idx) => `${idx + 1},"${w.name || "Ẩn danh"}","${w.content.replace(/"/g, '""')}","${w.tag}"`)
+      .join("\n");
+    const csvContent = "\uFEFF" + headers + rows;
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Danh_Sach_Trung_Thuong_FU_DEVER_${Date.now()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="min-h-screen bg-radial from-[#1e345e] via-[#12203A] to-[#0a1222] text-[#faeeda] p-4 sm:p-8 flex flex-col justify-between">
+    <div className="min-h-screen bg-radial from-[#1e345e] via-[#12203A] to-[#0a1222] text-[#faeeda] p-4 sm:p-8 flex flex-col justify-between select-none">
       {/* Top Header */}
       <div className="max-w-4xl w-full mx-auto flex items-center justify-between">
         <Link
           href="/admin"
-          className="px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-[#fac775] flex items-center gap-1.5 transition-colors"
+          className="px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-xs font-bold text-[#fac775] flex items-center gap-1.5 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Về trang Admin</span>
         </Link>
 
-        <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#fac775]/20 border border-[#fac775]/40 text-[#fac775] text-xs font-bold uppercase tracking-wider">
+        <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#fac775]/20 border border-[#fac775]/40 text-[#fac775] text-xs font-black uppercase tracking-wider">
           <Trophy className="w-4 h-4 text-[#fac775]" />
           <span>Minigame Vòng Quay Ước Mơ</span>
         </div>
       </div>
 
       {/* Main Lucky Draw Arena */}
-      <div className="max-w-2xl w-full mx-auto my-6 bg-white/5 border-2 border-[#fac775]/40 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-md text-center relative overflow-hidden">
+      <div className="max-w-2xl w-full mx-auto my-6 bg-white/5 border-2 border-[#fac775]/40 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl text-center relative overflow-hidden">
         {/* Glow ambient */}
         <div className="absolute inset-x-0 -top-20 h-40 bg-[#fac775]/20 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 mb-6">
-          <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#fac775]/20 border-2 border-[#fac775] flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(250,199,117,0.5)]">
-            🎁
+          <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#fac775]/20 border-2 border-[#fac775] flex items-center justify-center p-1 shadow-[0_0_30px_rgba(250,199,117,0.5)]">
+            <Image
+              src="/assets/buggy/3.png"
+              alt="Buggy Trophy"
+              width={48}
+              height={48}
+              className="object-contain animate-bounce"
+            />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#fac775] tracking-tight mb-1">
+          <h1 className="text-2xl sm:text-4xl font-black text-[#fac775] tracking-tight mb-1 font-display">
             VÒNG QUAY MAY MẮN
           </h1>
           <p className="text-xs text-[#faeeda]/80">
@@ -158,12 +185,12 @@ export default function LuckyDrawPage() {
                 </span>
               </div>
 
-              <p className="text-sm font-medium italic text-[#faeeda] line-clamp-3 leading-relaxed">
+              <p className="text-sm font-medium italic text-[#faeeda] line-clamp-3 leading-relaxed whitespace-pre-line">
                 &ldquo;{currentDisplayDream.content}&rdquo;
               </p>
 
-              <div className="text-[11px] text-[#fac775] font-semibold">
-                {DREAM_CATEGORIES.find((c) => c.id === currentDisplayDream.tag)?.label}
+              <div className="text-[11px] text-[#fac775] font-bold">
+                🏮 {DREAM_CATEGORIES.find((c) => c.id === currentDisplayDream.tag)?.label}
               </div>
             </div>
           ) : (
@@ -206,9 +233,18 @@ export default function LuckyDrawPage() {
       {/* Winner History Log */}
       {winnerHistory.length > 0 && (
         <div className="max-w-2xl w-full mx-auto bg-white/5 border border-white/10 rounded-3xl p-4 text-xs">
-          <div className="flex items-center gap-1.5 font-bold text-[#fac775] mb-2">
-            <PartyPopper className="w-4 h-4" />
-            <span>Danh sách bạn đã trúng thưởng ({winnerHistory.length}):</span>
+          <div className="flex items-center justify-between font-bold text-[#fac775] mb-2">
+            <div className="flex items-center gap-1.5">
+              <PartyPopper className="w-4 h-4" />
+              <span>Danh sách bạn đã trúng thưởng ({winnerHistory.length}):</span>
+            </div>
+            <button
+              onClick={handleExportWinnersCSV}
+              className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-[11px] text-[#fac775] flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Xuất CSV</span>
+            </button>
           </div>
           <div className="space-y-1.5 max-h-36 overflow-y-auto">
             {winnerHistory.map((w, idx) => (

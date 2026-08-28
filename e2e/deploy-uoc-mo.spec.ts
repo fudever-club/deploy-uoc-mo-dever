@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Deploy Ước Mơ — End to End User Flows", () => {
-  test("1. Full Wish Submission and Dream Card generation flow", async ({ page }) => {
+  test("1. Full Wish Submission, Poetry Generation, and Dream Card flow", async ({ page }) => {
     // 1. Visit Main Page
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
@@ -21,7 +21,14 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     const submitBtn = page.locator("#btn-submit-dream");
 
     await nameInput.fill("Phan Quang Nhật K22");
-    await contentInput.fill("Xây dựng cộng đồng lập trình FU-DEVER ngày càng vững mạnh và rực rỡ!");
+
+    // Test AI Poetry generator button
+    const poemBtn = page.locator("button:has-text('Gieo Vần Thơ DEVER')");
+    await expect(poemBtn).toBeVisible();
+    await poemBtn.click();
+
+    // Verify poem content filled
+    await expect(contentInput).not.toBeEmpty();
 
     // Choose Category Tag
     const tagBtn = page.locator("button:has-text('Ước mơ lớn')");
@@ -43,11 +50,18 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     await expect(page.locator("button:has-text('Tải Ảnh Về Máy')")).toBeVisible();
   });
 
-  test("2. Public Lantern Sky Display Screen (/display)", async ({ page }) => {
+  test("2. Public Lantern Sky Display & Constellation Mode (/display)", async ({ page }) => {
     await page.goto("/display");
     await expect(page.locator("text=Deploy Ước Mơ · Club Day 2026")).toBeVisible();
     await expect(page.locator("text=CLB LẬP TRÌNH FU-DEVER").first()).toBeVisible();
     await expect(page.locator("#counter-pill")).toBeVisible();
+
+    // Toggle Constellation Galaxy Mode
+    const galaxyBtn = page.locator("button:has-text('Chòm Sao')");
+    if (await galaxyBtn.isVisible()) {
+      await galaxyBtn.click();
+      await expect(page.locator("button:has-text('Toàn Vũ Trụ')")).toBeVisible();
+    }
   });
 
   test("3. Admin Dashboard Authentication & Management (/admin)", async ({ page }) => {

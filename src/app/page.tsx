@@ -3,24 +3,27 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import confetti from "canvas-confetti";
-import { DREAM_CATEGORIES, BUGGY_MOODS, INSPIRATION_PROMPTS, EVENT_INFO } from "@/lib/constants";
+import { DREAM_CATEGORIES, BUGGY_MOODS, INSPIRATION_PROMPTS } from "@/lib/constants";
 import { Dream, DreamCategory, CardTheme } from "@/types/dream";
-import { playLanternChime } from "@/lib/audio";
+import { generatePoem } from "@/lib/poem-generator";
+import { playLanternAscendChime, playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
 import { DreamCardModal } from "@/components/DreamCardModal";
+import { ARPhotoBoothModal } from "@/components/ARPhotoBoothModal";
+import { BuggyCatcherModal } from "@/components/BuggyCatcherModal";
 import { ReactionBar } from "@/components/ReactionBar";
 import {
   Sparkles,
   Send,
-  CheckCircle2,
   Image as ImageIcon,
   ArrowRight,
   RotateCcw,
   AlertCircle,
-  HeartHandshake,
   Lightbulb,
   Palette,
   Eye,
   Flame,
+  Camera,
+  Feather,
 } from "lucide-react";
 
 export default function WishSubmissionPage() {
@@ -39,21 +42,47 @@ export default function WishSubmissionPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [createdDream, setCreatedDream] = useState<Dream | null>(null);
   const [showCardModal, setShowCardModal] = useState(false);
-  const [totalCount, setTotalCount] = useState<number>(18);
+  const [showPhotoBooth, setShowPhotoBooth] = useState(false);
+  const [showBuggyGame, setShowBuggyGame] = useState(false);
+  const [totalCount, setTotalCount] = useState<number>(24);
+
+  // Easter Egg tap counter
+  const [buggyTapCount, setBuggyTapCount] = useState(0);
+
+  // AI Poem Generator state
+  const [generatedPoem, setGeneratedPoem] = useState<{ title: string; lines: string[]; badge: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/dreams")
       .then((res) => res.json())
       .then((json) => {
         if (json.success && Array.isArray(json.data)) {
-          setTotalCount(Math.max(18, json.data.length));
+          setTotalCount(Math.max(24, json.data.length));
         }
       })
       .catch(() => {});
   }, []);
 
+  const handleBuggyTap = () => {
+    playTactileClick();
+    const nextCount = buggyTapCount + 1;
+    setBuggyTapCount(nextCount);
+    if (nextCount >= 5) {
+      setBuggyTapCount(0);
+      setShowBuggyGame(true);
+    }
+  };
+
   const handleApplyPrompt = (promptText: string) => {
+    playTactileClick();
     setContent(promptText);
+  };
+
+  const handleGeneratePoem = () => {
+    playPoemMagicSound();
+    const poem = generatePoem(name, tag);
+    setGeneratedPoem(poem);
+    setContent(poem.lines.join("\n"));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,13 +123,13 @@ export default function WishSubmissionPage() {
       setCreatedDream(json.data);
       setStep("thankyou");
 
-      // Audio chime
-      playLanternChime();
+      // Ascending audio chime
+      playLanternAscendChime();
 
       // Confetti burst
       confetti({
-        particleCount: 100,
-        spread: 80,
+        particleCount: 110,
+        spread: 85,
         origin: { y: 0.6 },
         colors: ["#FAC775", "#993C1D", "#0091EA", "#00F5D4", "#FAEEDA"],
       });
@@ -113,12 +142,14 @@ export default function WishSubmissionPage() {
   };
 
   const resetForm = () => {
+    playTactileClick();
     setName("");
     setContent("");
     setTag("career");
     setMascotIndex(1);
     setTheme("classic");
     setConsent(true);
+    setGeneratedPoem(null);
     setCreatedDream(null);
     setStep("form");
   };
@@ -170,9 +201,13 @@ export default function WishSubmissionPage() {
         {/* STEP 1: INTRO SCREEN */}
         {step === "intro" && (
           <div className="bg-white/95 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(153,60,29,0.08)] border border-[#fac775]/50 backdrop-blur-xl text-center animate-in fade-in zoom-in-95 duration-300">
-            {/* Mascot / Icon Badge */}
-            <div className="relative mx-auto w-24 h-24 mb-4 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#fac775]/50 via-[#0091ea]/30 to-[#993c1d]/30 rounded-full animate-pulse blur-xs" />
+            {/* Mascot Buggy Badge with Easter Egg Tap */}
+            <div
+              onClick={handleBuggyTap}
+              className="relative mx-auto w-24 h-24 mb-4 flex items-center justify-center cursor-pointer group select-none"
+              title="Chạm 5 lần vào Buggy để mở minigame bí mật!"
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#fac775]/50 via-[#0091ea]/30 to-[#993c1d]/30 rounded-full animate-pulse blur-xs group-hover:scale-110 transition-transform" />
               <div className="relative w-20 h-20 rounded-full bg-gradient-to-b from-[#993c1d] to-[#712b13] p-1.5 shadow-xl flex items-center justify-center border-2 border-[#fac775]">
                 <Image
                   src="/assets/buggy/1.png"
@@ -226,7 +261,10 @@ export default function WishSubmissionPage() {
             {/* Start Button */}
             <button
               id="btn-start-dream"
-              onClick={() => setStep("form")}
+              onClick={() => {
+                playTactileClick();
+                setStep("form");
+              }}
               className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#993c1d] via-[#712b13] to-[#993c1d] hover:opacity-95 text-white font-black text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(153,60,29,0.35)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Thả Đèn Lồng Ước Mơ Ngay</span>
@@ -282,7 +320,10 @@ export default function WishSubmissionPage() {
                     <button
                       key={cat.id}
                       type="button"
-                      onClick={() => setTag(cat.id)}
+                      onClick={() => {
+                        playTactileClick();
+                        setTag(cat.id);
+                      }}
                       className={`py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                         tag === cat.id
                           ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
@@ -296,12 +337,26 @@ export default function WishSubmissionPage() {
                 </div>
               </div>
 
-              {/* Quick Inspiration Prompts */}
+              {/* Quick Prompts & AI Poem Engine */}
               <div>
-                <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Gợi ý ước mơ nhanh:</span>
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                  <div className="flex items-center gap-1">
+                    <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Gợi ý ước mơ nhanh:</span>
+                  </div>
+
+                  {/* AI Poem Generator Button */}
+                  <button
+                    type="button"
+                    onClick={handleGeneratePoem}
+                    className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+                    title="Gieo vần thơ Trung Thu DEVER"
+                  >
+                    <Feather className="w-3 h-3" />
+                    <span>✨ Gieo Vần Thơ DEVER</span>
+                  </button>
                 </div>
+
                 <div className="flex flex-wrap gap-1.5">
                   {INSPIRATION_PROMPTS.map((p, idx) => (
                     <button
@@ -329,7 +384,7 @@ export default function WishSubmissionPage() {
                   rows={3}
                   maxLength={300}
                   required
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#993c1d] focus:ring-3 focus:ring-[#993c1d]/15 outline-none text-xs sm:text-sm text-slate-800 transition-all resize-none"
+                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#993c1d] focus:ring-3 focus:ring-[#993c1d]/15 outline-none text-xs sm:text-sm text-slate-800 transition-all resize-none font-sans"
                 />
                 <div className="text-right text-[10px] text-slate-400 mt-1 font-medium">
                   {content.length}/300 ký tự
@@ -345,9 +400,14 @@ export default function WishSubmissionPage() {
                   </div>
                   <span>{DREAM_CATEGORIES.find((c) => c.id === tag)?.emoji}</span>
                 </div>
-                <p className="text-xs text-white/90 italic font-medium line-clamp-2">
+                <p className="text-xs text-white/90 italic font-medium line-clamp-3 whitespace-pre-line">
                   &ldquo;{content || "Nội dung ước mơ của bạn sẽ xuất hiện lung linh tại đây..."}&rdquo;
                 </p>
+                {generatedPoem && (
+                  <div className="mt-1 text-[10px] text-amber-300 font-bold">
+                    🏮 {generatedPoem.badge}
+                  </div>
+                )}
               </div>
 
               {/* Customizer: Mascot & Theme */}
@@ -362,7 +422,10 @@ export default function WishSubmissionPage() {
                       <button
                         key={mood.index}
                         type="button"
-                        onClick={() => setMascotIndex(mood.index)}
+                        onClick={() => {
+                          playTactileClick();
+                          setMascotIndex(mood.index);
+                        }}
                         className={`p-1 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                           mascotIndex === mood.index
                             ? "bg-[#fac775]/40 border-2 border-[#993c1d] scale-105 shadow-xs"
@@ -391,7 +454,10 @@ export default function WishSubmissionPage() {
                   <div className="grid grid-cols-3 gap-1">
                     <button
                       type="button"
-                      onClick={() => setTheme("classic")}
+                      onClick={() => {
+                        playTactileClick();
+                        setTheme("classic");
+                      }}
                       className={`py-1.5 px-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
                         theme === "classic"
                           ? "bg-[#993c1d] text-white border border-[#fac775]"
@@ -402,7 +468,10 @@ export default function WishSubmissionPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setTheme("tech")}
+                      onClick={() => {
+                        playTactileClick();
+                        setTheme("tech");
+                      }}
                       className={`py-1.5 px-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
                         theme === "tech"
                           ? "bg-[#0091ea] text-white border border-[#00f5d4]"
@@ -413,7 +482,10 @@ export default function WishSubmissionPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setTheme("gold")}
+                      onClick={() => {
+                        playTactileClick();
+                        setTheme("gold");
+                      }}
                       className={`py-1.5 px-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
                         theme === "gold"
                           ? "bg-[#712b13] text-[#fac775] border border-[#fac775]"
@@ -503,7 +575,7 @@ export default function WishSubmissionPage() {
                   {DREAM_CATEGORIES.find((c) => c.id === createdDream.tag)?.shortLabel}
                 </span>
               </div>
-              <p className="text-sm font-medium italic text-white line-clamp-3">
+              <p className="text-sm font-medium italic text-white line-clamp-3 whitespace-pre-line">
                 &ldquo;{createdDream.content}&rdquo;
               </p>
             </div>
@@ -512,14 +584,28 @@ export default function WishSubmissionPage() {
             <ReactionBar />
 
             {/* Action Buttons */}
-            <div className="space-y-2.5 mt-5">
+            <div className="space-y-2 mt-5">
               <button
                 id="btn-view-card"
-                onClick={() => setShowCardModal(true)}
+                onClick={() => {
+                  playTactileClick();
+                  setShowCardModal(true);
+                }}
                 className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#993c1d] to-[#fac775] hover:opacity-95 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all cursor-pointer"
               >
                 <ImageIcon className="w-4 h-4" />
                 <span>Xem & Tải Dream Card (Story 9:16)</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  playTactileClick();
+                  setShowPhotoBooth(true);
+                }}
+                className="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-[#0091ea] to-[#00f5d4] hover:opacity-95 text-[#051329] font-black text-xs flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition-all cursor-pointer"
+              >
+                <Camera className="w-4 h-4" />
+                <span>Chụp Ảnh Polaroid Kỷ Niệm (Photo Booth)</span>
               </button>
 
               <button
@@ -529,12 +615,6 @@ export default function WishSubmissionPage() {
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Gửi thêm một ước mơ khác</span>
               </button>
-            </div>
-
-            {/* Club Social Footnote */}
-            <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
-              <HeartHandshake className="w-3.5 h-3.5 text-[#993c1d]" />
-              <span>Chào mừng bạn đến với đại gia đình <strong>FU-DEVER</strong>!</span>
             </div>
           </div>
         )}
@@ -548,6 +628,20 @@ export default function WishSubmissionPage() {
           onClose={() => setShowCardModal(false)}
         />
       )}
+
+      {/* AR Photo Booth Modal */}
+      <ARPhotoBoothModal
+        isOpen={showPhotoBooth}
+        onClose={() => setShowPhotoBooth(false)}
+        dreamName={createdDream?.name}
+        dreamContent={createdDream?.content}
+      />
+
+      {/* Buggy Catcher Minigame Easter Egg Modal */}
+      <BuggyCatcherModal
+        isOpen={showBuggyGame}
+        onClose={() => setShowBuggyGame(false)}
+      />
     </div>
   );
 }
