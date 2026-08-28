@@ -27,12 +27,11 @@ import {
 import { StandeeQRModal } from "@/components/StandeeQRModal";
 import { LanternSkyCanvas, SkyTheme } from "@/components/LanternSkyCanvas";
 import { ConstellationGalaxyView } from "@/components/ConstellationGalaxyView";
+import { FloatingLanternCardsSky } from "@/components/FloatingLanternCardsSky";
 
 export default function DisplaySkyPage() {
   const [dreams, setDreams] = useState<Dream[]>([]);
-  const [lanterns, setLanterns] = useState<LanternItem[]>([]);
   const [selectedDream, setSelectedDream] = useState<Dream | null>(null);
-  const [hoveredDream, setHoveredDream] = useState<LanternItem | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
@@ -43,64 +42,10 @@ export default function DisplaySkyPage() {
   const [reactions, setReactions] = useState<LiveReaction[]>([]);
   const [skyTheme, setSkyTheme] = useState<SkyTheme>("midnight");
 
-  // View Mode: Classic Lantern Sky vs Constellation Galaxy
+  // View Mode: Floating Hanging Lanterns vs Constellation Galaxy
   const [viewMode, setViewMode] = useState<"lanterns" | "galaxy">("lanterns");
 
   const audioUnlocked = useRef(false);
-
-  // Pre-generate static background stars
-  const staticStars = useMemo(() => {
-    const stars = [];
-    for (let i = 0; i < 50; i++) {
-      stars.push({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 90,
-        size: Math.random() * 2.5 + 1,
-        duration: Math.random() * 3 + 2,
-        delay: Math.random() * 5,
-      });
-    }
-    return stars;
-  }, []);
-
-  const calculateLanternPosition = (index: number, total: number): { x: number; y: number; delay: number; scale: number } => {
-    const cols = total > 50 ? 10 : total > 25 ? 7 : 5;
-    const colIndex = index % cols;
-    const rowIndex = Math.floor(index / cols);
-
-    const cellWidth = 84 / cols;
-    const cellHeight = 65 / Math.max(1, Math.ceil(total / cols));
-
-    const jitterX = (Math.sin(index * 99) * 0.4 + 0.5) * (cellWidth * 0.6);
-    const jitterY = (Math.cos(index * 77) * 0.4 + 0.5) * (cellHeight * 0.6);
-
-    const x = 7 + colIndex * cellWidth + jitterX;
-    const y = 16 + rowIndex * cellHeight + jitterY;
-
-    const scale = total > 60 ? 0.72 : total > 35 ? 0.82 : 0.95;
-    const delay = (index % 10) * 0.2;
-
-    return { x, y: Math.min(y, 80), delay, scale };
-  };
-
-  const updateLanternsFromDreams = (dreamList: Dream[]) => {
-    const visibleList = dreamList.filter((d) => !d.hidden);
-    const total = visibleList.length;
-
-    const mapped: LanternItem[] = visibleList.map((dream, idx) => {
-      const pos = calculateLanternPosition(idx, total);
-      return {
-        ...dream,
-        x: pos.x,
-        y: pos.y,
-        delay: pos.delay,
-        scale: pos.scale,
-      };
-    });
-
-    setLanterns(mapped);
-  };
 
   const fetchDreams = async () => {
     try {
@@ -108,7 +53,6 @@ export default function DisplaySkyPage() {
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setDreams(json.data);
-        updateLanternsFromDreams(json.data);
       }
     } catch (err) {
       console.error("Failed to load dreams:", err);
@@ -136,11 +80,7 @@ export default function DisplaySkyPage() {
       try {
         const newDream = JSON.parse(event.data) as Dream;
         if (!newDream.hidden) {
-          setDreams((prev) => {
-            const next = [newDream, ...prev.filter((d) => d.id !== newDream.id)];
-            updateLanternsFromDreams(next);
-            return next;
-          });
+          setDreams((prev) => [newDream, ...prev.filter((d) => d.id !== newDream.id)]);
 
           if (soundEnabled && audioUnlocked.current) {
             playLanternAscendChime();
@@ -154,11 +94,7 @@ export default function DisplaySkyPage() {
     eventSource.addEventListener("update", (event) => {
       try {
         const updated = JSON.parse(event.data) as Dream;
-        setDreams((prev) => {
-          const next = prev.map((d) => (d.id === updated.id ? updated : d));
-          updateLanternsFromDreams(next);
-          return next;
-        });
+        setDreams((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
       } catch (e) {
         console.error("SSE update error:", e);
       }
@@ -167,11 +103,7 @@ export default function DisplaySkyPage() {
     eventSource.addEventListener("delete", (event) => {
       try {
         const { id } = JSON.parse(event.data) as { id: string };
-        setDreams((prev) => {
-          const next = prev.filter((d) => d.id !== id);
-          updateLanternsFromDreams(next);
-          return next;
-        });
+        setDreams((prev) => prev.filter((d) => d.id !== id));
       } catch (e) {
         console.error("SSE delete error:", e);
       }
@@ -244,42 +176,43 @@ export default function DisplaySkyPage() {
     }
   };
 
-  // Filter lanterns by category
-  const displayedLanterns = useMemo(() => {
-    if (selectedTagFilter === "all") return lanterns;
-    return lanterns.filter((l) => l.tag === selectedTagFilter);
-  }, [lanterns, selectedTagFilter]);
+  const visibleDreams = useMemo(() => dreams.filter((d) => !d.hidden), [dreams]);
 
   // Auto-spotlight rotation every 12 seconds
   useEffect(() => {
-    if (!isAutoSpotlight || displayedLanterns.length === 0) return;
+    if (!isAutoSpotlight || visibleDreams.length === 0) return;
 
     const timer = setInterval(() => {
-      setSpotlightIndex((prev) => (prev + 1) % displayedLanterns.length);
+      setSpotlightIndex((prev) => (prev + 1) % visibleDreams.length);
     }, 12000);
 
     return () => clearInterval(timer);
-  }, [isAutoSpotlight, displayedLanterns.length]);
+  }, [isAutoSpotlight, visibleDreams.length]);
 
-  const currentSpotlightDream = displayedLanterns[spotlightIndex] || null;
+  const currentSpotlightDream = visibleDreams[spotlightIndex] || null;
 
   return (
     <div className="relative w-screen h-screen overflow-hidden select-none bg-[#12203A] text-[#faeeda]">
-      {/* 1. BACKGROUND CANVAS & STARS */}
+      {/* 1. BACKGROUND PARTICLES & SKY LAYER */}
+      <LanternSkyCanvas theme={skyTheme} />
+
+      {/* 2. DYNAMIC FLOATING LANTERN WISH CARDS (OR CONSTELLATION GALAXY) */}
       {viewMode === "lanterns" ? (
-        <LanternSkyCanvas theme={skyTheme} />
+        <FloatingLanternCardsSky
+          dreams={dreams}
+          theme={skyTheme}
+          selectedTagFilter={selectedTagFilter}
+          onSelectDream={(d) => setSelectedDream(d)}
+        />
       ) : (
         <ConstellationGalaxyView
           dreams={dreams}
-          onSelectDream={(d) => {
-            setSelectedDream(d);
-            playPoemMagicSound();
-          }}
+          onSelectDream={(d) => setSelectedDream(d)}
         />
       )}
 
-      {/* 2. TOP FLOATING CONTROL DOCK */}
-      <div className="absolute top-4 inset-x-4 z-30 flex items-center justify-between pointer-events-none">
+      {/* 3. TOP FLOATING CONTROL DOCK */}
+      <div className="absolute top-4 inset-x-4 z-40 flex items-center justify-between pointer-events-none">
         {/* Brand Header */}
         <div className="flex items-center gap-3 pointer-events-auto">
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#993c1d] to-[#12203A] p-1 border-2 border-[#fac775] shadow-lg flex items-center justify-center">
@@ -318,10 +251,10 @@ export default function DisplaySkyPage() {
                   ? "bg-[#993c1d] text-white shadow-xs"
                   : "text-white/70 hover:text-white"
               }`}
-              title="Chế độ Bầu Trời Đèn Lồng"
+              title="Chế độ Đèn Lồng Treo Thẻ Ước Mơ"
             >
               <Layers className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Đèn Lồng</span>
+              <span className="hidden sm:inline">Đèn Lồng Bay</span>
             </button>
             <button
               onClick={() => setViewMode("galaxy")}
@@ -374,7 +307,7 @@ export default function DisplaySkyPage() {
           <div id="counter-pill" className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg">
             <Sparkles className="w-4 h-4 text-[#fac775] animate-pulse" />
             <span className="text-sm font-extrabold text-white">
-              {lanterns.length}
+              {visibleDreams.length}
             </span>
             <span className="text-xs text-[#faeeda]/90 font-medium">
               <span className="inline sm:hidden">ước mơ</span>
@@ -424,7 +357,7 @@ export default function DisplaySkyPage() {
         </div>
       </div>
 
-      {/* 2.5 BROADCAST ANNOUNCEMENT BANNER IF ACTIVE */}
+      {/* 4. BROADCAST ANNOUNCEMENT BANNER IF ACTIVE */}
       {activeAnnouncement && activeAnnouncement.active && (
         <div className="absolute top-18 inset-x-6 z-30 pointer-events-none flex justify-center animate-in slide-in-from-top duration-300">
           <div className="max-w-2xl px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#993c1d]/95 via-[#0091ea]/90 to-[#993c1d]/95 border-2 border-[#fac775] shadow-2xl backdrop-blur-md flex items-center gap-3 text-white text-xs sm:text-sm font-bold">
@@ -434,92 +367,7 @@ export default function DisplaySkyPage() {
         </div>
       )}
 
-      {/* 3. FLOATING LANTERNS SKY LAYER (When in Lanterns view mode) */}
-      {viewMode === "lanterns" && (
-        <div className="absolute inset-0 z-10 p-4">
-          {lanterns.length === 0 ? (
-            /* Empty Initial State */
-            <div className="h-full flex flex-col items-center justify-center text-center p-6 animate-in fade-in duration-700">
-              <div className="w-20 h-20 mb-4 rounded-full bg-[#fac775]/20 border border-[#fac775] flex items-center justify-center text-3xl animate-float shadow-[0_0_30px_rgba(250,199,117,0.4)]">
-                🏮
-              </div>
-              <h2 className="text-2xl font-extrabold text-[#fac775] mb-2 drop-shadow-md font-display">
-                Bầu Trời Đèn Lồng Đang Chờ Đón K22
-              </h2>
-              <p className="text-sm text-[#faeeda]/80 max-w-md leading-relaxed mb-6">
-                Hãy là người đầu tiên quét mã QR tại gian hàng <strong>FU-DEVER</strong> để gửi ước mơ thắp sáng màn đêm!
-              </p>
-              <button
-                onClick={() => setShowQRModal(true)}
-                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#993c1d] to-[#fac775] text-white font-bold text-xs flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
-              >
-                <QrCode className="w-4 h-4" />
-                <span>Quét mã gửi ước mơ ngay</span>
-              </button>
-            </div>
-          ) : (
-            /* Floating Lanterns Grid */
-            displayedLanterns.map((item) => {
-              const category = DREAM_CATEGORIES.find((c) => c.id === item.tag);
-              const isTech = item.theme === "tech" || skyTheme === "cyber";
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => {
-                    setSelectedDream(item);
-                    playPoemMagicSound();
-                  }}
-                  onMouseEnter={() => setHoveredDream(item)}
-                  onMouseLeave={() => setHoveredDream(null)}
-                  className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform duration-500 hover:scale-115 hover:z-40"
-                  style={{
-                    left: `${item.x}%`,
-                    top: `${item.y}%`,
-                    transform: `scale(${item.scale})`,
-                    animationDelay: `${item.delay}s`,
-                  }}
-                >
-                  {/* Glowing Lantern Card */}
-                  <div
-                    className={`relative p-3 rounded-2xl transition-all duration-300 ${
-                      isTech
-                        ? "bg-[#002244]/90 border border-[#00f5d4] shadow-[0_0_20px_rgba(0,245,212,0.35)]"
-                        : "bg-gradient-to-b from-[#993c1d]/90 to-[#712b13]/90 border border-[#fac775]/70 shadow-[0_0_25px_rgba(250,199,117,0.4)]"
-                    } backdrop-blur-md max-w-[180px] sm:max-w-[220px] text-center`}
-                  >
-                    {/* Lantern Top Ring */}
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-2 rounded-t-full border-t border-x border-[#fac775]/80 bg-transparent" />
-
-                    {/* Sender Name & Category */}
-                    <div className="flex items-center justify-between text-[10px] font-bold text-[#fac775] mb-1">
-                      <span className="truncate max-w-[100px]">{item.name || "Ẩn danh K22"}</span>
-                      <span>{category?.emoji}</span>
-                    </div>
-
-                    {/* Wish Snippet */}
-                    <p className="text-xs text-white/95 line-clamp-2 italic font-medium leading-tight">
-                      &ldquo;{item.content}&rdquo;
-                    </p>
-
-                    {/* Mascot Sticker */}
-                    <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-[#12203A] border border-[#fac775] p-0.5 shadow-sm">
-                      <Image
-                        src={`/assets/buggy/${item.mascotIndex || 1}.png`}
-                        alt="Buggy"
-                        width={20}
-                        height={20}
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      )}
-
-      {/* 4. LIVE REACTIONS RISING FLOAT STREAM */}
+      {/* 5. LIVE REACTIONS RISING FLOAT STREAM */}
       <div className="absolute inset-x-0 bottom-0 top-1/2 pointer-events-none z-25 overflow-hidden">
         {reactions.map((react, idx) => (
           <div
@@ -537,11 +385,11 @@ export default function DisplaySkyPage() {
         ))}
       </div>
 
-      {/* 5. SPOTLIGHT CAROUSEL BANNER (Bottom-left card) */}
+      {/* 6. SPOTLIGHT CAROUSEL BANNER (Bottom-left card) */}
       {currentSpotlightDream && isAutoSpotlight && (
         <div
           onClick={() => setSelectedDream(currentSpotlightDream)}
-          className="absolute bottom-6 left-6 z-30 max-w-sm p-4 rounded-3xl bg-[#12203A]/90 border border-[#fac775] backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all animate-in slide-in-from-bottom duration-500"
+          className="absolute bottom-6 left-6 z-30 max-w-sm p-4 rounded-3xl bg-[#12203A]/90 border border-[#fac775] backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all animate-in slide-in-from-bottom duration-500 pointer-events-auto"
         >
           <div className="flex items-center justify-between text-xs font-bold text-[#fac775] mb-1.5">
             <div className="flex items-center gap-1.5">
@@ -569,7 +417,7 @@ export default function DisplaySkyPage() {
         </div>
       )}
 
-      {/* 6. CATEGORY FILTER BAR (Bottom Center) */}
+      {/* 7. CATEGORY FILTER BAR (Bottom Center) */}
       {viewMode === "lanterns" && (
         <div className="absolute bottom-6 inset-x-0 z-30 flex justify-center pointer-events-none px-4">
           <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 rounded-full bg-[#12203A]/85 backdrop-blur-xl border border-[#fac775]/40 shadow-2xl pointer-events-auto overflow-x-auto max-w-full">
@@ -581,11 +429,11 @@ export default function DisplaySkyPage() {
                   : "text-[#faeeda]/80 hover:text-white hover:bg-white/10"
               }`}
             >
-              Tất cả ({lanterns.length})
+              Tất cả ({visibleDreams.length})
             </button>
 
             {DREAM_CATEGORIES.map((cat) => {
-              const count = lanterns.filter((l) => l.tag === cat.id).length;
+              const count = visibleDreams.filter((l) => l.tag === cat.id).length;
               return (
                 <button
                   key={cat.id}
@@ -606,7 +454,7 @@ export default function DisplaySkyPage() {
         </div>
       )}
 
-      {/* 7. SPOTLIGHT DREAM DETAIL MODAL */}
+      {/* 8. SPOTLIGHT DREAM DETAIL MODAL */}
       {selectedDream && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-md bg-[#12203A] border-2 border-[#fac775] rounded-3xl shadow-2xl p-6 text-[#faeeda] animate-in zoom-in-95 duration-200">
