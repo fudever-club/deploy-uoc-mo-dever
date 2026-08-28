@@ -1,11 +1,41 @@
+/**
+ * High-performance HTML5 Canvas renderer for 9:16 (1080x1920) Story Cards.
+ * Features 2 distinct styles:
+ * 1. Thiệp Lụa Hoa Đăng & Thư Gấm Hoàng Gia (Classical Royal Silk Scroll with Postage Stamp & Imperial Seal)
+ * 2. Vé Lên Tàu Vũ Trụ DEVER K22 (Luxury Retro Cosmic Boarding Pass with Perforated Stub, Barcode & Visa Stamp)
+ */
+
 import { Dream } from "@/types/dream";
-import { DREAM_CATEGORIES, EVENT_INFO, getBuggyMascotUrl, getDeverStampInfo } from "./constants";
+import {
+  EVENT_INFO,
+  DREAM_CATEGORIES,
+  getBuggyMascotUrl,
+  getDeverStampInfo,
+} from "./constants";
 
 export interface RenderCardOptions {
   width?: number;
   height?: number;
 }
 
+// Robust Vietnamese-friendly typography constants (prevents glyph splitting on Windows Canvas)
+const FONT_SANS = "-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const FONT_MONO = "'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace";
+const FONT_SERIF = "'Playfair Display', 'Merriweather', 'Times New Roman', serif";
+
+/**
+ * Cleanly normalizes Vietnamese text to NFC to prevent accent/glyph splitting bugs in Canvas.
+ */
+function cleanVietnameseText(text: string): string {
+  if (!text) return "";
+  return text.normalize("NFC").trim();
+}
+
+/**
+ * ----------------------------------------------------
+ * STYLE 1: THIỆP LỤA HOA ĐĂNG & THƯ GẤM HOÀNG GIA
+ * ----------------------------------------------------
+ */
 export async function renderDreamCardToDataUrl(
   dream: Dream,
   options: RenderCardOptions = {}
@@ -21,244 +51,161 @@ export async function renderDreamCardToDataUrl(
 
   const theme = dream.theme || "classic";
   const mascotIndex = dream.mascotIndex || "11";
-  const categoryInfo = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
   const stampInfo = getDeverStampInfo(dream.stampVariant, theme);
 
-  // 1. CLASSICAL SILK & CELESTIAL BACKGROUND
+  // Theme Palette Tokens
+  let bgTop = "#0f172a";
+  let bgMid = "#1e112a";
+  let bgBot = "#12203A";
+  let primaryGold = "#FAC775";
+  let secondaryGold = "#FFD166";
+  let cardBgGradStart = "rgba(42, 16, 16, 0.88)";
+  let cardBgGradEnd = "rgba(18, 32, 58, 0.94)";
+
   if (theme === "tech") {
-    // Cyber Silk Space
-    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-    bgGrad.addColorStop(0, "#030814");
-    bgGrad.addColorStop(0.3, "#071733");
-    bgGrad.addColorStop(0.7, "#0c2856");
-    bgGrad.addColorStop(1, "#020610");
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, width, height);
-
-    // Radiant Cyan Star Aura
-    const aura = ctx.createRadialGradient(width * 0.5, 260, 20, width * 0.5, 260, 480);
-    aura.addColorStop(0, "rgba(0, 245, 212, 0.35)");
-    aura.addColorStop(0.5, "rgba(0, 145, 234, 0.15)");
-    aura.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = aura;
-    ctx.beginPath();
-    ctx.arc(width * 0.5, 260, 480, 0, Math.PI * 2);
-    ctx.fill();
+    bgTop = "#040914";
+    bgMid = "#081b33";
+    bgBot = "#020813";
+    primaryGold = "#00F5D4";
+    secondaryGold = "#0091EA";
+    cardBgGradStart = "rgba(4, 25, 48, 0.90)";
+    cardBgGradEnd = "rgba(2, 10, 24, 0.95)";
   } else if (theme === "gold") {
-    // Imperial Golden Silk Decree
-    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-    bgGrad.addColorStop(0, "#261300");
-    bgGrad.addColorStop(0.25, "#4d2b02");
-    bgGrad.addColorStop(0.65, "#7a4605");
-    bgGrad.addColorStop(0.9, "#a6680a");
-    bgGrad.addColorStop(1, "#1c0c00");
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, width, height);
+    bgTop = "#1a0f00";
+    bgMid = "#382004";
+    bgBot = "#150a00";
+    primaryGold = "#FFD166";
+    secondaryGold = "#FAC775";
+    cardBgGradStart = "rgba(60, 34, 4, 0.90)";
+    cardBgGradEnd = "rgba(24, 12, 0, 0.96)";
+  }
 
-    // Golden Full Moon
-    const moon = ctx.createRadialGradient(width * 0.5, 240, 30, width * 0.5, 240, 420);
-    moon.addColorStop(0, "rgba(255, 223, 128, 0.7)");
-    moon.addColorStop(0.4, "rgba(250, 199, 117, 0.25)");
-    moon.addColorStop(0.8, "rgba(255, 209, 102, 0.08)");
-    moon.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = moon;
-    ctx.beginPath();
-    ctx.arc(width * 0.5, 240, 420, 0, Math.PI * 2);
-    ctx.fill();
-  } else {
-    // Royal Crimson Lantern Heritage
-    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-    bgGrad.addColorStop(0, "#230404");
-    bgGrad.addColorStop(0.25, "#520c07");
-    bgGrad.addColorStop(0.65, "#802011");
-    bgGrad.addColorStop(0.88, "#993c1d");
-    bgGrad.addColorStop(1, "#1a0202");
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, width, height);
+  // 1. BACKGROUND WITH SILK TEXTURE & GOLD DUST
+  const mainGrad = ctx.createLinearGradient(0, 0, 0, height);
+  mainGrad.addColorStop(0, bgTop);
+  mainGrad.addColorStop(0.5, bgMid);
+  mainGrad.addColorStop(1, bgBot);
+  ctx.fillStyle = mainGrad;
+  ctx.fillRect(0, 0, width, height);
 
-    // Warm Lantern Horizon Glow
-    const moon = ctx.createRadialGradient(width * 0.5, 240, 20, width * 0.5, 240, 400);
-    moon.addColorStop(0, "rgba(255, 214, 153, 0.65)");
-    moon.addColorStop(0.35, "rgba(250, 199, 117, 0.3)");
-    moon.addColorStop(0.7, "rgba(153, 60, 29, 0.15)");
-    moon.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = moon;
+  // Gold dust specks in celestial background
+  for (let i = 0; i < 50; i++) {
+    const gx = (Math.sin(i * 99) * 0.5 + 0.5) * width;
+    const gy = (Math.cos(i * 33) * 0.5 + 0.5) * height;
+    const gr = i % 3 === 0 ? 3 : 1.5;
+    ctx.fillStyle = i % 2 === 0 ? "rgba(250, 199, 117, 0.65)" : "rgba(255, 255, 255, 0.5)";
     ctx.beginPath();
-    ctx.arc(width * 0.5, 240, 400, 0, Math.PI * 2);
+    ctx.arc(gx, gy, gr, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // 2. SUBTLE GOLD DUST & SILK SPECKS
-  const goldColor = theme === "tech" ? "rgba(0, 245, 212, " : theme === "gold" ? "rgba(255, 223, 128, " : "rgba(250, 199, 117, ";
-  const specks = [
-    [100, 120, 3, 0.8], [220, 250, 2, 0.6], [880, 180, 4, 0.9], [960, 420, 2.5, 0.7],
-    [140, 580, 3.5, 0.85], [920, 920, 2, 0.5], [120, 1280, 3, 0.7], [940, 1420, 3.5, 0.85],
-    [320, 160, 2, 0.5], [760, 280, 2.5, 0.6], [180, 950, 2, 0.4], [860, 1220, 3, 0.7],
-    [540, 130, 4, 0.9], [420, 380, 2, 0.5], [680, 410, 2.5, 0.6], [500, 1820, 3, 0.7]
-  ];
-  specks.forEach(([x, y, r, a]) => {
-    ctx.fillStyle = `${goldColor}${a})`;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  });
+  // 2. MAIN SILK SCROLL CONTAINER
+  const cardX = 75;
+  const cardY = 100;
+  const cardW = width - 150;
+  const cardH = height - 200;
 
-  // 3. IMPERIAL DOUBLE-LINED FILIGREE BORDER
-  const primaryGold = theme === "tech" ? "#00f5d4" : theme === "gold" ? "#ffd166" : "#fac775";
-  const secondaryGold = theme === "tech" ? "#0091ea" : theme === "gold" ? "#b87c12" : "#993c1d";
-
-  // Outer solid frame
-  ctx.strokeStyle = primaryGold;
-  ctx.lineWidth = 4;
-  ctx.strokeRect(38, 38, width - 76, height - 76);
-
-  // Inner dashed delicate border
+  // Outer decorative glow
   ctx.save();
-  ctx.strokeStyle = `${primaryGold}bb`;
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(52, 52, width - 104, height - 104);
+  ctx.shadowColor = primaryGold;
+  ctx.shadowBlur = 28;
+  ctx.fillStyle = `${primaryGold}15`;
+  ctx.beginPath();
+  ctx.roundRect(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 38);
+  ctx.fill();
   ctx.restore();
 
-  // Classical Oriental Cloud Filigree Corners
-  const drawCornerFiligree = (cx: number, cy: number, rot: number) => {
+  // Silk Parchment Body
+  const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
+  cardGrad.addColorStop(0, cardBgGradStart);
+  cardGrad.addColorStop(1, cardBgGradEnd);
+  ctx.fillStyle = cardGrad;
+  ctx.beginPath();
+  ctx.roundRect(cardX, cardY, cardW, cardH, 32);
+  ctx.fill();
+
+  // Double Gold Border
+  ctx.strokeStyle = primaryGold;
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  ctx.strokeStyle = `${secondaryGold}66`;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(cardX + 14, cardY + 14, cardW - 28, cardH - 28, 22);
+  ctx.stroke();
+
+  // 3. ORIENTAL CLOUD CORNER FILIGREE
+  const drawCornerCloud = (cx: number, cy: number, flipX: number, flipY: number) => {
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(rot);
-    ctx.strokeStyle = primaryGold;
+    ctx.scale(flipX, flipY);
+    ctx.strokeStyle = secondaryGold;
     ctx.lineWidth = 2.5;
-
-    // Corner bracket
     ctx.beginPath();
-    ctx.moveTo(0, 40);
+    ctx.moveTo(0, 36);
     ctx.lineTo(0, 0);
-    ctx.lineTo(40, 0);
+    ctx.lineTo(36, 0);
     ctx.stroke();
 
-    // Inner curve / cloud swirl
     ctx.beginPath();
-    ctx.arc(16, 16, 12, Math.PI, Math.PI * 1.5);
+    ctx.arc(16, 16, 8, Math.PI, 1.5 * Math.PI);
     ctx.stroke();
-
-    // Little diamond accent
-    ctx.fillStyle = primaryGold;
-    ctx.beginPath();
-    ctx.arc(6, 6, 3, 0, Math.PI * 2);
-    ctx.fill();
-
     ctx.restore();
   };
 
-  drawCornerFiligree(62, 62, 0);
-  drawCornerFiligree(width - 62, 62, Math.PI / 2);
-  drawCornerFiligree(width - 62, height - 62, Math.PI);
-  drawCornerFiligree(62, height - 62, -Math.PI / 2);
+  drawCornerCloud(cardX + 26, cardY + 26, 1, 1);
+  drawCornerCloud(cardX + cardW - 26, cardY + 26, -1, 1);
+  drawCornerCloud(cardX + 26, cardY + cardH - 26, 1, -1);
+  drawCornerCloud(cardX + cardW - 26, cardY + cardH - 26, -1, -1);
 
-  // 4. HEADER: IMPERIAL CEREMONY BANNER & MOON LANTERN
+  // 4. HEADER: IMPERIAL EVENT BANNER
+  const bannerY = cardY + 65;
   ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  // Top Ribbon / Dynasty header
   ctx.fillStyle = primaryGold;
-  ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', serif";
-  ctx.fillText("✦ BẢNG VÀNG HOA ĐĂNG · TRUNG THU ĐẠI HỘI ✦", width / 2, 115);
+  ctx.font = `bold 22px ${FONT_SANS}`;
+  ctx.fillText("✦ BẢNG VÀNG HOA ĐĂNG · TRUNG THU ĐẠI HỘI ✦", width / 2, bannerY);
 
-  // Main Event Proclamation Title
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetY = 4;
-  ctx.fillStyle = theme === "gold" ? "#fffbf0" : "#faeeda";
-  ctx.font = "900 70px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif";
-  ctx.fillText("DEPLOY ƯỚC MƠ", width / 2, 195);
-  ctx.restore();
+  ctx.fillStyle = theme === "gold" ? "#ffe8a3" : "#ffffff";
+  ctx.font = `900 52px ${FONT_SANS}`;
+  ctx.fillText(cleanVietnameseText("DEPLOY ƯỚC MƠ"), width / 2, bannerY + 58);
 
-  // Subtitle / Date
   ctx.fillStyle = `${primaryGold}dd`;
-  ctx.font = "24px -apple-system, BlinkMacSystemFont, 'Segoe UI', serif";
-  ctx.fillText("NGÀY HỘI CLB FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG", width / 2, 255);
+  ctx.font = `bold 22px ${FONT_SANS}`;
+  ctx.fillText(cleanVietnameseText("NGÀY HỘI CLB FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), width / 2, bannerY + 98);
 
-  // 5. CATEGORY GEMSTONE PILL
-  if (categoryInfo) {
-    const pillText = `${categoryInfo.emoji} ${categoryInfo.label}`;
-    ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-    const pillW = ctx.measureText(pillText).width + 64;
-    const pillH = 50;
-    const pillX = (width - pillW) / 2;
-    const pillY = 295;
-
-    ctx.fillStyle = `${secondaryGold}44`;
-    ctx.beginPath();
-    ctx.roundRect(pillX, pillY, pillW, pillH, 25);
-    ctx.fill();
-
-    ctx.strokeStyle = `${primaryGold}aa`;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    ctx.fillStyle = primaryGold;
-    ctx.fillText(pillText, width / 2, pillY + pillH / 2);
-  }
-
-  // 6. MAIN SILK SCROLL CONTENT CARD
-  const cardX = 80;
-  const cardY = 385;
-  const cardW = width - 160;
-  const cardH = 970;
-
-  // Silk Card Background with rich gradient
-  const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
-  if (theme === "tech") {
-    cardGrad.addColorStop(0, "rgba(4, 15, 36, 0.92)");
-    cardGrad.addColorStop(1, "rgba(2, 8, 20, 0.95)");
-  } else if (theme === "gold") {
-    cardGrad.addColorStop(0, "rgba(42, 22, 2, 0.94)");
-    cardGrad.addColorStop(1, "rgba(22, 11, 1, 0.96)");
-  } else {
-    cardGrad.addColorStop(0, "rgba(45, 9, 8, 0.92)");
-    cardGrad.addColorStop(1, "rgba(22, 3, 3, 0.95)");
-  }
-
-  ctx.fillStyle = cardGrad;
+  // Filigree divider line
+  ctx.strokeStyle = `${primaryGold}55`;
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.roundRect(cardX, cardY, cardW, cardH, 28);
+  ctx.moveTo(cardX + 80, bannerY + 125);
+  ctx.lineTo(width / 2 - 40, bannerY + 125);
+  ctx.moveTo(width / 2 + 40, bannerY + 125);
+  ctx.lineTo(cardX + cardW - 80, bannerY + 125);
+  ctx.stroke();
+
+  ctx.fillStyle = primaryGold;
+  ctx.beginPath();
+  ctx.arc(width / 2, bannerY + 125, 5, 0, Math.PI * 2);
   ctx.fill();
 
-  // Outer & Inner Gold Trim on Card
-  ctx.strokeStyle = `${primaryGold}99`;
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  ctx.strokeStyle = `${primaryGold}33`;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.roundRect(cardX + 12, cardY + 12, cardW - 24, cardH - 24, 20);
-  ctx.stroke();
-
-  // 7. VINTAGE POSTAGE STAMP WITH PERFORATED EDGES (TOP RIGHT OF SCROLL)
-  const stampBoxX = cardX + cardW - 190;
-  const stampBoxY = cardY + 30;
+  // 5. POSTAGE STAMP ON TOP RIGHT
   const stampBoxW = 160;
-  const stampBoxH = 190;
+  const stampBoxH = 200;
+  const stampBoxX = cardX + cardW - stampBoxW - 45;
+  const stampBoxY = bannerY + 155;
 
   ctx.save();
-  // Draw perforated stamp paper
-  ctx.fillStyle = "#fffcf2";
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.roundRect(stampBoxX, stampBoxY, stampBoxW, stampBoxH, 6);
+  ctx.roundRect(stampBoxX, stampBoxY, stampBoxW, stampBoxH, 10);
   ctx.fill();
 
-  // Stamp inner artwork frame
-  ctx.strokeStyle = secondaryGold;
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(stampBoxX + 8, stampBoxY + 8, stampBoxW - 16, stampBoxH - 36);
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.lineWidth = 2;
+  ctx.stroke();
 
-  // Stamp Header
-  ctx.fillStyle = secondaryGold;
-  ctx.textAlign = "center";
-  ctx.font = "black 10px monospace";
-  ctx.fillText("FU-DEVER 2026", stampBoxX + stampBoxW / 2, stampBoxY + 18);
-
-  // Draw Mascot Buggy on the Postage Stamp
+  // Stamp Mascot
   try {
     const mascotSrc = getBuggyMascotUrl(mascotIndex);
     const mascotImg = new Image();
@@ -266,216 +213,179 @@ export async function renderDreamCardToDataUrl(
     mascotImg.src = mascotSrc;
     await new Promise<void>((resolve) => {
       mascotImg.onload = () => {
-        ctx.drawImage(mascotImg, stampBoxX + 18, stampBoxY + 28, stampBoxW - 36, stampBoxH - 74);
+        ctx.drawImage(mascotImg, stampBoxX + 18, stampBoxY + 18, stampBoxW - 36, stampBoxH - 65);
         resolve();
       };
       mascotImg.onerror = () => resolve();
-      setTimeout(resolve, 800);
+      setTimeout(resolve, 600);
     });
   } catch {
-    // ignore
+    // fallback
   }
 
-  // Stamp Value / Denomination
+  // Stamp footer label
   ctx.fillStyle = "#0f172a";
-  ctx.font = "bold 12px monospace";
-  ctx.fillText("★ VIP DEV ★", stampBoxX + stampBoxW / 2, stampBoxY + stampBoxH - 12);
-
+  ctx.textAlign = "center";
+  ctx.font = `900 13px ${FONT_MONO}`;
+  ctx.fillText("★ VIP DEV ★", stampBoxX + stampBoxW / 2, stampBoxY + stampBoxH - 14);
   ctx.restore();
 
-  // 8. IMPERIAL VERMILION SEAL DAMPENED ACROSS THE POSTAGE STAMP
+  // 6. IMPERIAL VERMILION SEAL DAMPENED ACROSS STAMP
   ctx.save();
-  ctx.translate(stampBoxX - 10, stampBoxY + stampBoxH - 25);
+  ctx.translate(stampBoxX - 15, stampBoxY + stampBoxH - 30);
   ctx.rotate((-14 * Math.PI) / 180);
 
-  // Circular Double Seal Border
   ctx.strokeStyle = stampInfo.color;
   ctx.lineWidth = 3.5;
   ctx.beginPath();
-  ctx.arc(0, 0, 52, 0, Math.PI * 2);
+  ctx.arc(0, 0, 50, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.lineWidth = 1.2;
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.arc(0, 0, 46, 0, Math.PI * 2);
+  ctx.arc(0, 0, 44, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.fillStyle = `${stampInfo.color}22`;
+  ctx.fillStyle = `${stampInfo.color}20`;
   ctx.beginPath();
-  ctx.arc(0, 0, 46, 0, Math.PI * 2);
+  ctx.arc(0, 0, 44, 0, Math.PI * 2);
   ctx.fill();
 
-  // Draw Chosen DEVER Stamp Emblem inside seal
   try {
     const stampImg = new Image();
     stampImg.crossOrigin = "anonymous";
     stampImg.src = stampInfo.image;
     await new Promise<void>((resolve) => {
       stampImg.onload = () => {
-        ctx.drawImage(stampImg, -34, -34, 68, 68);
+        ctx.drawImage(stampImg, -32, -32, 64, 64);
         resolve();
       };
       stampImg.onerror = () => resolve();
-      setTimeout(resolve, 600);
+      setTimeout(resolve, 500);
     });
   } catch {
-    // fallback text
+    // fallback
   }
   ctx.restore();
 
-  // 9. DREAMER NAME: IMPERIAL TABLET CARTOUCHE (BẢNG DANH VỊ)
-  const dreamerName = dream.name && dream.name.trim().length > 0 ? dream.name.trim() : "TÂN SINH VIÊN K22";
-  const nameBoxW = cardW - 240;
-  const nameBoxX = cardX + 35;
-  const nameBoxY = cardY + 45;
+  // 7. PASSENGER CARTOUCHE NAMEPLATE
+  const rawName = dream.name && dream.name.trim().length > 0 ? dream.name.trim() : "TÂN SINH VIÊN K22";
+  const cleanName = cleanVietnameseText(rawName);
+  const nameBoxX = cardX + 45;
+  const nameBoxY = bannerY + 155;
+  const nameBoxW = cardW - stampBoxW - 110;
 
-  ctx.save();
   ctx.fillStyle = `${primaryGold}18`;
   ctx.beginPath();
-  ctx.roundRect(nameBoxX, nameBoxY, nameBoxW, 76, 16);
+  ctx.roundRect(nameBoxX, nameBoxY, nameBoxW, 95, 18);
   ctx.fill();
-  ctx.strokeStyle = `${primaryGold}77`;
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = `${primaryGold}88`;
+  ctx.lineWidth = 1.8;
   ctx.stroke();
 
   ctx.textAlign = "left";
-  ctx.fillStyle = `${primaryGold}cc`;
-  ctx.font = "bold 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace";
-  ctx.fillText("📜 HÀNH KHÁCH / KÝ DANH:", nameBoxX + 22, nameBoxY + 28);
+  ctx.fillStyle = `${primaryGold}dd`;
+  ctx.font = `bold 17px ${FONT_SANS}`;
+  ctx.fillText("📜 HÀNH KHÁCH / KÝ DANH:", nameBoxX + 22, nameBoxY + 34);
 
   ctx.fillStyle = theme === "gold" ? "#ffd166" : "#ffffff";
-  ctx.font = "black 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-  ctx.fillText(dreamerName.toUpperCase(), nameBoxX + 22, nameBoxY + 58);
-  ctx.restore();
+  ctx.font = `900 34px ${FONT_SANS}`;
+  ctx.fillText(cleanName.toUpperCase(), nameBoxX + 22, nameBoxY + 75);
 
-  // 10. THE MANIFESTO SCROLL / DREAM QUOTE
-  const quoteBoxX = cardX + 35;
-  const quoteBoxY = cardY + 240;
-  const quoteBoxW = cardW - 70;
-  const quoteBoxH = cardH - 280;
+  // 8. DREAM MANIFESTO BOX
+  const quoteBoxX = cardX + 45;
+  const quoteBoxY = bannerY + 285;
+  const quoteBoxW = cardW - 90;
+  const quoteBoxH = cardH - 560;
 
-  // Inner parchment for content
-  ctx.fillStyle = theme === "tech" ? "rgba(0, 245, 212, 0.04)" : "rgba(250, 199, 117, 0.05)";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
   ctx.beginPath();
-  ctx.roundRect(quoteBoxX, quoteBoxY, quoteBoxW, quoteBoxH, 18);
+  ctx.roundRect(quoteBoxX, quoteBoxY, quoteBoxW, quoteBoxH, 22);
   ctx.fill();
-  ctx.strokeStyle = `${primaryGold}33`;
-  ctx.lineWidth = 1;
+
+  ctx.strokeStyle = `${primaryGold}44`;
+  ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Section Header inside card
   ctx.fillStyle = primaryGold;
   ctx.textAlign = "center";
-  ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', serif";
-  ctx.fillText("✦ LỜI NGUYỆN CẤT CÁNH CÙNG HOA ĐĂNG ✦", width / 2, quoteBoxY + 45);
+  ctx.font = `bold 22px ${FONT_SANS}`;
+  ctx.fillText("✦ LỜI NGUYỆN CẤT CÁNH CÙNG HOA ĐĂNG ✦", width / 2, quoteBoxY + 50);
 
-  // Classical Opening Quote
-  ctx.fillStyle = `${primaryGold}66`;
-  ctx.font = "italic 72px Georgia, serif";
-  ctx.fillText("『", quoteBoxX + 55, quoteBoxY + 110);
-
-  // Dream Content Multi-line Wrapping
-  const maxContentW = quoteBoxW - 130;
-  const rawText = dream.content.trim();
-  const rawParas = rawText.split(/\r?\n/);
+  // Format and wrap clean Vietnamese text
+  const cleanContent = cleanVietnameseText(dream.content);
+  const maxContentW = quoteBoxW - 100;
 
   let fontSize = 34;
-  if (rawText.length > 250 || rawParas.length > 6) fontSize = 25;
-  else if (rawText.length > 140 || rawParas.length > 4) fontSize = 29;
-  else if (rawText.length < 60 && rawParas.length <= 2) fontSize = 38;
+  if (cleanContent.length > 200) fontSize = 26;
+  else if (cleanContent.length > 100) fontSize = 30;
 
-  ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif`;
-  ctx.fillStyle = theme === "gold" ? "#fffdf5" : "#ffffff";
+  ctx.font = `600 ${fontSize}px ${FONT_SANS}`;
+  ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
 
-  const lines: string[] = [];
-  for (const p of rawParas) {
-    const trimmed = p.trim();
-    if (!trimmed) {
-      lines.push("");
-      continue;
+  const words = cleanContent.split(" ");
+  const contentLines: string[] = [];
+  let curLine = "";
+  words.forEach((w) => {
+    const test = curLine ? `${curLine} ${w}` : w;
+    if (ctx.measureText(test).width > maxContentW && curLine) {
+      contentLines.push(curLine);
+      curLine = w;
+    } else {
+      curLine = test;
     }
-    const words = trimmed.split(" ");
-    let curLine = "";
-    for (let i = 0; i < words.length; i++) {
-      const test = curLine ? `${curLine} ${words[i]}` : words[i];
-      if (ctx.measureText(test).width > maxContentW && curLine) {
-        lines.push(curLine);
-        curLine = words[i];
-      } else {
-        curLine = test;
-      }
-    }
-    if (curLine) lines.push(curLine);
-  }
+  });
+  if (curLine) contentLines.push(curLine);
 
-  const lineH = fontSize * 1.58;
-  const totalTextH = lines.length * lineH;
-  const textStartY = quoteBoxY + 120 + Math.max(0, (quoteBoxH - 220 - totalTextH) / 2);
+  const lineH = fontSize * 1.6;
+  const totalH = contentLines.length * lineH;
+  const startTextY = quoteBoxY + 120 + Math.max(0, (quoteBoxH - 180 - totalH) / 2);
 
-  lines.slice(0, 9).forEach((line, idx) => {
-    ctx.fillText(line, width / 2, textStartY + idx * lineH);
+  contentLines.forEach((l, idx) => {
+    ctx.fillText(l, width / 2, startTextY + idx * lineH);
   });
 
-  // Classical Closing Quote
-  ctx.fillStyle = `${primaryGold}66`;
-  ctx.font = "italic 72px Georgia, serif";
-  ctx.fillText("』", width - quoteBoxX - 55, quoteBoxY + quoteBoxH - 45);
+  // 9. FOOTER SECTION
+  const footerY = cardY + cardH - 170;
 
-  // 11. FOOTER: OFFICIAL LOGO EMBLEM & VERIFICATION HASHTAGS
-  const footerY = 1430;
-
-  // Divider with diamond centerpiece
-  ctx.strokeStyle = `${primaryGold}55`;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(140, footerY);
-  ctx.lineTo(width / 2 - 40, footerY);
-  ctx.moveTo(width / 2 + 40, footerY);
-  ctx.lineTo(width - 140, footerY);
-  ctx.stroke();
-
-  // Diamond icon in divider
-  ctx.fillStyle = primaryGold;
-  ctx.beginPath();
-  ctx.arc(width / 2, footerY, 6, 0, Math.PI * 2);
-  ctx.fill();
-
-  // FU-DEVER White Emblem Logo
-  const logoW = 145;
-  const logoH = 145;
-  const logoY = footerY + 25;
+  // FU-DEVER Emblem
+  const logoW = 120;
+  const logoH = 120;
   try {
     const logoImg = new Image();
     logoImg.crossOrigin = "anonymous";
     logoImg.src = "/assets/logo/logo-dever-white.png";
     await new Promise<void>((resolve) => {
       logoImg.onload = () => {
-        ctx.drawImage(logoImg, (width - logoW) / 2, logoY, logoW, logoH);
+        ctx.drawImage(logoImg, (width - logoW) / 2, footerY - 10, logoW, logoH);
         resolve();
       };
       logoImg.onerror = () => resolve();
-      setTimeout(resolve, 800);
+      setTimeout(resolve, 500);
     });
   } catch {
     ctx.fillStyle = primaryGold;
-    ctx.font = "bold 36px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-    ctx.fillText("FU-DEVER", width / 2, logoY + 70);
+    ctx.font = `900 32px ${FONT_SANS}`;
+    ctx.fillText("FU-DEVER", width / 2, footerY + 50);
   }
 
-  // Club Affiliation Title
-  ctx.fillStyle = theme === "gold" ? "#ffeaa7" : "#faeeda";
-  ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  ctx.fillText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG", width / 2, logoY + logoH + 45);
+  ctx.fillStyle = theme === "gold" ? "#ffe8a3" : "#faeeda";
+  ctx.font = `bold 24px ${FONT_SANS}`;
+  ctx.fillText(cleanVietnameseText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), width / 2, footerY + logoH + 30);
 
-  // Social Hashtags
   ctx.fillStyle = primaryGold;
-  ctx.font = "bold 23px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  ctx.fillText(EVENT_INFO.hashtags.join("   "), width / 2, logoY + logoH + 95);
+  ctx.font = `bold 20px ${FONT_SANS}`;
+  ctx.fillText(EVENT_INFO.hashtags.join("    "), width / 2, footerY + logoH + 68);
 
   return canvas.toDataURL("image/png");
 }
 
+/**
+ * ----------------------------------------------------
+ * STYLE 2: VÉ LÊN TÀU VŨ TRỤ DEVER K22 (RETRO COSMIC BOARDING PASS)
+ * ----------------------------------------------------
+ */
 export async function renderBoardingPassCardToDataUrl(
   dream: Dream,
   options: RenderCardOptions = {}
@@ -492,316 +402,372 @@ export async function renderBoardingPassCardToDataUrl(
   const theme = dream.theme || "classic";
   const mascotIndex = dream.mascotIndex || "11";
   const category = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
+  const stampInfo = getDeverStampInfo(dream.stampVariant, theme);
 
-  // 1. COSMIC BACKGROUND
+  // Clean Vietnamese text to avoid accent bugs
+  const passengerName = cleanVietnameseText(dream.name || "TÂN SINH VIÊN K22").toUpperCase();
+  const rawWish = cleanVietnameseText(dream.content);
+
+  // 1. LUXURY COSMIC BACKGROUND
   const bgGrad = ctx.createLinearGradient(0, 0, width, height);
   if (theme === "tech") {
-    bgGrad.addColorStop(0, "#040914");
-    bgGrad.addColorStop(0.5, "#0a1936");
-    bgGrad.addColorStop(1, "#02050e");
+    bgGrad.addColorStop(0, "#030712");
+    bgGrad.addColorStop(0.5, "#0b1d3a");
+    bgGrad.addColorStop(1, "#020617");
   } else if (theme === "gold") {
     bgGrad.addColorStop(0, "#1f1001");
-    bgGrad.addColorStop(0.5, "#4a2a06");
+    bgGrad.addColorStop(0.5, "#3d2105");
     bgGrad.addColorStop(1, "#120800");
   } else {
-    bgGrad.addColorStop(0, "#190404");
-    bgGrad.addColorStop(0.5, "#3d0b0b");
+    bgGrad.addColorStop(0, "#150406");
+    bgGrad.addColorStop(0.5, "#2b0d12");
     bgGrad.addColorStop(1, "#12203A");
   }
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, width, height);
 
-  // Stardust
-  ctx.fillStyle = "rgba(250, 199, 117, 0.7)";
-  for (let i = 0; i < 40; i++) {
-    const sx = Math.random() * width;
-    const sy = Math.random() * height;
-    const sr = Math.random() * 2.5 + 1;
+  // Subtle Stardust
+  ctx.fillStyle = "rgba(250, 199, 117, 0.75)";
+  for (let i = 0; i < 45; i++) {
+    const sx = (Math.sin(i * 77) * 0.5 + 0.5) * width;
+    const sy = (Math.cos(i * 41) * 0.5 + 0.5) * height;
     ctx.beginPath();
-    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.arc(sx, sy, i % 3 === 0 ? 2.5 : 1.5, 0, Math.PI * 2);
     ctx.fill();
   }
 
   // 2. BOARDING PASS TICKET BODY CONTAINER
-  const passX = 70;
-  const passY = 100;
-  const passW = width - 140;
-  const passH = height - 200;
-  const notchY = passY + 1240; // Perforation notch
+  const passX = 80;
+  const passY = 90;
+  const passW = width - 160;
+  const passH = height - 180;
+  const notchY = passY + 1280; // Perforation notch position
+  const notchRadius = 32;
 
-  // Draw Ticket Base Shape
+  // Draw Ticket Shape with smooth inward notches
+  const drawTicketOutline = () => {
+    ctx.beginPath();
+    ctx.moveTo(passX + 36, passY);
+    ctx.lineTo(passX + passW - 36, passY);
+    ctx.arcTo(passX + passW, passY, passX + passW, passY + 36, 36);
+
+    // Right Edge with inward notch
+    ctx.lineTo(passX + passW, notchY - notchRadius);
+    ctx.arc(passX + passW, notchY, notchRadius, -Math.PI / 2, Math.PI / 2, true);
+    ctx.lineTo(passX + passW, passY + passH - 36);
+    ctx.arcTo(passX + passW, passY + passH, passX + passW - 36, passY + passH, 36);
+
+    // Bottom Edge
+    ctx.lineTo(passX + 36, passY + passH);
+    ctx.arcTo(passX, passY + passH, passX, passY + passH - 36, 36);
+
+    // Left Edge with inward notch
+    ctx.lineTo(passX, notchY + notchRadius);
+    ctx.arc(passX, notchY, notchRadius, Math.PI / 2, -Math.PI / 2, true);
+    ctx.lineTo(passX, passY + 36);
+    ctx.arcTo(passX, passY, passX + 36, passY, 36);
+    ctx.closePath();
+  };
+
+  // Outer drop shadow for realistic ticket feel
   ctx.save();
-  ctx.beginPath();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+  ctx.shadowBlur = 35;
+  ctx.shadowOffsetY = 15;
   ctx.fillStyle = "#ffffff";
-  ctx.roundRect(passX, passY, passW, passH, 36);
-  ctx.fill();
-
-  // Cut out Left and Right Perforation Notches
-  ctx.globalCompositeOperation = "destination-out";
-  ctx.beginPath();
-  ctx.arc(passX, notchY, 32, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(passX + passW, notchY, 32, 0, Math.PI * 2);
+  drawTicketOutline();
   ctx.fill();
   ctx.restore();
 
-  // Ticket Outer Shadow / Border
+  // Ticket Outer Golden / Cyan Border
   ctx.strokeStyle = theme === "tech" ? "#00f5d4" : theme === "gold" ? "#ffd166" : "#fac775";
-  ctx.lineWidth = 6;
+  ctx.lineWidth = 5;
+  drawTicketOutline();
   ctx.stroke();
 
-  // 3. TICKET HEADER (Airline / Space Agency Style)
-  const headerH = 180;
-  const headGrad = ctx.createLinearGradient(passX, passY, passX + passW, passY);
-  if (theme === "tech") {
-    headGrad.addColorStop(0, "#0091ea");
-    headGrad.addColorStop(1, "#00f5d4");
-  } else if (theme === "gold") {
-    headGrad.addColorStop(0, "#b87c12");
-    headGrad.addColorStop(1, "#ffd166");
-  } else {
-    headGrad.addColorStop(0, "#993c1d");
-    headGrad.addColorStop(1, "#e63946");
-  }
-
+  // 3. TICKET HEADER (Aerospace Branding)
+  const headerH = 200;
   ctx.save();
   ctx.beginPath();
   ctx.roundRect(passX, passY, passW, headerH, [36, 36, 0, 0]);
+  ctx.clip();
+
+  const headGrad = ctx.createLinearGradient(passX, passY, passX + passW, passY);
+  if (theme === "tech") {
+    headGrad.addColorStop(0, "#0055a5");
+    headGrad.addColorStop(1, "#0091ea");
+  } else if (theme === "gold") {
+    headGrad.addColorStop(0, "#8a5800");
+    headGrad.addColorStop(1, "#c88a10");
+  } else {
+    headGrad.addColorStop(0, "#712b13");
+    headGrad.addColorStop(0.5, "#993c1d");
+    headGrad.addColorStop(1, "#b94522");
+  }
   ctx.fillStyle = headGrad;
-  ctx.fill();
+  ctx.fillRect(passX, passY, passW, headerH);
   ctx.restore();
 
-  // Header Title & Logo
+  // Header Typography
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "left";
-  ctx.font = "bold 42px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  ctx.fillText("FU-DEVER SPACEWAYS", passX + 45, passY + 80);
+  ctx.font = `900 44px ${FONT_SANS}`;
+  ctx.fillText("FU-DEVER SPACEWAYS", passX + 50, passY + 80);
 
-  ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-  ctx.fillText("BOARDING PASS · VÉ LÊN TÀU K22", passX + 45, passY + 125);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+  ctx.font = `bold 22px ${FONT_SANS}`;
+  ctx.fillText(cleanVietnameseText("BOARDING PASS · VÉ LÊN TÀU VŨ TRỤ K22"), passX + 50, passY + 128);
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+  ctx.font = `bold 16px ${FONT_MONO}`;
+  ctx.fillText("FLIGHT OPERATED BY FU-DEVER AERO", passX + 50, passY + 160);
 
   ctx.textAlign = "right";
-  ctx.font = "black 48px monospace";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("FIRST CLASS", passX + passW - 45, passY + 100);
+  ctx.fillStyle = "#ffd166";
+  ctx.font = `900 36px ${FONT_MONO}`;
+  ctx.fillText("FIRST CLASS", passX + passW - 50, passY + 95);
 
-  // 4. FLIGHT PARAMETER GRID
-  const gridY = passY + headerH + 50;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+  ctx.font = `bold 18px ${FONT_MONO}`;
+  ctx.fillText("VIP DREAMER", passX + passW - 50, passY + 140);
 
-  const drawField = (label: string, value: string, x: number, y: number) => {
+  // 4. FLIGHT PARAMETER MATRIX
+  const gridY = passY + headerH + 45;
+
+  const drawField = (label: string, value: string, x: number, y: number, isAccent = false) => {
     ctx.textAlign = "left";
-    ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.font = `bold 17px ${FONT_SANS}`;
     ctx.fillStyle = "#64748b";
-    ctx.fillText(label, x, y);
+    ctx.fillText(cleanVietnameseText(label), x, y);
 
-    ctx.font = "black 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-    ctx.fillStyle = "#0f172a";
-    ctx.fillText(value, x, y + 42);
+    ctx.font = `900 30px ${FONT_SANS}`;
+    ctx.fillStyle = isAccent ? "#993c1d" : "#0f172a";
+    ctx.fillText(cleanVietnameseText(value), x, y + 38);
   };
 
-  drawField("FLIGHT / CHUYẾN BAY", "DEVER-K22", passX + 45, gridY);
-  drawField("GATE / CỔNG", "01 (FPTU DNG)", passX + 340, gridY);
-  drawField("SEAT / GHẾ", "22A (VIP DEV)", passX + 640, gridY);
+  drawField("FLIGHT / CHUYẾN BAY", "DEVER-K22", passX + 50, gridY);
+  drawField("GATE / CỔNG", "01 (FPTU DAD)", passX + 340, gridY);
+  drawField("SEAT / GHẾ", "22A (VIP DEV)", passX + 630, gridY);
 
-  const gridY2 = gridY + 110;
-  drawField("PASSENGER / HÀNH KHÁCH", (dream.name || "TÂN SINH VIÊN K22").toUpperCase(), passX + 45, gridY2);
+  const gridY2 = gridY + 95;
+  drawField("PASSENGER / HÀNH KHÁCH", passengerName, passX + 50, gridY2, true);
   drawField("TAG / CHUYÊN MỤC", `${category?.emoji || "✨"} ${category?.label || "Ước Mơ"}`, passX + 540, gridY2);
 
-  // Destination Route Banner
-  const routeY = gridY2 + 100;
-  ctx.fillStyle = "#f8fafc";
-  ctx.fillRect(passX + 35, routeY, passW - 70, 75);
-  ctx.strokeStyle = "#e2e8f0";
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(passX + 35, routeY, passW - 70, 75);
+  // 5. ROUTE FLIGHT PATH BANNER
+  const routeY = gridY2 + 90;
+  const routeH = 80;
 
-  ctx.fillStyle = "#0f172a";
+  ctx.fillStyle = "#f8fafc";
+  ctx.beginPath();
+  ctx.roundRect(passX + 40, routeY, passW - 80, routeH, 16);
+  ctx.fill();
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
   ctx.textAlign = "left";
-  ctx.font = "black 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  ctx.fillText("FPTU DA NANG (DAD)", passX + 55, routeY + 46);
+  ctx.fillStyle = "#0f172a";
+  ctx.font = `900 24px ${FONT_SANS}`;
+  ctx.fillText("FPTU DA NANG (DAD)", passX + 65, routeY + 48);
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#993c1d";
-  ctx.font = "bold 24px monospace";
-  ctx.fillText("✈ ─── 🚀 ─── 🏮", passX + passW / 2, routeY + 46);
+  ctx.font = `bold 24px ${FONT_MONO}`;
+  ctx.fillText("✈ ─── 🚀 ─── 🏮", passX + passW / 2, routeY + 48);
 
   ctx.textAlign = "right";
   ctx.fillStyle = "#0091ea";
-  ctx.font = "black 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  ctx.fillText("DEVER PLANET (DEV)", passX + passW - 55, routeY + 46);
+  ctx.font = `900 24px ${FONT_SANS}`;
+  ctx.fillText("DEVER PLANET (DEV)", passX + passW - 65, routeY + 48);
 
-  // 5. DREAM MANIFESTO / MISSION STATEMENT BOX
-  const wishY = routeY + 105;
-  const wishH = 360;
+  // 6. DREAM MANIFESTO / MISSION STATEMENT BOX
+  const wishY = routeY + 110;
+  const wishH = 430;
 
   ctx.fillStyle = "#fffdf7";
-  ctx.fillRect(passX + 35, wishY, passW - 70, wishH);
+  ctx.beginPath();
+  ctx.roundRect(passX + 40, wishY, passW - 80, wishH, 20);
+  ctx.fill();
+
   ctx.strokeStyle = theme === "tech" ? "#00f5d4" : theme === "gold" ? "#fac775" : "#fed7aa";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(passX + 35, wishY, passW - 70, wishH);
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
 
   ctx.fillStyle = "#993c1d";
   ctx.textAlign = "left";
-  ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  ctx.fillText("📜 LỜI NGUYỆN CẤT CÁNH / MISSION STATEMENT:", passX + 55, wishY + 45);
+  ctx.font = `900 21px ${FONT_SANS}`;
+  ctx.fillText(cleanVietnameseText("📜 LỜI NGUYỆN CẤT CÁNH / MISSION STATEMENT:"), passX + 65, wishY + 45);
 
-  // Multi-line dream content
+  // Quotation marks decoration
+  ctx.fillStyle = "rgba(153, 60, 29, 0.25)";
+  ctx.font = `900 64px ${FONT_SERIF}`;
+  ctx.fillText("“", passX + 60, wishY + 105);
+
+  // Text Wrapping with clean Vietnamese typography
+  const wishMaxW = passW - 170;
+  let wishFontSize = 32;
+  if (rawWish.length > 180) wishFontSize = 24;
+  else if (rawWish.length > 90) wishFontSize = 28;
+
+  ctx.font = `600 ${wishFontSize}px ${FONT_SANS}`;
   ctx.fillStyle = "#1e293b";
-  ctx.font = "italic 28px Georgia, 'Times New Roman', serif";
   ctx.textAlign = "center";
 
-  const rawLines = dream.content.split("\n");
-  const lines: string[] = [];
-  const maxW = passW - 130;
+  const wishWords = rawWish.split(" ");
+  const wishLines: string[] = [];
+  let curWishLine = "";
+  wishWords.forEach((w) => {
+    const test = curWishLine ? `${curWishLine} ${w}` : w;
+    if (ctx.measureText(test).width > wishMaxW && curWishLine) {
+      wishLines.push(curWishLine);
+      curWishLine = w;
+    } else {
+      curWishLine = test;
+    }
+  });
+  if (curWishLine) wishLines.push(curWishLine);
 
-  rawLines.forEach((raw) => {
-    const words = raw.split(" ");
-    let line = "";
-    words.forEach((word) => {
-      const test = line ? `${line} ${word}` : word;
-      if (ctx.measureText(test).width > maxW) {
-        lines.push(line);
-        line = word;
-      } else {
-        line = test;
-      }
-    });
-    if (line) lines.push(line);
+  const wishLineH = wishFontSize * 1.55;
+  const wishTextStartY = wishY + 120 + Math.max(0, (wishH - 240 - wishLines.length * wishLineH) / 2);
+
+  wishLines.slice(0, 5).forEach((line, idx) => {
+    ctx.fillText(line, passX + passW / 2, wishTextStartY + idx * wishLineH);
   });
 
-  const textStartY = wishY + 110;
-  lines.slice(0, 5).forEach((l, idx) => {
-    ctx.fillText(`“ ${l} ”`, passX + passW / 2, textStartY + idx * 46);
-  });
-
-  // Mascot Sticker
+  // Mascot Buggy Badge on Bottom Right of Manifesto
   try {
     const mascotImg = new Image();
     mascotImg.crossOrigin = "anonymous";
     mascotImg.src = getBuggyMascotUrl(mascotIndex);
     await new Promise<void>((resolve) => {
       mascotImg.onload = () => {
-        ctx.drawImage(mascotImg, passX + passW - 190, wishY + wishH - 160, 140, 140);
+        ctx.drawImage(mascotImg, passX + passW - 200, wishY + wishH - 165, 145, 145);
         resolve();
       };
       mascotImg.onerror = () => resolve();
-      setTimeout(resolve, 800);
+      setTimeout(resolve, 600);
     });
   } catch {
     // ignore
   }
 
-  // 6. AUTHENTIC DEVER RUBBER VISA STAMP
-  const stampInfo = getDeverStampInfo(dream.stampVariant, theme);
+  // Authentic Rubber Visa Stamp on Bottom Left of Manifesto
   ctx.save();
-  ctx.translate(passX + 175, wishY + wishH - 75);
-  ctx.rotate((-13 * Math.PI) / 180);
+  ctx.translate(passX + 185, wishY + wishH - 85);
+  ctx.rotate((-12 * Math.PI) / 180);
 
-  // Outer double stamp border
   ctx.strokeStyle = stampInfo.color;
   ctx.lineWidth = 4;
   ctx.beginPath();
-  ctx.roundRect(-135, -55, 270, 110, 16);
+  ctx.roundRect(-140, -55, 280, 110, 16);
   ctx.stroke();
 
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.roundRect(-128, -48, 256, 96, 12);
+  ctx.roundRect(-133, -48, 266, 96, 12);
   ctx.stroke();
 
-  // Semi-transparent ink tint
   ctx.fillStyle = `${stampInfo.color}15`;
   ctx.beginPath();
-  ctx.roundRect(-128, -48, 256, 96, 12);
+  ctx.roundRect(-133, -48, 266, 96, 12);
   ctx.fill();
 
-  // Draw Official Stamp Emblem Image (on the left)
-  const stampSize = 74;
+  // Stamp Emblem
+  const stampIconSize = 72;
   try {
     const stampImg = new Image();
     stampImg.crossOrigin = "anonymous";
     stampImg.src = stampInfo.image;
     await new Promise<void>((resolve) => {
       stampImg.onload = () => {
-        ctx.drawImage(stampImg, -120, -37, stampSize, stampSize);
+        ctx.drawImage(stampImg, -125, -36, stampIconSize, stampIconSize);
         resolve();
       };
       stampImg.onerror = () => resolve();
-      setTimeout(resolve, 800);
+      setTimeout(resolve, 600);
     });
   } catch {
     // fallback
   }
 
-  // Text on the right of stamp
   ctx.textAlign = "left";
   ctx.fillStyle = stampInfo.color;
-  ctx.font = "black 17px -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace";
-  ctx.fillText("★ FU-DEVER VERIFIED ★", -35, -12);
+  ctx.font = `900 18px ${FONT_MONO}`;
+  ctx.fillText("★ FU-DEVER VERIFIED ★", -40, -10);
 
-  ctx.font = "bold 14px monospace";
-  ctx.fillText("ONBOARDED · CLUB DAY 2026", -35, 12);
+  ctx.font = `bold 14px ${FONT_MONO}`;
+  ctx.fillText("ONBOARDED · CLUB DAY 2026", -40, 14);
 
-  ctx.font = "bold 11px monospace";
-  ctx.fillText(stampInfo.label.toUpperCase(), -35, 32);
-
+  ctx.font = `bold 12px ${FONT_MONO}`;
+  ctx.fillText(stampInfo.label.toUpperCase(), -40, 34);
   ctx.restore();
 
-  // 7. PERFORATED DASHED LINE
+  // 7. PERFORATED DASHED TEAR LINE
   ctx.save();
   ctx.strokeStyle = "#94a3b8";
-  ctx.lineWidth = 3;
-  ctx.setLineDash([12, 10]);
+  ctx.lineWidth = 3.5;
+  ctx.setLineDash([16, 12]);
   ctx.beginPath();
-  ctx.moveTo(passX + 35, notchY);
-  ctx.lineTo(passX + passW - 35, notchY);
+  ctx.moveTo(passX + notchRadius + 10, notchY);
+  ctx.lineTo(passX + passW - notchRadius - 10, notchY);
   ctx.stroke();
   ctx.restore();
 
-  // 8. TICKET STUB BOTTOM SECTION
-  const stubY = notchY + 45;
+  // 8. TICKET STUB BOTTOM SECTION (LUXURY FLIGHT COUPON)
+  const stubY = notchY + 35;
 
-  // Barcode lines generator
-  ctx.fillStyle = "#0f172a";
+  // Boarding Instruction Pill
+  ctx.fillStyle = "#f1f5f9";
+  ctx.beginPath();
+  ctx.roundRect(passX + 50, stubY, passW - 100, 48, 12);
+  ctx.fill();
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#475569";
+  ctx.font = `bold 16px ${FONT_MONO}`;
+  ctx.fillText("BOARDING TIME: 18:30 · PLEASE BE AT BOOTH GATE 10 MINS BEFORE TAKEOFF", passX + passW / 2, stubY + 30);
+
+  // Vector Barcode Generator
+  const barcodeY = stubY + 70;
   const barcodeX = passX + 60;
   const barcodeW = passW - 120;
-  const barcodeH = 110;
+  const barcodeH = 105;
 
+  ctx.fillStyle = "#0f172a";
   let currentBX = barcodeX;
-  const barPattern = [3, 1, 4, 2, 1, 5, 2, 4, 1, 3, 2, 4, 6, 2, 1, 3, 4, 1, 2, 5, 2, 1, 4, 3, 2, 5, 1, 4, 2, 3, 1, 5, 2, 3, 4];
+  const barPattern = [
+    3, 1, 4, 2, 1, 5, 2, 4, 1, 3, 2, 4, 6, 2, 1, 3, 4, 1, 2, 5, 2, 1, 4, 3, 2, 5, 1, 4, 2, 3, 1, 5, 2, 3, 4, 2, 1, 5, 3, 2, 4
+  ];
   barPattern.forEach((w, idx) => {
     if (idx % 2 === 0) {
-      ctx.fillRect(currentBX, stubY, w * 2.2, barcodeH);
+      ctx.fillRect(currentBX, barcodeY, w * 2.1, barcodeH);
     }
-    currentBX += w * 4.2;
+    currentBX += w * 3.7;
   });
 
   // Ticket Serial Number
   ctx.textAlign = "center";
-  ctx.fillStyle = "#475569";
-  ctx.font = "bold 20px monospace";
-  ctx.fillText(`SN: DEVER-K22-FPTU-${Date.now().toString(36).toUpperCase()}`, passX + passW / 2, stubY + barcodeH + 35);
+  ctx.fillStyle = "#334155";
+  ctx.font = `bold 20px ${FONT_MONO}`;
+  ctx.fillText(`SN: DEVER-K22-FPTU-${Date.now().toString(36).toUpperCase()}`, passX + passW / 2, barcodeY + barcodeH + 35);
 
-  // Footer Branding & Hashtags
+  // Footer Branding & Social Hashtags
   ctx.fillStyle = "#0f172a";
-  ctx.font = "black 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  ctx.fillText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG", passX + passW / 2, stubY + barcodeH + 80);
+  ctx.font = `900 24px ${FONT_SANS}`;
+  ctx.fillText(cleanVietnameseText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), passX + passW / 2, barcodeY + barcodeH + 82);
 
   ctx.fillStyle = "#993c1d";
-  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  ctx.fillText(EVENT_INFO.hashtags.join("    "), passX + passW / 2, stubY + barcodeH + 120);
+  ctx.font = `bold 20px ${FONT_SANS}`;
+  ctx.fillText(EVENT_INFO.hashtags.join("    "), passX + passW / 2, barcodeY + barcodeH + 122);
 
   return canvas.toDataURL("image/png");
 }
 
 export function downloadDreamCard(dataUrl: string, filename = "Deploy_Uoc_Mo_FU_DEVER.png") {
   const link = document.createElement("a");
-  link.href = dataUrl;
   link.download = filename;
+  link.href = dataUrl;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
-
