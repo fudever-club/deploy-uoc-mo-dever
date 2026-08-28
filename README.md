@@ -11,13 +11,25 @@
 </p>
 
 <p align="center">
+  <a href="https://deploy-uoc-mo-dever.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-deploy--uoc--mo--dever.vercel.app-0091EA?style=for-the-badge&logo=vercel" alt="Live Demo" /></a>
   <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-15.2.1-black?style=for-the-badge&logo=next.js" alt="Next.js 15" /></a>
   <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react" alt="React 19" /></a>
   <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript" /></a>
   <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-v4.0-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" /></a>
   <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-Realtime-3ECF8E?style=for-the-badge&logo=supabase" alt="Supabase" /></a>
-  <a href="https://vercel.com"><img src="https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel" alt="Vercel" /></a>
 </p>
+
+---
+
+## 🌐 Trải Nghiệm Trực Tiếp (Live Deployment)
+
+Bạn có thể trải nghiệm toàn bộ hệ thống đã được triển khai sẵn sàng trên Vercel:
+
+* 📱 **Trang Gửi Ước Mơ (Mobile)**: [https://deploy-uoc-mo-dever.vercel.app](https://deploy-uoc-mo-dever.vercel.app)
+* 🌌 **Màn Hình Bầu Trời Trình Chiếu (Sky Display)**: [https://deploy-uoc-mo-dever.vercel.app/display](https://deploy-uoc-mo-dever.vercel.app/display)
+* 🖨️ **Poster Standee Chuẩn In Ấn**: [https://deploy-uoc-mo-dever.vercel.app/standee](https://deploy-uoc-mo-dever.vercel.app/standee)
+* 🎁 **Minigame Vòng Quay May Mắn**: [https://deploy-uoc-mo-dever.vercel.app/admin/lucky-draw](https://deploy-uoc-mo-dever.vercel.app/admin/lucky-draw)
+* 🛡️ **Bảng Điều Hành Gian Hàng (Admin)**: [https://deploy-uoc-mo-dever.vercel.app/admin](https://deploy-uoc-mo-dever.vercel.app/admin) *(Mật khẩu: `dever2026`)*
 
 ---
 
@@ -41,7 +53,7 @@ Sinh viên chỉ cần quét mã QR tại gian hàng để gửi gắm những h
 
 ### 🌌 2. Bầu Trời Đèn Lồng Trình Chiếu Display (`/display`)
 * **Hiệu năng cực đại 60–120 FPS**: Ứng dụng kỹ thuật **Direct DOM Transform & GPU Hardware Acceleration**, giải phóng 100% CPU của Server và trình duyệt.
-* **3 Chế Độ Chuyển Động Độc Đáo**:
+* **3 Chế Độ Chuyển Độc Đáo**:
   * 🔄 **Bay Xoay Vòng 3D (Carousel Orbit)**: Quỹ đạo elip nghiêng 3D đảm bảo 100% ước mơ đều lần lượt xuất hiện rõ nét ở tiền cảnh.
   * 🍃 **Trôi Tự Do (Organic Drift)**: Đèn lồng nảy nổi bồng bềnh tự nhiên theo ngọn gió thu.
   * 🌐 **Chòm Sao Thiên Hà (Constellation Galaxy)**: Kết nối các ước mơ cùng chủ đề thành mạng lưới chòm sao lấp lánh.
@@ -104,11 +116,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Mở trình duyệt và truy cập:
-- Trang gửi ước mơ: [http://localhost:3000](http://localhost:3000)
-- Màn hình Sky Display: [http://localhost:3000/display](http://localhost:3000/display)
-- Trang Quản trị viên: [http://localhost:3000/admin](http://localhost:3000/admin) *(Mật khẩu mặc định: `dever2026`)*
-- Poster Standee: [http://localhost:3000/standee](http://localhost:3000/standee)
+Sau đó mở trình duyệt tại `http://localhost:3000`.
 
 ---
 
@@ -147,7 +155,7 @@ npm run build
 
 * **Fanpage Chính Thức**: [facebook.com/fudever.club](https://www.facebook.com/fudever.club)
 * **GitHub Organization**: [github.com/fudever-club](https://github.com/fudever-club)
-* **Email Liên Hệ**: `fudever.contact@gmail.com`
+* **Email Liên Hệ**: `club.dever@gmail.com`
 * **Địa Chỉ**: Tòa nhà FPT University, Khu đô thị FPT City, Ngũ Hành Sơn, Đà Nẵng
 
 ---

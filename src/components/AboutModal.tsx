@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { X, Sparkles, Heart, Code2, Users, Rocket, ExternalLink, Github, Facebook, Globe, ShieldCheck } from "lucide-react";
+import { X, Sparkles, Heart, Code2, Users, Rocket, ExternalLink, Github, Facebook, Globe, Mail } from "lucide-react";
 import { playTactileClick } from "@/lib/audio-synthesizer";
 
 interface AboutModalProps {
@@ -15,7 +15,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 select-none">
-      <div className="relative w-full max-w-lg bg-[#12203A] border-2 border-[#fac775]/60 rounded-3xl shadow-2xl p-5 sm:p-7 text-[#faeeda] flex flex-col max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-[#12203A] border-2 border-[#fac775]/60 rounded-3xl shadow-2xl p-5 sm:p-6 text-[#faeeda] flex flex-col max-h-[92vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={() => {
@@ -28,105 +28,130 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Club Logo Header */}
-        <div className="text-center mb-5">
-          <div className="relative mx-auto w-20 h-20 mb-3 rounded-full bg-gradient-to-tr from-[#993c1d] via-[#12203A] to-[#0091ea] p-1.5 border-2 border-[#fac775] shadow-[0_0_30px_rgba(250,199,117,0.4)] flex items-center justify-center">
+        {/* Header with Logo */}
+        <div className="text-center mb-4">
+          <div className="relative mx-auto w-16 h-16 mb-2.5 rounded-full bg-gradient-to-tr from-[#993c1d] via-[#12203A] to-[#0091ea] p-1 border-2 border-[#fac775] shadow-[0_0_25px_rgba(250,199,117,0.4)] flex items-center justify-center">
             <Image
               src="/assets/logo/logo-dever-white.png"
               alt="FU-DEVER Official Logo"
-              width={56}
-              height={56}
+              width={46}
+              height={46}
               className="object-contain"
             />
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#fac775]/20 text-[#fac775] text-xs font-black uppercase tracking-wider mb-1.5 border border-[#fac775]/30">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fac775]/20 text-[#fac775] text-[11px] font-black uppercase tracking-wider mb-1 border border-[#fac775]/30">
+            <Sparkles className="w-3 h-3 text-amber-400" />
             <span>FPT University Da Nang</span>
           </div>
 
-          <h2 className="text-2xl font-black text-white font-display tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-white font-display tracking-tight">
             CLB LẬP TRÌNH FU-DEVER 🏮
           </h2>
-          <p className="text-xs text-[#faeeda]/80 mt-1">
-            Nơi kết nối đam mê công nghệ, ươm mầm tài năng và cùng nhau phát triển
+          <p className="text-xs text-[#faeeda]/85 mt-1 leading-relaxed max-w-sm mx-auto">
+            Sản phẩm <strong>Deploy Ước Mơ</strong> chào đón tân sinh viên <strong>K22</strong> tại Club Day 2026 — Thả đèn lồng số hóa &amp; nhận thiệp Story 9:16 độc quyền.
           </p>
         </div>
 
-        {/* Core Pillars */}
-        <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-            <Code2 className="w-5 h-5 mx-auto text-[#00f5d4] mb-1" />
-            <span className="block text-xs font-bold text-white">Chuyên Môn</span>
-            <span className="text-[10px] text-slate-400">Web, AI, Mobile & ICPC</span>
+        {/* Live Vercel App Link Pill */}
+        <div className="mb-4">
+          <a
+            href="https://deploy-uoc-mo-dever.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#0091ea]/25 via-emerald-500/20 to-[#0091ea]/25 hover:from-[#0091ea]/35 hover:to-emerald-500/30 border border-emerald-400/50 text-xs font-bold text-white transition-all shadow-md group"
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <Globe className="w-4 h-4 text-emerald-400" />
+              <span>Live App: deploy-uoc-mo-dever.vercel.app</span>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-emerald-300 group-hover:translate-x-0.5 transition-transform" />
+          </a>
+        </div>
+
+        {/* 3 Core Pillars */}
+        <div className="grid grid-cols-3 gap-2 mb-3.5 text-center">
+          <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
+            <Code2 className="w-4 h-4 mx-auto text-[#00f5d4] mb-0.5" />
+            <span className="block text-[11px] font-bold text-white">Chuyên Môn</span>
+            <span className="text-[9px] text-slate-400">Web, AI, Mobile</span>
           </div>
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-            <Rocket className="w-5 h-5 mx-auto text-[#fac775] mb-1" />
-            <span className="block text-xs font-bold text-white">Dự Án Thực Chiến</span>
-            <span className="text-[10px] text-slate-400">Hackathon & Products</span>
+          <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
+            <Rocket className="w-4 h-4 mx-auto text-[#fac775] mb-0.5" />
+            <span className="block text-[11px] font-bold text-white">Thực Chiến</span>
+            <span className="text-[9px] text-slate-400">Hackathon &amp; ICPC</span>
           </div>
-          <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-            <Users className="w-5 h-5 mx-auto text-[#85b7eb] mb-1" />
-            <span className="block text-xs font-bold text-white">Gia Đình DEVER</span>
-            <span className="text-[10px] text-slate-400">Đồng đội & Kỷ niệm</span>
+          <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
+            <Users className="w-4 h-4 mx-auto text-[#85b7eb] mb-0.5" />
+            <span className="block text-[11px] font-bold text-white">Gia Đình</span>
+            <span className="text-[9px] text-slate-400">Đồng đội gắn kết</span>
           </div>
         </div>
 
-        {/* Storytelling & Mascot Lore */}
-        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#993c1d]/40 to-[#712b13]/40 border border-[#fac775]/40 mb-4 flex items-center gap-3">
-          <div className="shrink-0 w-12 h-12 rounded-full bg-[#12203A] border border-[#fac775] p-1 shadow-md flex items-center justify-center">
+        {/* Mascot lore banner */}
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-[#993c1d]/35 to-[#712b13]/35 border border-[#fac775]/30 mb-3.5 flex items-center gap-2.5">
+          <div className="shrink-0 w-10 h-10 rounded-full bg-[#12203A] border border-[#fac775] p-1 flex items-center justify-center">
             <Image
               src="/assets/buggy/1.png"
               alt="Buggy Mascot"
-              width={38}
-              height={38}
+              width={32}
+              height={32}
               className="object-contain"
             />
           </div>
-          <div className="text-xs">
-            <h4 className="font-extrabold text-amber-300">Linh vật Buggy &quot;Bọ Cánh Cam&quot;</h4>
-            <p className="text-slate-300 text-[11px] leading-relaxed">
-              Sứ giả diệt bug và thắp sáng ước mơ của DEVER. Chúc các tân sinh viên <strong>K22</strong> một hành trình đại học rực rỡ!
-            </p>
+          <div className="text-[11px]">
+            <span className="font-extrabold text-amber-300">Linh vật Buggy Cánh Cam: </span>
+            <span className="text-slate-300">
+              Sứ giả diệt bug và chắp cánh hoài bão cho các bạn tân sinh viên K22!
+            </span>
           </div>
         </div>
 
-        {/* Social & Community Links */}
-        <div className="space-y-2 mb-4">
+        {/* Social & Contact links */}
+        <div className="space-y-1.5 mb-3.5">
           <a
             href="https://www.facebook.com/fudever.club"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between p-3 rounded-2xl bg-[#0091ea]/20 hover:bg-[#0091ea]/30 border border-[#0091ea]/50 text-xs font-bold text-white transition-all cursor-pointer group"
+            className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all group"
           >
-            <div className="flex items-center gap-2.5">
-              <Facebook className="w-4 h-4 text-[#0091ea]" />
-              <span>Fanpage Chính Thức: facebook.com/fudever.club</span>
+            <div className="flex items-center gap-2">
+              <Facebook className="w-3.5 h-3.5 text-[#0091ea]" />
+              <span className="text-[11px]">facebook.com/fudever.club</span>
             </div>
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" />
+            <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-white" />
           </a>
 
           <a
             href="https://github.com/fudever-club"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-bold text-white transition-all cursor-pointer group"
+            className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all group"
           >
-            <div className="flex items-center gap-2.5">
-              <Github className="w-4 h-4 text-[#fac775]" />
-              <span>GitHub Organization: github.com/fudever-club</span>
+            <div className="flex items-center gap-2">
+              <Github className="w-3.5 h-3.5 text-[#fac775]" />
+              <span className="text-[11px]">github.com/fudever-club</span>
             </div>
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" />
+            <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-white" />
           </a>
+
+          <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white">
+            <div className="flex items-center gap-2">
+              <Mail className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-[11px] text-slate-300">Email: club.dever@gmail.com</span>
+            </div>
+            <span className="text-[9px] text-[#fac775] font-mono">OFFICIAL</span>
+          </div>
         </div>
 
         {/* Footer info */}
-        <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
+        <div className="pt-2.5 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
           <div className="flex items-center gap-1 text-[#fac775]">
             <Heart className="w-3 h-3 fill-current text-red-500" />
             <span>Deploy Ước Mơ · Club Day 2026</span>
           </div>
-          <span>Made with ❤️ by FU-DEVER</span>
+          <span>FU-DEVER Club</span>
         </div>
       </div>
     </div>
