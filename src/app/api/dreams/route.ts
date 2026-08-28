@@ -8,8 +8,17 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const includeHidden = searchParams.get("includeHidden") === "true";
-    const dreams = await getDreams(includeHidden);
-    return NextResponse.json({ success: true, data: dreams });
+    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : 150;
+    const dreams = await getDreams(includeHidden, limit);
+
+    return NextResponse.json(
+      { success: true, data: dreams },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=1, stale-while-revalidate=4",
+        },
+      }
+    );
   } catch (error) {
     console.error("GET /api/dreams error:", error);
     return NextResponse.json(
@@ -43,6 +52,9 @@ export async function POST(req: NextRequest) {
       content: body.content.trim(),
       tag: body.tag || "other",
       consent: true,
+      mascotIndex: body.mascotIndex || 1,
+      theme: body.theme || "classic",
+      lanternShape: body.lanternShape || "hoian_lotus",
     });
 
     return NextResponse.json({ success: true, data: dream }, { status: 201 });

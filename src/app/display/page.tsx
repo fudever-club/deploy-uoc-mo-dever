@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { Dream, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
+import { Dream } from "@/types/dream";
 import { DREAM_CATEGORIES } from "@/lib/constants";
 import { playLanternAscendChime, playReactionSound, playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
 import { ambientSound } from "@/lib/ambient-sound";
+import { useRealtimeDreams } from "@/lib/use-realtime-dreams";
 import {
   Sparkles,
   Volume2,
@@ -17,30 +18,24 @@ import {
   Megaphone,
   Radio,
   Play,
-  Sun,
-  Moon,
-  Zap,
   RotateCw,
   Wind,
   Globe2,
+  Wifi,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
-import { LanternSkyCanvas, SkyTheme } from "@/components/LanternSkyCanvas";
+import { LanternSkyCanvas } from "@/components/LanternSkyCanvas";
 import { ConstellationGalaxyView } from "@/components/ConstellationGalaxyView";
 import { FloatingLanternCardsSky, FlightMode } from "@/components/FloatingLanternCardsSky";
 
 export default function DisplaySkyPage() {
-  const [dreams, setDreams] = useState<Dream[]>([]);
   const [selectedDream, setSelectedDream] = useState<Dream | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>("all");
-  const [activeAnnouncement, setActiveAnnouncement] = useState<BroadcastAnnouncement | null>(null);
   const [spotlightIndex, setSpotlightIndex] = useState<number>(0);
   const [isAutoSpotlight, setIsAutoSpotlight] = useState<boolean>(true);
-  const [reactions, setReactions] = useState<LiveReaction[]>([]);
-  const [skyTheme, setSkyTheme] = useState<SkyTheme>("midnight");
 
   // Flight Mode: "carousel" (Xoay vòng 3D) vs "drift" (Trôi tự do) vs "galaxy" (Chòm sao)
   const [flightMode, setFlightMode] = useState<FlightMode>("carousel");
@@ -48,94 +43,24 @@ export default function DisplaySkyPage() {
 
   const audioUnlocked = useRef(false);
 
-  const fetchDreams = async () => {
-    try {
-      const res = await fetch("/api/dreams");
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        setDreams(json.data);
-      }
-    } catch (err) {
-      console.error("Failed to load dreams:", err);
+  // Sound handlers
+  const handleNewDream = useCallback((dream: Dream) => {
+    if (soundEnabled && audioUnlocked.current && !dream.hidden) {
+      playLanternAscendChime();
     }
-  };
-
-  // Real-time SSE listener
-  useEffect(() => {
-    fetchDreams();
-
-    const eventSource = new EventSource("/api/dreams/stream");
-
-    eventSource.addEventListener("connected", (event) => {
-      try {
-        const payload = JSON.parse(event.data);
-        if (payload.activeAnnouncement) {
-          setActiveAnnouncement(payload.activeAnnouncement);
-        }
-      } catch (e) {
-        console.debug("SSE connect payload error:", e);
-      }
-    });
-
-    eventSource.addEventListener("insert", (event) => {
-      try {
-        const newDream = JSON.parse(event.data) as Dream;
-        if (!newDream.hidden) {
-          setDreams((prev) => [newDream, ...prev.filter((d) => d.id !== newDream.id)]);
-
-          if (soundEnabled && audioUnlocked.current) {
-            playLanternAscendChime();
-          }
-        }
-      } catch (e) {
-        console.error("SSE insert error:", e);
-      }
-    });
-
-    eventSource.addEventListener("update", (event) => {
-      try {
-        const updated = JSON.parse(event.data) as Dream;
-        setDreams((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
-      } catch (e) {
-        console.error("SSE update error:", e);
-      }
-    });
-
-    eventSource.addEventListener("delete", (event) => {
-      try {
-        const { id } = JSON.parse(event.data) as { id: string };
-        setDreams((prev) => prev.filter((d) => d.id !== id));
-      } catch (e) {
-        console.error("SSE delete error:", e);
-      }
-    });
-
-    eventSource.addEventListener("announcement", (event) => {
-      try {
-        const announcement = JSON.parse(event.data) as BroadcastAnnouncement;
-        setActiveAnnouncement(announcement);
-      } catch (e) {
-        console.error("SSE announcement error:", e);
-      }
-    });
-
-    eventSource.addEventListener("reaction", (event) => {
-      try {
-        const react = JSON.parse(event.data) as LiveReaction;
-        setReactions((prev) => [...prev.slice(-15), react]);
-
-        if (soundEnabled && audioUnlocked.current) {
-          playReactionSound(react.emoji);
-        }
-      } catch (e) {
-        console.error("SSE reaction error:", e);
-      }
-    });
-
-    return () => {
-      eventSource.close();
-    };
   }, [soundEnabled]);
+
+  const handleReaction = useCallback((reaction: { emoji: string }) => {
+    if (soundEnabled && audioUnlocked.current) {
+      playReactionSound(reaction.emoji);
+    }
+  }, [soundEnabled]);
+
+  // Unified Realtime Hook (Direct Supabase Channel + SSE + Resilient Adaptive Polling)
+  const { dreams, activeAnnouncement, reactions, connectionStatus } = useRealtimeDreams({
+    onInsert: handleNewDream,
+    onReaction: handleReaction,
+  });
 
   // Unlock procedural ambient audio on first user interaction
   useEffect(() => {
@@ -197,13 +122,12 @@ export default function DisplaySkyPage() {
   return (
     <div className="relative w-screen h-screen overflow-hidden select-none bg-[#12203A] text-[#faeeda]">
       {/* 1. BACKGROUND PARTICLES & SKY LAYER */}
-      <LanternSkyCanvas theme={skyTheme} />
+      <LanternSkyCanvas />
 
       {/* 2. DYNAMIC FLOATING LANTERN WISH CARDS (OR CONSTELLATION GALAXY) */}
       {viewMode === "lanterns" ? (
         <FloatingLanternCardsSky
           dreams={dreams}
-          theme={skyTheme}
           flightMode={flightMode}
           selectedTagFilter={selectedTagFilter}
           onSelectDream={(d) => setSelectedDream(d)}
@@ -235,6 +159,15 @@ export default function DisplaySkyPage() {
               </span>
               <span className="hidden sm:inline-block text-[11px] text-[#fac775]/90 font-semibold">
                 FPT University Da Nang
+              </span>
+              {/* Connection Status Badge */}
+              <span
+                className="hidden md:inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-400/40 text-emerald-300 font-mono"
+                title={`Kết nối Realtime: ${connectionStatus}`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <Wifi className="w-2.5 h-2.5" />
+                <span>{connectionStatus === "supabase" ? "SUPABASE" : connectionStatus === "sse" ? "SSE LIVE" : "LIVE"}</span>
               </span>
             </div>
             <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight drop-shadow-md flex items-center gap-1.5 font-display">
@@ -298,48 +231,6 @@ export default function DisplaySkyPage() {
               <span className="hidden md:inline">Chòm Sao</span>
             </button>
           </div>
-
-          {/* SKY THEME SWITCHER */}
-          {viewMode === "lanterns" && (
-            <div className="hidden lg:flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/30 shadow-lg">
-              <button
-                onClick={() => {
-                  playTactileClick();
-                  setSkyTheme("midnight");
-                }}
-                className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                  skyTheme === "midnight" ? "bg-[#fac775] text-[#12203A]" : "text-white/60 hover:text-white"
-                }`}
-                title="Trời đêm Trăng Rằm"
-              >
-                <Moon className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => {
-                  playTactileClick();
-                  setSkyTheme("cyber");
-                }}
-                className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                  skyTheme === "cyber" ? "bg-[#00f5d4] text-[#050914]" : "text-white/60 hover:text-white"
-                }`}
-                title="DEVER Cyber Neon"
-              >
-                <Zap className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => {
-                  playTactileClick();
-                  setSkyTheme("dawn");
-                }}
-                className={`p-1.5 rounded-full transition-all cursor-pointer ${
-                  skyTheme === "dawn" ? "bg-[#ffb800] text-[#3a1306]" : "text-white/60 hover:text-white"
-                }`}
-                title="Bình Minh K22"
-              >
-                <Sun className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
 
           {/* Dream Counter Badge */}
           <div id="counter-pill" className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg">

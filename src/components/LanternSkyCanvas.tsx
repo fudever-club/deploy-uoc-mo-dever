@@ -2,8 +2,6 @@
 
 import React, { useEffect, useRef } from "react";
 
-export type SkyTheme = "midnight" | "cyber" | "dawn";
-
 interface Particle {
   x: number;
   y: number;
@@ -34,11 +32,10 @@ interface Ripple {
   color: string;
 }
 
-interface LanternSkyCanvasProps {
-  theme?: SkyTheme;
-}
+// Signature FU-DEVER Night Sky Palette (Ultra-lightweight, 0 runtime theme switching overhead)
+const SKY_PALETTE = ["#FAC775", "#FAEEDA", "#85B7EB", "#00F5D4", "#FFD166"];
 
-export const LanternSkyCanvas: React.FC<LanternSkyCanvasProps> = ({ theme = "midnight" }) => {
+export const LanternSkyCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const ripplesRef = useRef<Ripple[]>([]);
   const particlesRef = useRef<Particle[]>([]);
@@ -46,7 +43,7 @@ export const LanternSkyCanvas: React.FC<LanternSkyCanvasProps> = ({ theme = "mid
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     let animationFrameId: number;
@@ -60,54 +57,40 @@ export const LanternSkyCanvas: React.FC<LanternSkyCanvasProps> = ({ theme = "mid
     };
     window.addEventListener("resize", handleResize);
 
-    // Color Palettes by Theme
-    const getPalette = () => {
-      switch (theme) {
-        case "cyber":
-          return ["#00F5D4", "#0091EA", "#85B7EB", "#FFFFFF", "#7000FF"];
-        case "dawn":
-          return ["#FAC775", "#FFB800", "#FF6B6B", "#FAEEDA", "#E0AA4E"];
-        case "midnight":
-        default:
-          return ["#FAC775", "#FAEEDA", "#85B7EB", "#00F5D4", "#FFD166"];
-      }
-    };
-
-    // 1. Fireflies / Stardust Particles
-    const colors = getPalette();
-    const particleCount = Math.min(75, Math.floor((width * height) / 20000));
+    // Stardust & Warm Firefly Particles (Lightweight & high performance)
+    const particleCount = Math.min(45, Math.floor((width * height) / 32000));
     particlesRef.current = [];
 
     for (let i = 0; i < particleCount; i++) {
       particlesRef.current.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: -Math.random() * 0.55 - 0.15,
-        radius: Math.random() * 2.2 + 0.8,
-        alpha: Math.random() * 0.8 + 0.2,
-        alphaSpeed: (Math.random() * 0.02 + 0.006) * (Math.random() > 0.5 ? 1 : -1),
-        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: -Math.random() * 0.4 - 0.1,
+        radius: Math.random() * 2.0 + 0.8,
+        alpha: Math.random() * 0.7 + 0.3,
+        alphaSpeed: (Math.random() * 0.015 + 0.005) * (Math.random() > 0.5 ? 1 : -1),
+        color: SKY_PALETTE[Math.floor(Math.random() * SKY_PALETTE.length)],
       });
     }
 
-    // 2. Shooting Stars
+    // Shooting Stars
     const shootingStars: ShootingStar[] = [];
     const spawnShootingStar = () => {
-      if (Math.random() < 0.02 && shootingStars.length < 3) {
+      if (Math.random() < 0.015 && shootingStars.length < 2) {
         shootingStars.push({
           x: Math.random() * width * 0.85,
           y: Math.random() * (height * 0.4),
-          length: Math.random() * 90 + 40,
-          speed: Math.random() * 8 + 10,
-          angle: Math.PI / 4 + (Math.random() - 0.5) * 0.25,
-          opacity: 1,
+          length: Math.random() * 80 + 35,
+          speed: Math.random() * 7 + 8,
+          angle: Math.PI / 4 + (Math.random() - 0.5) * 0.2,
+          opacity: 0.9,
           active: true,
         });
       }
     };
 
-    // 3. Interactive Click Ripple Trigger
+    // Interactive Click Ripple Trigger
     const handleClick = (e: MouseEvent | TouchEvent) => {
       const clientX = "touches" in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
       const clientY = "touches" in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
@@ -115,63 +98,61 @@ export const LanternSkyCanvas: React.FC<LanternSkyCanvasProps> = ({ theme = "mid
       ripplesRef.current.push({
         x: clientX,
         y: clientY,
-        radius: 5,
-        maxRadius: 100,
-        opacity: 0.8,
-        color: theme === "cyber" ? "#00F5D4" : "#FAC775",
+        radius: 4,
+        maxRadius: 80,
+        opacity: 0.75,
+        color: "#FAC775",
       });
 
-      // Spawn small burst of extra particles
-      for (let i = 0; i < 8; i++) {
+      // Spawn small burst of stardust
+      for (let i = 0; i < 4; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 2 + 1;
+        const speed = Math.random() * 1.8 + 0.8;
         particlesRef.current.push({
           x: clientX,
           y: clientY,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          radius: Math.random() * 2.5 + 1,
-          alpha: 1,
-          alphaSpeed: -0.025,
-          color: colors[Math.floor(Math.random() * colors.length)],
+          radius: Math.random() * 2.0 + 1,
+          alpha: 0.9,
+          alphaSpeed: -0.02,
+          color: SKY_PALETTE[Math.floor(Math.random() * SKY_PALETTE.length)],
         });
       }
     };
 
     window.addEventListener("click", handleClick);
 
-    // 4. Main Render Loop
+    // Main Ultra-Fast Render Loop (Zero ShadowBlur overhead)
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
       // Render Ripples
       for (let i = ripplesRef.current.length - 1; i >= 0; i--) {
         const r = ripplesRef.current[i];
-        ctx.save();
         ctx.strokeStyle = r.color;
         ctx.globalAlpha = Math.max(0, r.opacity);
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
         ctx.stroke();
-        ctx.restore();
 
-        r.radius += 2.5;
-        r.opacity -= 0.02;
+        r.radius += 2.2;
+        r.opacity -= 0.025;
 
         if (r.radius >= r.maxRadius || r.opacity <= 0) {
           ripplesRef.current.splice(i, 1);
         }
       }
 
-      // Render Particles
+      // Render Particles with crisp glowing halo
       for (let i = particlesRef.current.length - 1; i >= 0; i--) {
         const p = particlesRef.current[i];
         p.x += p.vx;
         p.y += p.vy;
         p.alpha += p.alphaSpeed;
 
-        if (p.alpha > 0.95 || p.alpha < 0.15) {
+        if (p.alpha > 0.9 || p.alpha < 0.2) {
           p.alphaSpeed = -p.alphaSpeed;
         }
 
@@ -182,17 +163,22 @@ export const LanternSkyCanvas: React.FC<LanternSkyCanvasProps> = ({ theme = "mid
         if (p.x < -10) p.x = width + 10;
         if (p.x > width + 10) p.x = -10;
 
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, Math.min(1, p.alpha));
+        const currentAlpha = Math.max(0, Math.min(1, p.alpha));
+
+        // Soft outer glow halo (fast 2-circle technique)
         ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 10;
+        ctx.globalAlpha = currentAlpha * 0.25;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius * 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bright core
+        ctx.globalAlpha = currentAlpha;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
 
-        // Expire transient burst particles
+        // Expire burst particles
         if (p.alphaSpeed < 0 && p.alpha <= 0) {
           particlesRef.current.splice(i, 1);
         }
@@ -208,28 +194,27 @@ export const LanternSkyCanvas: React.FC<LanternSkyCanvasProps> = ({ theme = "mid
         const endY = star.y - Math.sin(star.angle) * star.length;
 
         const gradient = ctx.createLinearGradient(star.x, star.y, endX, endY);
-        const starColor = theme === "cyber" ? "0, 245, 212" : "250, 199, 117";
-        gradient.addColorStop(0, `rgba(${starColor}, ${star.opacity})`);
-        gradient.addColorStop(1, `rgba(${starColor}, 0)`);
+        gradient.addColorStop(0, `rgba(250, 199, 117, ${star.opacity})`);
+        gradient.addColorStop(1, "rgba(250, 199, 117, 0)");
 
-        ctx.save();
         ctx.strokeStyle = gradient;
-        ctx.lineWidth = 2.5;
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(star.x, star.y);
         ctx.lineTo(endX, endY);
         ctx.stroke();
-        ctx.restore();
 
         star.x += Math.cos(star.angle) * star.speed;
         star.y += Math.sin(star.angle) * star.speed;
-        star.opacity -= 0.02;
+        star.opacity -= 0.022;
 
         if (star.opacity <= 0 || star.y > height || star.x > width) {
           shootingStars.splice(i, 1);
         }
       }
 
+      ctx.globalAlpha = 1;
       animationFrameId = requestAnimationFrame(render);
     };
 
@@ -240,7 +225,7 @@ export const LanternSkyCanvas: React.FC<LanternSkyCanvasProps> = ({ theme = "mid
       window.removeEventListener("click", handleClick);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [theme]);
+  }, []);
 
   return (
     <canvas

@@ -2,15 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import confetti from "canvas-confetti";
 import { DREAM_CATEGORIES, BUGGY_MOODS, INSPIRATION_PROMPTS } from "@/lib/constants";
 import { Dream, DreamCategory, CardTheme } from "@/types/dream";
 import { generatePoem } from "@/lib/poem-generator";
 import { LanternSVG, LANTERN_SHAPES, LanternShape } from "@/components/LanternSVG";
 import { playLanternAscendChime, playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
-import { DreamCardModal } from "@/components/DreamCardModal";
-import { ARPhotoBoothModal } from "@/components/ARPhotoBoothModal";
-import { BuggyCatcherModal } from "@/components/BuggyCatcherModal";
 import { ReactionBar } from "@/components/ReactionBar";
 import {
   Sparkles,
@@ -21,12 +19,27 @@ import {
   AlertCircle,
   Lightbulb,
   Palette,
-  Eye,
   Flame,
   Camera,
   Feather,
   Layers,
 } from "lucide-react";
+
+// Dynamically lazy-load heavy interactive modals to minimize initial bundle size on mobile devices
+const DreamCardModal = dynamic(
+  () => import("@/components/DreamCardModal").then((mod) => mod.DreamCardModal),
+  { ssr: false }
+);
+
+const ARPhotoBoothModal = dynamic(
+  () => import("@/components/ARPhotoBoothModal").then((mod) => mod.ARPhotoBoothModal),
+  { ssr: false }
+);
+
+const BuggyCatcherModal = dynamic(
+  () => import("@/components/BuggyCatcherModal").then((mod) => mod.BuggyCatcherModal),
+  { ssr: false }
+);
 
 export default function WishSubmissionPage() {
   const [step, setStep] = useState<"intro" | "form" | "thankyou">("intro");
@@ -220,6 +233,7 @@ export default function WishSubmissionPage() {
                   width={64}
                   height={64}
                   className="object-contain drop-shadow-md animate-float"
+                  priority
                 />
               </div>
             </div>
@@ -657,8 +671,8 @@ export default function WishSubmissionPage() {
         )}
       </div>
 
-      {/* Dream Card Modal */}
-      {createdDream && (
+      {/* Dream Card Modal - Lazy Loaded */}
+      {createdDream && showCardModal && (
         <DreamCardModal
           dream={createdDream}
           isOpen={showCardModal}
@@ -666,19 +680,23 @@ export default function WishSubmissionPage() {
         />
       )}
 
-      {/* AR Photo Booth Modal */}
-      <ARPhotoBoothModal
-        isOpen={showPhotoBooth}
-        onClose={() => setShowPhotoBooth(false)}
-        dreamName={createdDream?.name || undefined}
-        dreamContent={createdDream?.content || undefined}
-      />
+      {/* AR Photo Booth Modal - Lazy Loaded */}
+      {showPhotoBooth && (
+        <ARPhotoBoothModal
+          isOpen={showPhotoBooth}
+          onClose={() => setShowPhotoBooth(false)}
+          dreamName={createdDream?.name || undefined}
+          dreamContent={createdDream?.content || undefined}
+        />
+      )}
 
-      {/* Buggy Catcher Minigame Easter Egg Modal */}
-      <BuggyCatcherModal
-        isOpen={showBuggyGame}
-        onClose={() => setShowBuggyGame(false)}
-      />
+      {/* Buggy Catcher Minigame Easter Egg Modal - Lazy Loaded */}
+      {showBuggyGame && (
+        <BuggyCatcherModal
+          isOpen={showBuggyGame}
+          onClose={() => setShowBuggyGame(false)}
+        />
+      )}
     </div>
   );
 }

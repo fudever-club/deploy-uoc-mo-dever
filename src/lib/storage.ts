@@ -1,10 +1,10 @@
 import { Dream, DreamInput, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient, RealtimeChannel } from "@supabase/supabase-js";
 import { EventEmitter } from "events";
 import fs from "fs";
 import path from "path";
 
-// Global event bus for SSE / Realtime broadcasts
+// Global event bus for Local SSE broadcasts
 class RealtimeBus extends EventEmitter {
   constructor() {
     super();
@@ -19,6 +19,10 @@ declare global {
   var __localDreams: Dream[] | undefined;
   // eslint-disable-next-line no-var
   var __activeAnnouncement: BroadcastAnnouncement | null | undefined;
+  // eslint-disable-next-line no-var
+  var __supabaseServerClient: SupabaseClient | undefined;
+  // eslint-disable-next-line no-var
+  var __supabaseBroadcastChannel: RealtimeChannel | undefined;
 }
 
 export const realtimeBus = global.__realtimeBus ?? new RealtimeBus();
@@ -48,6 +52,7 @@ const INITIAL_DREAMS: Dream[] = [
     hidden: false,
     mascotIndex: 3,
     theme: "tech",
+    lanternShape: "cyber_dever",
   },
   {
     id: "dream-init-2",
@@ -59,6 +64,7 @@ const INITIAL_DREAMS: Dream[] = [
     hidden: false,
     mascotIndex: 15,
     theme: "gold",
+    lanternShape: "hoian_lotus",
   },
   {
     id: "dream-init-3",
@@ -70,6 +76,7 @@ const INITIAL_DREAMS: Dream[] = [
     hidden: false,
     mascotIndex: 8,
     theme: "classic",
+    lanternShape: "star",
   },
   {
     id: "dream-init-4",
@@ -81,12 +88,13 @@ const INITIAL_DREAMS: Dream[] = [
     hidden: false,
     mascotIndex: 1,
     theme: "classic",
+    lanternShape: "carp_dragon",
   },
 ];
 
-// Load local dreams
+// Load local dreams with caching
 function loadLocalDreams(): Dream[] {
-  if (global.__localDreams) {
+  if (global.__localDreams && global.__localDreams.length > 0) {
     return global.__localDreams;
   }
   try {
@@ -119,22 +127,39 @@ function saveLocalDreams(dreams: Dream[]) {
 }
 
 // Supabase client instance if configured
-let supabaseInstance: SupabaseClient | null = null;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (supabaseUrl && supabaseKey) {
-  try {
-    supabaseInstance = createClient(supabaseUrl, supabaseKey);
-  } catch (err) {
-    console.warn("Supabase init failed, fallback to local storage:", err);
+function getSupabaseClient(): SupabaseClient | null {
+  if (global.__supabaseServerClient) {
+    return global.__supabaseServerClient;
   }
+  if (supabaseUrl && supabaseKey) {
+    try {
+      const client = createClient(supabaseUrl, supabaseKey, {
+        auth: { persistSession: false },
+      });
+      global.__supabaseServerClient = client;
+      return client;
+    } catch (err) {
+      console.warn("Supabase init failed, fallback to local storage:", err);
+    }
+  }
+  return null;
 }
 
-export async function getDreams(includeHidden = false): Promise<Dream[]> {
-  if (supabaseInstance) {
+export const DREAM_COLUMNS = "id, name, content, tag, consent, created_at, hidden, mascotIndex, theme, lanternShape";
+
+export async function getDreams(includeHidden = false, limit = 150): Promise<Dream[]> {
+  const supabase = getSupabaseClient();
+  if (supabase) {
     try {
-      let query = supabaseInstance.from("dreams").select("*").order("created_at", { ascending: false });
+      let query = supabase
+        .from("dreams")
+        .select(DREAM_COLUMNS)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
       if (!includeHidden) {
         query = query.eq("hidden", false);
       }
@@ -164,11 +189,18 @@ export async function createDream(input: DreamInput): Promise<Dream> {
     hidden: false,
     mascotIndex: input.mascotIndex || 1,
     theme: input.theme || "classic",
+    lanternShape: input.lanternShape || "hoian_lotus",
   };
 
-  if (supabaseInstance) {
+  const supabase = getSupabaseClient();
+  if (supabase) {
     try {
-      const { data, error } = await supabaseInstance.from("dreams").insert([newDream]).select().single();
+      const { data, error } = await supabase
+        .from("dreams")
+        .insert([newDream])
+        .select(DREAM_COLUMNS)
+        .single();
+
       if (!error && data) {
         realtimeBus.emit("dream:inserted", data);
         return data as Dream;
@@ -184,19 +216,20 @@ export async function createDream(input: DreamInput): Promise<Dream> {
   list.unshift(newDream);
   saveLocalDreams(list);
 
-  // Broadcast event
+  // Broadcast event for local SSE
   realtimeBus.emit("dream:inserted", newDream);
   return newDream;
 }
 
 export async function updateDreamVisibility(id: string, hidden: boolean): Promise<Dream | null> {
-  if (supabaseInstance) {
+  const supabase = getSupabaseClient();
+  if (supabase) {
     try {
-      const { data, error } = await supabaseInstance
+      const { data, error } = await supabase
         .from("dreams")
         .update({ hidden })
         .eq("id", id)
-        .select()
+        .select(DREAM_COLUMNS)
         .single();
       if (!error && data) {
         realtimeBus.emit("dream:updated", data);
@@ -220,9 +253,10 @@ export async function updateDreamVisibility(id: string, hidden: boolean): Promis
 }
 
 export async function deleteDream(id: string): Promise<boolean> {
-  if (supabaseInstance) {
+  const supabase = getSupabaseClient();
+  if (supabase) {
     try {
-      const { error } = await supabaseInstance.from("dreams").delete().eq("id", id);
+      const { error } = await supabase.from("dreams").delete().eq("id", id);
       if (!error) {
         realtimeBus.emit("dream:deleted", { id });
         return true;
@@ -251,6 +285,20 @@ export function broadcastReaction(emoji: string): LiveReaction {
     x: Math.random() * 80 + 10,
     timestamp: Date.now(),
   };
+
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    try {
+      supabase.channel("dreams-live-channel").send({
+        type: "broadcast",
+        event: "reaction",
+        payload: reaction,
+      });
+    } catch {
+      // ignore broadcast error
+    }
+  }
+
   realtimeBus.emit("reaction:broadcast", reaction);
   return reaction;
 }
@@ -259,6 +307,18 @@ export function broadcastReaction(emoji: string): LiveReaction {
 export function setBroadcastAnnouncement(message: string | null): BroadcastAnnouncement | null {
   if (!message || message.trim().length === 0) {
     global.__activeAnnouncement = null;
+    const supabase = getSupabaseClient();
+    if (supabase) {
+      try {
+        supabase.channel("dreams-live-channel").send({
+          type: "broadcast",
+          event: "announcement",
+          payload: null,
+        });
+      } catch {
+        // ignore
+      }
+    }
     realtimeBus.emit("announcement:broadcast", null);
     return null;
   }
@@ -271,6 +331,20 @@ export function setBroadcastAnnouncement(message: string | null): BroadcastAnnou
   };
 
   global.__activeAnnouncement = announcement;
+
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    try {
+      supabase.channel("dreams-live-channel").send({
+        type: "broadcast",
+        event: "announcement",
+        payload: announcement,
+      });
+    } catch {
+      // ignore
+    }
+  }
+
   realtimeBus.emit("announcement:broadcast", announcement);
   return announcement;
 }
@@ -281,15 +355,16 @@ export function getActiveAnnouncement(): BroadcastAnnouncement | null {
 
 // Batch Mock Generator for Booth Testing
 export async function generateMockBatch(count = 5): Promise<Dream[]> {
-  const mockNames = ["Minh Khoi K22", "Thanh Thao", "Gia Khiem", "Phuong Linh", "Duy Anh", "Minh Ngoc", "Hoang Nam"];
+  const mockNames = ["Minh Khởi K22", "Thanh Thảo", "Gia Khiêm", "Phương Linh", "Duy Anh", "Minh Ngọc", "Hoàng Nam"];
   const mockWishes = [
-    "Muon tro thanh Flutter Developer xịn sò và tham gia core team DEVER!",
+    "Muốn trở thành Flutter Developer xịn sò và tham gia core team DEVER!",
     "Đạt điểm rèn luyện 100 và kết nạp nhiều người bạn tốt tại FPTU!",
-    "Deploy thanh cong web app dau tay phuc vu hang ngan sinh vien!",
-    "Cung DEVER vo dich hackathon Reshape The Future 2026!",
-    "Co mot ky hoc ky that ruc ro voi that nhieu ky niem dang nho!",
+    "Deploy thành công web app đầu tay phục vụ hàng ngàn sinh viên!",
+    "Cùng DEVER vô địch hackathon Reshape The Future 2026!",
+    "Có một kỳ học thật rực rỡ với thật nhiều kỷ niệm đáng nhớ!",
   ];
   const tags: ("career" | "study" | "travel" | "family" | "big_dream")[] = ["career", "study", "travel", "big_dream", "career"];
+  const shapes = ["hoian_lotus", "star", "keoquan", "garlic_silk", "carp_dragon", "cyber_dever"];
 
   const created: Dream[] = [];
   for (let i = 0; i < count; i++) {
@@ -300,6 +375,7 @@ export async function generateMockBatch(count = 5): Promise<Dream[]> {
       consent: true,
       mascotIndex: (i % 8) + 1,
       theme: i % 2 === 0 ? "classic" : "tech",
+      lanternShape: shapes[i % shapes.length],
     });
     created.push(d);
   }
