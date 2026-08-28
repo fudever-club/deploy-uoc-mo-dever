@@ -20,377 +20,431 @@ export async function renderDreamCardToDataUrl(
   if (!ctx) throw new Error("Could not get 2D context from canvas");
 
   const theme = dream.theme || "classic";
-  const mascotIndex = dream.mascotIndex || 1;
+  const mascotIndex = dream.mascotIndex || "11";
+  const categoryInfo = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
+  const stampInfo = getDeverStampInfo(dream.stampVariant, theme);
 
-  // 1. BACKGROUND RENDERING BASED ON THEME
+  // 1. CLASSICAL SILK & CELESTIAL BACKGROUND
   if (theme === "tech") {
-    // Cyber / Tech DEVER Theme (Deep Midnight Navy + Cyber Cyan Glow)
-    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
-    bgGradient.addColorStop(0, "#030814");
-    bgGradient.addColorStop(0.35, "#091a38");
-    bgGradient.addColorStop(0.7, "#0c2856");
-    bgGradient.addColorStop(1, "#02050e");
-    ctx.fillStyle = bgGradient;
+    // Cyber Silk Space
+    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+    bgGrad.addColorStop(0, "#030814");
+    bgGrad.addColorStop(0.3, "#071733");
+    bgGrad.addColorStop(0.7, "#0c2856");
+    bgGrad.addColorStop(1, "#020610");
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Cyan glowing ambient light
-    const glowGrad = ctx.createRadialGradient(width * 0.8, height * 0.2, 10, width * 0.8, height * 0.2, 380);
-    glowGrad.addColorStop(0, "rgba(0, 245, 212, 0.45)");
-    glowGrad.addColorStop(0.5, "rgba(0, 145, 234, 0.2)");
-    glowGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = glowGrad;
+    // Radiant Cyan Star Aura
+    const aura = ctx.createRadialGradient(width * 0.5, 260, 20, width * 0.5, 260, 480);
+    aura.addColorStop(0, "rgba(0, 245, 212, 0.35)");
+    aura.addColorStop(0.5, "rgba(0, 145, 234, 0.15)");
+    aura.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = aura;
     ctx.beginPath();
-    ctx.arc(width * 0.8, height * 0.2, 380, 0, Math.PI * 2);
+    ctx.arc(width * 0.5, 260, 480, 0, Math.PI * 2);
     ctx.fill();
   } else if (theme === "gold") {
-    // Imperial Radiant Warm Amber & Gold Theme (Distinct from Crimson Red)
-    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
-    bgGradient.addColorStop(0, "#2c1800");
-    bgGradient.addColorStop(0.25, "#593404");
-    bgGradient.addColorStop(0.6, "#8c5408");
-    bgGradient.addColorStop(0.85, "#b87c12");
-    bgGradient.addColorStop(1, "#1c0f00");
-    ctx.fillStyle = bgGradient;
+    // Imperial Golden Silk Decree
+    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+    bgGrad.addColorStop(0, "#261300");
+    bgGrad.addColorStop(0.25, "#4d2b02");
+    bgGrad.addColorStop(0.65, "#7a4605");
+    bgGrad.addColorStop(0.9, "#a6680a");
+    bgGrad.addColorStop(1, "#1c0c00");
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Luminous Imperial Moon & Golden Aura
-    const goldMoon = ctx.createRadialGradient(width * 0.5, height * 0.18, 30, width * 0.5, height * 0.18, 360);
-    goldMoon.addColorStop(0, "rgba(255, 215, 0, 0.65)");
-    goldMoon.addColorStop(0.4, "rgba(250, 199, 117, 0.3)");
-    goldMoon.addColorStop(0.8, "rgba(255, 209, 102, 0.08)");
-    goldMoon.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = goldMoon;
+    // Golden Full Moon
+    const moon = ctx.createRadialGradient(width * 0.5, 240, 30, width * 0.5, 240, 420);
+    moon.addColorStop(0, "rgba(255, 223, 128, 0.7)");
+    moon.addColorStop(0.4, "rgba(250, 199, 117, 0.25)");
+    moon.addColorStop(0.8, "rgba(255, 209, 102, 0.08)");
+    moon.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = moon;
     ctx.beginPath();
-    ctx.arc(width * 0.5, height * 0.18, 360, 0, Math.PI * 2);
+    ctx.arc(width * 0.5, 240, 420, 0, Math.PI * 2);
     ctx.fill();
   } else {
-    // Classic Crimson Festival Theme (Deep Red Velvet & Festive Lantern)
-    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
-    bgGradient.addColorStop(0, "#280505");
-    bgGradient.addColorStop(0.3, "#61100b");
-    bgGradient.addColorStop(0.7, "#993c1d");
-    bgGradient.addColorStop(1, "#180303");
-    ctx.fillStyle = bgGradient;
+    // Royal Crimson Lantern Heritage
+    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+    bgGrad.addColorStop(0, "#230404");
+    bgGrad.addColorStop(0.25, "#520c07");
+    bgGrad.addColorStop(0.65, "#802011");
+    bgGrad.addColorStop(0.88, "#993c1d");
+    bgGrad.addColorStop(1, "#1a0202");
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Warm Orange-Red Moon Glow
-    const moonGrad = ctx.createRadialGradient(width * 0.85, height * 0.15, 20, width * 0.85, height * 0.15, 280);
-    moonGrad.addColorStop(0, "rgba(250, 199, 117, 0.5)");
-    moonGrad.addColorStop(0.5, "rgba(230, 70, 30, 0.18)");
-    moonGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = moonGrad;
+    // Warm Lantern Horizon Glow
+    const moon = ctx.createRadialGradient(width * 0.5, 240, 20, width * 0.5, 240, 400);
+    moon.addColorStop(0, "rgba(255, 214, 153, 0.65)");
+    moon.addColorStop(0.35, "rgba(250, 199, 117, 0.3)");
+    moon.addColorStop(0.7, "rgba(153, 60, 29, 0.15)");
+    moon.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = moon;
     ctx.beginPath();
-    ctx.arc(width * 0.85, height * 0.15, 280, 0, Math.PI * 2);
+    ctx.arc(width * 0.5, 240, 400, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // Sparkling background stars
-  ctx.fillStyle =
-    theme === "tech"
-      ? "rgba(0, 245, 212, 0.8)"
-      : theme === "gold"
-      ? "rgba(255, 223, 128, 0.9)"
-      : "rgba(250, 238, 218, 0.75)";
-  const starCoords = [
-    [120, 150, 4],
-    [240, 280, 2.5],
-    [880, 340, 3.5],
-    [980, 520, 2],
-    [150, 680, 3],
-    [920, 1100, 2.5],
-    [100, 1350, 3],
-    [950, 1500, 3.5],
+  // 2. SUBTLE GOLD DUST & SILK SPECKS
+  const goldColor = theme === "tech" ? "rgba(0, 245, 212, " : theme === "gold" ? "rgba(255, 223, 128, " : "rgba(250, 199, 117, ";
+  const specks = [
+    [100, 120, 3, 0.8], [220, 250, 2, 0.6], [880, 180, 4, 0.9], [960, 420, 2.5, 0.7],
+    [140, 580, 3.5, 0.85], [920, 920, 2, 0.5], [120, 1280, 3, 0.7], [940, 1420, 3.5, 0.85],
+    [320, 160, 2, 0.5], [760, 280, 2.5, 0.6], [180, 950, 2, 0.4], [860, 1220, 3, 0.7],
+    [540, 130, 4, 0.9], [420, 380, 2, 0.5], [680, 410, 2.5, 0.6], [500, 1820, 3, 0.7]
   ];
-  starCoords.forEach(([x, y, r]) => {
+  specks.forEach(([x, y, r, a]) => {
+    ctx.fillStyle = `${goldColor}${a})`;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
   });
 
-  // Border Frame
-  const borderColor =
-    theme === "tech"
-      ? "rgba(0, 145, 234, 0.7)"
-      : theme === "gold"
-      ? "rgba(255, 209, 102, 0.85)"
-      : "rgba(250, 199, 117, 0.55)";
-  const innerBorderColor =
-    theme === "tech"
-      ? "rgba(0, 245, 212, 0.6)"
-      : theme === "gold"
-      ? "rgba(255, 238, 187, 0.9)"
-      : "rgba(224, 86, 56, 0.6)";
+  // 3. IMPERIAL DOUBLE-LINED FILIGREE BORDER
+  const primaryGold = theme === "tech" ? "#00f5d4" : theme === "gold" ? "#ffd166" : "#fac775";
+  const secondaryGold = theme === "tech" ? "#0091ea" : theme === "gold" ? "#b87c12" : "#993c1d";
 
-  ctx.strokeStyle = borderColor;
+  // Outer solid frame
+  ctx.strokeStyle = primaryGold;
   ctx.lineWidth = 4;
-  ctx.strokeRect(40, 40, width - 80, height - 80);
+  ctx.strokeRect(38, 38, width - 76, height - 76);
 
-  ctx.strokeStyle = innerBorderColor;
+  // Inner dashed delicate border
+  ctx.save();
+  ctx.strokeStyle = `${primaryGold}bb`;
   ctx.lineWidth = 1.5;
-  ctx.strokeRect(55, 55, width - 110, height - 110);
+  ctx.strokeRect(52, 52, width - 104, height - 104);
+  ctx.restore();
 
-  // Corner Accents
-  const drawCorner = (cx: number, cy: number, rot: number) => {
+  // Classical Oriental Cloud Filigree Corners
+  const drawCornerFiligree = (cx: number, cy: number, rot: number) => {
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(rot);
-    ctx.strokeStyle = theme === "tech" ? "#00f5d4" : theme === "gold" ? "#ffd166" : "#fac775";
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = primaryGold;
+    ctx.lineWidth = 2.5;
+
+    // Corner bracket
     ctx.beginPath();
-    ctx.moveTo(0, 25);
+    ctx.moveTo(0, 40);
     ctx.lineTo(0, 0);
-    ctx.lineTo(25, 0);
+    ctx.lineTo(40, 0);
     ctx.stroke();
+
+    // Inner curve / cloud swirl
+    ctx.beginPath();
+    ctx.arc(16, 16, 12, Math.PI, Math.PI * 1.5);
+    ctx.stroke();
+
+    // Little diamond accent
+    ctx.fillStyle = primaryGold;
+    ctx.beginPath();
+    ctx.arc(6, 6, 3, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.restore();
   };
-  drawCorner(65, 65, 0);
-  drawCorner(width - 65, 65, Math.PI / 2);
-  drawCorner(width - 65, height - 65, Math.PI);
-  drawCorner(65, height - 65, -Math.PI / 2);
 
-  // 2. HEADER SECTION
+  drawCornerFiligree(62, 62, 0);
+  drawCornerFiligree(width - 62, 62, Math.PI / 2);
+  drawCornerFiligree(width - 62, height - 62, Math.PI);
+  drawCornerFiligree(62, height - 62, -Math.PI / 2);
+
+  // 4. HEADER: IMPERIAL CEREMONY BANNER & MOON LANTERN
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  // Event Tag Pill
-  ctx.fillStyle = theme === "tech" ? "#00f5d4" : theme === "gold" ? "#ffd166" : "#fac775";
-  ctx.font = "bold 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-  ctx.fillText("🏮 FU-DEVER CLUB DAY 2026 🏮", width / 2, 140);
+  // Top Ribbon / Dynasty header
+  ctx.fillStyle = primaryGold;
+  ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', serif";
+  ctx.fillText("✦ BẢNG VÀNG HOA ĐĂNG · TRUNG THU ĐẠI HỘI ✦", width / 2, 115);
 
-  // Main Activity Title
-  ctx.fillStyle = theme === "gold" ? "#fff6db" : "#faeeda";
-  ctx.font = "900 68px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-  ctx.fillText("DEPLOY ƯỚC MƠ", width / 2, 230);
+  // Main Event Proclamation Title
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+  ctx.fillStyle = theme === "gold" ? "#fffbf0" : "#faeeda";
+  ctx.font = "900 70px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif";
+  ctx.fillText("DEPLOY ƯỚC MƠ", width / 2, 195);
+  ctx.restore();
 
   // Subtitle / Date
-  ctx.fillStyle =
-    theme === "tech"
-      ? "rgba(133, 183, 235, 0.9)"
-      : theme === "gold"
-      ? "rgba(255, 238, 187, 0.9)"
-      : "rgba(250, 238, 218, 0.85)";
-  ctx.font = "30px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-  ctx.fillText("Kỷ niệm ngày hội CLB · 12/09/2026", width / 2, 295);
+  ctx.fillStyle = `${primaryGold}dd`;
+  ctx.font = "24px -apple-system, BlinkMacSystemFont, 'Segoe UI', serif";
+  ctx.fillText("NGÀY HỘI CLB FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG", width / 2, 255);
 
-  // Category Tag Pill
-  const categoryInfo = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
+  // 5. CATEGORY GEMSTONE PILL
   if (categoryInfo) {
     const pillText = `${categoryInfo.emoji} ${categoryInfo.label}`;
-    ctx.font = "bold 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    const pillWidth = ctx.measureText(pillText).width + 60;
-    const pillHeight = 56;
-    const pillX = (width - pillWidth) / 2;
-    const pillY = 360;
+    ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    const pillW = ctx.measureText(pillText).width + 64;
+    const pillH = 50;
+    const pillX = (width - pillW) / 2;
+    const pillY = 295;
 
-    ctx.fillStyle =
-      theme === "tech"
-        ? "rgba(0, 145, 234, 0.3)"
-        : theme === "gold"
-        ? "rgba(255, 209, 102, 0.25)"
-        : "rgba(250, 199, 117, 0.2)";
+    ctx.fillStyle = `${secondaryGold}44`;
     ctx.beginPath();
-    ctx.roundRect(pillX, pillY, pillWidth, pillHeight, 28);
+    ctx.roundRect(pillX, pillY, pillW, pillH, 25);
     ctx.fill();
-    ctx.strokeStyle =
-      theme === "tech"
-        ? "rgba(0, 245, 212, 0.7)"
-        : theme === "gold"
-        ? "rgba(255, 209, 102, 0.85)"
-        : "rgba(250, 199, 117, 0.6)";
-    ctx.lineWidth = 2;
+
+    ctx.strokeStyle = `${primaryGold}aa`;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    ctx.fillStyle = theme === "tech" ? "#00f5d4" : theme === "gold" ? "#ffd166" : "#fac775";
-    ctx.fillText(pillText, width / 2, pillY + pillHeight / 2);
+    ctx.fillStyle = primaryGold;
+    ctx.fillText(pillText, width / 2, pillY + pillH / 2);
   }
 
-  // 3. MIDDLE CONTENT CARD
-  const cardX = 90;
-  const cardY = 460;
-  const cardW = width - 180;
-  const cardH = 880;
+  // 6. MAIN SILK SCROLL CONTENT CARD
+  const cardX = 80;
+  const cardY = 385;
+  const cardW = width - 160;
+  const cardH = 970;
 
-  ctx.fillStyle =
-    theme === "tech"
-      ? "rgba(4, 12, 28, 0.85)"
-      : theme === "gold"
-      ? "rgba(36, 20, 2, 0.88)"
-      : "rgba(28, 6, 6, 0.82)";
+  // Silk Card Background with rich gradient
+  const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
+  if (theme === "tech") {
+    cardGrad.addColorStop(0, "rgba(4, 15, 36, 0.92)");
+    cardGrad.addColorStop(1, "rgba(2, 8, 20, 0.95)");
+  } else if (theme === "gold") {
+    cardGrad.addColorStop(0, "rgba(42, 22, 2, 0.94)");
+    cardGrad.addColorStop(1, "rgba(22, 11, 1, 0.96)");
+  } else {
+    cardGrad.addColorStop(0, "rgba(45, 9, 8, 0.92)");
+    cardGrad.addColorStop(1, "rgba(22, 3, 3, 0.95)");
+  }
+
+  ctx.fillStyle = cardGrad;
   ctx.beginPath();
-  ctx.roundRect(cardX, cardY, cardW, cardH, 32);
+  ctx.roundRect(cardX, cardY, cardW, cardH, 28);
   ctx.fill();
-  ctx.strokeStyle =
-    theme === "tech"
-      ? "rgba(0, 245, 212, 0.55)"
-      : theme === "gold"
-      ? "rgba(255, 209, 102, 0.75)"
-      : "rgba(250, 199, 117, 0.4)";
+
+  // Outer & Inner Gold Trim on Card
+  ctx.strokeStyle = `${primaryGold}99`;
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  // Try to load and draw Mascot Buggy Sticker on the card
+  ctx.strokeStyle = `${primaryGold}33`;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(cardX + 12, cardY + 12, cardW - 24, cardH - 24, 20);
+  ctx.stroke();
+
+  // 7. VINTAGE POSTAGE STAMP WITH PERFORATED EDGES (TOP RIGHT OF SCROLL)
+  const stampBoxX = cardX + cardW - 190;
+  const stampBoxY = cardY + 30;
+  const stampBoxW = 160;
+  const stampBoxH = 190;
+
+  ctx.save();
+  // Draw perforated stamp paper
+  ctx.fillStyle = "#fffcf2";
+  ctx.beginPath();
+  ctx.roundRect(stampBoxX, stampBoxY, stampBoxW, stampBoxH, 6);
+  ctx.fill();
+
+  // Stamp inner artwork frame
+  ctx.strokeStyle = secondaryGold;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(stampBoxX + 8, stampBoxY + 8, stampBoxW - 16, stampBoxH - 36);
+
+  // Stamp Header
+  ctx.fillStyle = secondaryGold;
+  ctx.textAlign = "center";
+  ctx.font = "black 10px monospace";
+  ctx.fillText("FU-DEVER 2026", stampBoxX + stampBoxW / 2, stampBoxY + 18);
+
+  // Draw Mascot Buggy on the Postage Stamp
   try {
     const mascotSrc = getBuggyMascotUrl(mascotIndex);
     const mascotImg = new Image();
     mascotImg.crossOrigin = "anonymous";
     mascotImg.src = mascotSrc;
     await new Promise<void>((resolve) => {
-      if (mascotImg.complete && mascotImg.naturalWidth > 0) {
-        const mW = 135;
-        const mH = 135;
-        ctx.drawImage(mascotImg, cardX + cardW - 155, cardY + 20, mW, mH);
-        resolve();
-        return;
-      }
       mascotImg.onload = () => {
-        const mW = 135;
-        const mH = 135;
-        ctx.drawImage(mascotImg, cardX + cardW - 155, cardY + 20, mW, mH);
+        ctx.drawImage(mascotImg, stampBoxX + 18, stampBoxY + 28, stampBoxW - 36, stampBoxH - 74);
         resolve();
       };
-      mascotImg.onerror = () => {
-        console.warn("Could not load mascot sticker from:", mascotSrc);
-        resolve();
-      };
-      setTimeout(resolve, 1500);
+      mascotImg.onerror = () => resolve();
+      setTimeout(resolve, 800);
     });
-  } catch (e) {
-    console.warn("Mascot draw error:", e);
+  } catch {
+    // ignore
   }
 
-  // Traditional DEVER Seal Stamp (Top Right)
-  const stampInfo = getDeverStampInfo(dream.stampVariant, theme);
+  // Stamp Value / Denomination
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "bold 12px monospace";
+  ctx.fillText("★ VIP DEV ★", stampBoxX + stampBoxW / 2, stampBoxY + stampBoxH - 12);
+
+  ctx.restore();
+
+  // 8. IMPERIAL VERMILION SEAL DAMPENED ACROSS THE POSTAGE STAMP
   ctx.save();
-  ctx.translate(cardX + cardW - 75, cardY + 50);
-  ctx.rotate((6 * Math.PI) / 180);
+  ctx.translate(stampBoxX - 10, stampBoxY + stampBoxH - 25);
+  ctx.rotate((-14 * Math.PI) / 180);
 
+  // Circular Double Seal Border
   ctx.strokeStyle = stampInfo.color;
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 3.5;
   ctx.beginPath();
-  ctx.arc(0, 0, 36, 0, Math.PI * 2);
+  ctx.arc(0, 0, 52, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1.2;
   ctx.beginPath();
-  ctx.arc(0, 0, 32, 0, Math.PI * 2);
+  ctx.arc(0, 0, 46, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.fillStyle = `${stampInfo.color}20`;
+  ctx.fillStyle = `${stampInfo.color}22`;
   ctx.beginPath();
-  ctx.arc(0, 0, 32, 0, Math.PI * 2);
+  ctx.arc(0, 0, 46, 0, Math.PI * 2);
   ctx.fill();
 
+  // Draw Chosen DEVER Stamp Emblem inside seal
   try {
     const stampImg = new Image();
     stampImg.crossOrigin = "anonymous";
     stampImg.src = stampInfo.image;
     await new Promise<void>((resolve) => {
       stampImg.onload = () => {
-        ctx.drawImage(stampImg, -26, -26, 52, 52);
+        ctx.drawImage(stampImg, -34, -34, 68, 68);
         resolve();
       };
       stampImg.onerror = () => resolve();
       setTimeout(resolve, 600);
     });
   } catch {
-    // ignore
+    // fallback text
   }
   ctx.restore();
 
-  // Dreamer Name
-  const dreamerName = dream.name && dream.name.trim().length > 0 ? dream.name.trim() : "Ẩn danh";
-  ctx.fillStyle =
-    theme === "tech"
-      ? "#00f5d4"
-      : theme === "gold"
-      ? "#ffd166"
-      : "#fac775";
-  ctx.font = "bold 44px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  // 9. DREAMER NAME: IMPERIAL TABLET CARTOUCHE (BẢNG DANH VỊ)
+  const dreamerName = dream.name && dream.name.trim().length > 0 ? dream.name.trim() : "TÂN SINH VIÊN K22";
+  const nameBoxW = cardW - 240;
+  const nameBoxX = cardX + 35;
+  const nameBoxY = cardY + 45;
+
+  ctx.save();
+  ctx.fillStyle = `${primaryGold}18`;
+  ctx.beginPath();
+  ctx.roundRect(nameBoxX, nameBoxY, nameBoxW, 76, 16);
+  ctx.fill();
+  ctx.strokeStyle = `${primaryGold}77`;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = `${primaryGold}cc`;
+  ctx.font = "bold 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace";
+  ctx.fillText("📜 HÀNH KHÁCH / KÝ DANH:", nameBoxX + 22, nameBoxY + 28);
+
+  ctx.fillStyle = theme === "gold" ? "#ffd166" : "#ffffff";
+  ctx.font = "black 32px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  ctx.fillText(dreamerName.toUpperCase(), nameBoxX + 22, nameBoxY + 58);
+  ctx.restore();
+
+  // 10. THE MANIFESTO SCROLL / DREAM QUOTE
+  const quoteBoxX = cardX + 35;
+  const quoteBoxY = cardY + 240;
+  const quoteBoxW = cardW - 70;
+  const quoteBoxH = cardH - 280;
+
+  // Inner parchment for content
+  ctx.fillStyle = theme === "tech" ? "rgba(0, 245, 212, 0.04)" : "rgba(250, 199, 117, 0.05)";
+  ctx.beginPath();
+  ctx.roundRect(quoteBoxX, quoteBoxY, quoteBoxW, quoteBoxH, 18);
+  ctx.fill();
+  ctx.strokeStyle = `${primaryGold}33`;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Section Header inside card
+  ctx.fillStyle = primaryGold;
   ctx.textAlign = "center";
-  ctx.fillText(`✨ ${dreamerName} ✨`, width / 2, cardY + 80);
+  ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', serif";
+  ctx.fillText("✦ LỜI NGUYỆN CẤT CÁNH CÙNG HOA ĐĂNG ✦", width / 2, quoteBoxY + 45);
 
-  // Quote open
-  ctx.fillStyle =
-    theme === "tech"
-      ? "rgba(0, 245, 212, 0.5)"
-      : theme === "gold"
-      ? "rgba(255, 209, 102, 0.65)"
-      : "rgba(250, 199, 117, 0.4)";
-  ctx.font = "italic 70px Georgia, serif";
-  ctx.fillText("“", width / 2, cardY + 160);
+  // Classical Opening Quote
+  ctx.fillStyle = `${primaryGold}66`;
+  ctx.font = "italic 72px Georgia, serif";
+  ctx.fillText("『", quoteBoxX + 55, quoteBoxY + 110);
 
-  // Dream Content auto-scaling font size with newline support
-  const maxContentWidth = cardW - 120;
+  // Dream Content Multi-line Wrapping
+  const maxContentW = quoteBoxW - 130;
   const rawText = dream.content.trim();
-  const rawParagraphs = rawText.split(/\r?\n/);
+  const rawParas = rawText.split(/\r?\n/);
 
-  let fontSize = 38;
-  if (rawText.length > 250 || rawParagraphs.length > 6) fontSize = 28;
-  else if (rawText.length > 140 || rawParagraphs.length > 4) fontSize = 32;
-  else if (rawText.length < 60 && rawParagraphs.length <= 2) fontSize = 44;
+  let fontSize = 34;
+  if (rawText.length > 250 || rawParas.length > 6) fontSize = 25;
+  else if (rawText.length > 140 || rawParas.length > 4) fontSize = 29;
+  else if (rawText.length < 60 && rawParas.length <= 2) fontSize = 38;
 
-  ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
-  ctx.fillStyle = theme === "gold" ? "#fffbf0" : "#ffffff";
+  ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif`;
+  ctx.fillStyle = theme === "gold" ? "#fffdf5" : "#ffffff";
+  ctx.textAlign = "center";
 
-  // Word wrap while respecting user newlines / poem stanzas
   const lines: string[] = [];
-  for (const para of rawParagraphs) {
-    const trimmed = para.trim();
+  for (const p of rawParas) {
+    const trimmed = p.trim();
     if (!trimmed) {
       lines.push("");
       continue;
     }
     const words = trimmed.split(" ");
-    let currentLine = "";
+    let curLine = "";
     for (let i = 0; i < words.length; i++) {
-      const testLine = currentLine ? `${currentLine} ${words[i]}` : words[i];
-      const metrics = ctx.measureText(testLine);
-      if (metrics.width > maxContentWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = words[i];
+      const test = curLine ? `${curLine} ${words[i]}` : words[i];
+      if (ctx.measureText(test).width > maxContentW && curLine) {
+        lines.push(curLine);
+        curLine = words[i];
       } else {
-        currentLine = testLine;
+        curLine = test;
       }
     }
-    if (currentLine) lines.push(currentLine);
+    if (curLine) lines.push(curLine);
   }
 
-  const lineHeight = fontSize * 1.55;
-  const totalTextHeight = lines.length * lineHeight;
-  const availableContentH = cardH - 300;
-  const startY = cardY + 200 + Math.max(0, (availableContentH - totalTextHeight) / 2);
+  const lineH = fontSize * 1.58;
+  const totalTextH = lines.length * lineH;
+  const textStartY = quoteBoxY + 120 + Math.max(0, (quoteBoxH - 220 - totalTextH) / 2);
 
-  lines.forEach((line, idx) => {
-    ctx.fillText(line, width / 2, startY + idx * lineHeight);
+  lines.slice(0, 9).forEach((line, idx) => {
+    ctx.fillText(line, width / 2, textStartY + idx * lineH);
   });
 
-  // Quote close
-  ctx.fillStyle =
-    theme === "tech"
-      ? "rgba(0, 245, 212, 0.5)"
-      : theme === "gold"
-      ? "rgba(255, 209, 102, 0.65)"
-      : "rgba(250, 199, 117, 0.4)";
-  ctx.font = "italic 70px Georgia, serif";
-  ctx.fillText("”", width / 2, cardY + cardH - 60);
+  // Classical Closing Quote
+  ctx.fillStyle = `${primaryGold}66`;
+  ctx.font = "italic 72px Georgia, serif";
+  ctx.fillText("』", width - quoteBoxX - 55, quoteBoxY + quoteBoxH - 45);
 
-  // 4. FOOTER SECTION
-  ctx.strokeStyle =
-    theme === "tech"
-      ? "rgba(0, 145, 234, 0.6)"
-      : theme === "gold"
-      ? "rgba(255, 209, 102, 0.6)"
-      : "rgba(250, 199, 117, 0.4)";
+  // 11. FOOTER: OFFICIAL LOGO EMBLEM & VERIFICATION HASHTAGS
+  const footerY = 1430;
+
+  // Divider with diamond centerpiece
+  ctx.strokeStyle = `${primaryGold}55`;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(160, 1410);
-  ctx.lineTo(width - 160, 1410);
+  ctx.moveTo(140, footerY);
+  ctx.lineTo(width / 2 - 40, footerY);
+  ctx.moveTo(width / 2 + 40, footerY);
+  ctx.lineTo(width - 140, footerY);
   ctx.stroke();
 
-  // Draw Official Logo
-  const logoW = 150;
-  const logoH = 150;
-  const logoY = 1450;
+  // Diamond icon in divider
+  ctx.fillStyle = primaryGold;
+  ctx.beginPath();
+  ctx.arc(width / 2, footerY, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // FU-DEVER White Emblem Logo
+  const logoW = 145;
+  const logoH = 145;
+  const logoY = footerY + 25;
   try {
     const logoImg = new Image();
     logoImg.crossOrigin = "anonymous";
@@ -404,30 +458,20 @@ export async function renderDreamCardToDataUrl(
       setTimeout(resolve, 800);
     });
   } catch {
-    ctx.fillStyle = "#0091ea";
-    ctx.font = "bold 38px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    ctx.fillText("FU-DEVER", width / 2, logoY + 75);
+    ctx.fillStyle = primaryGold;
+    ctx.font = "bold 36px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.fillText("FU-DEVER", width / 2, logoY + 70);
   }
 
-  // Club Tagline
-  ctx.fillStyle =
-    theme === "tech"
-      ? "#85b7eb"
-      : theme === "gold"
-      ? "#ffeaa7"
-      : "#faeeda";
-  ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-  ctx.fillText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG", width / 2, 1660);
+  // Club Affiliation Title
+  ctx.fillStyle = theme === "gold" ? "#ffeaa7" : "#faeeda";
+  ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  ctx.fillText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG", width / 2, logoY + logoH + 45);
 
-  // Hashtags
-  ctx.fillStyle =
-    theme === "tech"
-      ? "#00f5d4"
-      : theme === "gold"
-      ? "#ffd166"
-      : "#fac775";
-  ctx.font = "bold 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-  ctx.fillText(EVENT_INFO.hashtags.join("   "), width / 2, 1725);
+  // Social Hashtags
+  ctx.fillStyle = primaryGold;
+  ctx.font = "bold 23px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  ctx.fillText(EVENT_INFO.hashtags.join("   "), width / 2, logoY + logoH + 95);
 
   return canvas.toDataURL("image/png");
 }

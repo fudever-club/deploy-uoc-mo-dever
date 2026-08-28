@@ -186,7 +186,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                 }`}
               >
                 <span>🏮</span>
-                <span>Cổ Điển</span>
+                <span>Thư Gấm Đỏ</span>
               </button>
 
               <button
@@ -202,7 +202,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                 }`}
               >
                 <span>🚀</span>
-                <span>DEVER Tech</span>
+                <span>Cyber Space</span>
               </button>
 
               <button
