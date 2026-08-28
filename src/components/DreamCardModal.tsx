@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useRef } from "react";
 import { Dream, CardTheme } from "@/types/dream";
-import { BUGGY_MOODS } from "@/lib/constants";
+import { BUGGY_MOODS, DREAM_CATEGORIES } from "@/lib/constants";
 import { downloadDreamCard, renderDreamCardToDataUrl } from "@/lib/dream-card-canvas";
-import { Download, Share2, X, Sparkles, Check, Palette, Smartphone } from "lucide-react";
+import { LanternSVG, LanternShape } from "@/components/LanternSVG";
+import { playPoemMagicSound, playTactileClick } from "@/lib/audio-synthesizer";
+import { Download, Share2, X, Sparkles, Check, Palette, Sparkle } from "lucide-react";
 import Image from "next/image";
 
 interface DreamCardModalProps {
@@ -16,63 +18,59 @@ interface DreamCardModalProps {
 export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, onClose }) => {
   const [selectedTheme, setSelectedTheme] = useState<CardTheme>(dream.theme || "classic");
   const [selectedMascot, setSelectedMascot] = useState<number>(dream.mascotIndex || 1);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && dream) {
-      setLoading(true);
+  if (!isOpen || !dream) return null;
+
+  const categoryInfo = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
+  const shape = (dream.lanternShape as LanternShape) || "hoian_lotus";
+
+  const handleDownload = async () => {
+    playTactileClick();
+    setIsExporting(true);
+    try {
       const customizedDream: Dream = {
         ...dream,
         theme: selectedTheme,
         mascotIndex: selectedMascot,
       };
-
-      renderDreamCardToDataUrl(customizedDream)
-        .then((url) => {
-          setImageUrl(url);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Failed to render dream card:", err);
-          setLoading(false);
-        });
-    }
-  }, [isOpen, dream, selectedTheme, selectedMascot]);
-
-  if (!isOpen) return null;
-
-  const handleDownload = () => {
-    if (imageUrl) {
+      const dataUrl = await renderDreamCardToDataUrl(customizedDream, { width: 1080, height: 1920 });
       const fileName = `Dream_Card_${dream.name ? dream.name.replace(/\s+/g, "_") : "FU_DEVER"}_${selectedTheme}_2026.png`;
-      downloadDreamCard(imageUrl, fileName);
+      downloadDreamCard(dataUrl, fileName);
+    } catch (err) {
+      console.error("Export error:", err);
+    } finally {
+      setIsExporting(false);
     }
   };
 
   const handleShare = async () => {
-    if (!imageUrl) return;
+    playTactileClick();
+    try {
+      const customizedDream: Dream = {
+        ...dream,
+        theme: selectedTheme,
+        mascotIndex: selectedMascot,
+      };
+      const dataUrl = await renderDreamCardToDataUrl(customizedDream, { width: 1080, height: 1920 });
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      const file = new File([blob], "Dream_Card_FU_DEVER_2026.png", { type: "image/png" });
 
-    if (navigator.share) {
-      try {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const file = new File([blob], "Dream_Card_FU_DEVER_2026.png", { type: "image/png" });
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: "Ước mơ của tôi tại FU-DEVER Club Day 2026",
-            text: "Tôi vừa thả đèn lồng ước mơ cùng CLB Lập trình FU-DEVER! #FUDEVER #DeployUocMo",
-            files: [file],
-          });
-          return;
-        }
-      } catch {
-        // fallback to copy
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: "Ước mơ của tôi tại FU-DEVER Club Day 2026",
+          text: "Tôi vừa thả đèn lồng ước mơ cùng CLB Lập trình FU-DEVER! #FUDEVER #DeployUocMo",
+          files: [file],
+        });
+        return;
       }
+    } catch {
+      // Fallback
     }
 
-    navigator.clipboard.writeText("#FUDEVER #ClubDay2026 #DeployUocMo");
+    navigator.clipboard.writeText("#FUDEVER #ClubDay2026 #DeployUocMo #FPTU");
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
@@ -110,7 +108,10 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => setSelectedTheme("classic")}
+                onClick={() => {
+                  playTactileClick();
+                  setSelectedTheme("classic");
+                }}
                 className={`py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   selectedTheme === "classic"
                     ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
@@ -123,7 +124,10 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
 
               <button
                 type="button"
-                onClick={() => setSelectedTheme("tech")}
+                onClick={() => {
+                  playTactileClick();
+                  setSelectedTheme("tech");
+                }}
                 className={`py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   selectedTheme === "tech"
                     ? "bg-[#0091ea] text-white border border-[#00f5d4] shadow-xs"
@@ -136,7 +140,10 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
 
               <button
                 type="button"
-                onClick={() => setSelectedTheme("gold")}
+                onClick={() => {
+                  playTactileClick();
+                  setSelectedTheme("gold");
+                }}
                 className={`py-1.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                   selectedTheme === "gold"
                     ? "bg-[#712b13] text-[#fac775] border border-[#fac775] shadow-xs"
@@ -159,7 +166,10 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                 <button
                   key={mood.index}
                   type="button"
-                  onClick={() => setSelectedMascot(mood.index)}
+                  onClick={() => {
+                    playTactileClick();
+                    setSelectedMascot(mood.index);
+                  }}
                   className={`p-1 rounded-xl shrink-0 transition-all cursor-pointer border ${
                     selectedMascot === mood.index
                       ? "bg-[#fac775]/25 border-[#fac775] scale-110 shadow-xs"
@@ -180,37 +190,103 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
           </div>
         </div>
 
-        {/* Card Preview Container */}
-        <div className="relative flex-1 min-h-[300px] max-h-[440px] overflow-hidden rounded-2xl border border-[#fac775]/30 bg-[#070d17]/80 flex items-center justify-center p-2 shadow-inner">
-          {loading ? (
-            <div className="flex flex-col items-center gap-3 text-center">
-              <div className="w-10 h-10 border-3 border-[#fac775] border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-[#fac775]">Đang render thiệp HD...</p>
+        {/* CRISP REAL-TIME LIVE 9:16 DREAM CARD PREVIEW (NO BLACK SCREEN) */}
+        <div className="relative flex-1 min-h-[380px] max-h-[460px] overflow-hidden rounded-2xl border-2 border-[#fac775]/40 bg-[#060c18] flex items-center justify-center p-3 shadow-2xl">
+          <div
+            className={`relative w-full max-w-[260px] aspect-[9/16] rounded-2xl p-4 flex flex-col justify-between text-center overflow-hidden shadow-2xl border ${
+              selectedTheme === "tech"
+                ? "bg-gradient-to-b from-[#08101e] via-[#0f203c] to-[#002244] border-[#00f5d4] text-[#00f5d4]"
+                : selectedTheme === "gold"
+                ? "bg-gradient-to-b from-[#3a1306] via-[#712b13] to-[#993c1d] border-[#fac775] text-[#fac775]"
+                : "bg-gradient-to-b from-[#4a1204] via-[#712b13] to-[#993c1d] border-[#fac775] text-[#faeeda]"
+            }`}
+          >
+            {/* Background Ambient Glow & Star Orbs */}
+            <div className="absolute top-0 right-0 w-36 h-36 rounded-full bg-amber-400/20 blur-2xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-red-600/20 blur-2xl pointer-events-none" />
+
+            {/* Inner Border Trim */}
+            <div className="absolute inset-1.5 border border-white/20 rounded-xl pointer-events-none" />
+
+            {/* 1. Header: Event Info */}
+            <div className="relative z-10">
+              <span className="text-[8px] tracking-widest font-black uppercase text-amber-300 block">
+                🏮 FU-DEVER CLUB DAY 2026 🏮
+              </span>
+              <h4 className="text-sm font-black text-white tracking-wider font-display drop-shadow-md">
+                DEPLOY ƯỚC MƠ
+              </h4>
+              <div className="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-white/10 text-[8px] font-bold text-amber-200">
+                {categoryInfo?.emoji} {categoryInfo?.shortLabel}
+              </div>
             </div>
-          ) : imageUrl ? (
-            <div className="relative h-full aspect-[9/16] shadow-2xl rounded-xl overflow-hidden border border-[#fac775]/40 animate-in fade-in zoom-in-95 duration-200">
-              <Image
-                src={imageUrl}
-                alt="Dream Card Preview"
-                fill
-                className="object-contain"
-                unoptimized
-              />
+
+            {/* 2. Middle: Selected Lantern + Name + Content + Seal */}
+            <div className="relative z-10 my-auto py-2">
+              {/* Floating Lantern SVG */}
+              <div className="flex justify-center mb-1.5">
+                <LanternSVG shape={shape} size={42} glow={true} className="animate-glow" />
+              </div>
+
+              {/* Dreamer Name */}
+              <div className="text-xs font-black text-white drop-shadow-sm mb-1">
+                ✨ {dream.name || "Tân Sinh Viên K22"} ✨
+              </div>
+
+              {/* Wish Content Box */}
+              <div className="p-2.5 rounded-xl bg-black/35 border border-white/15 backdrop-blur-md">
+                <p className="text-[10px] sm:text-[11px] italic font-medium text-white/95 line-clamp-4 leading-snug whitespace-pre-line">
+                  &ldquo;{dream.content}&rdquo;
+                </p>
+              </div>
+
+              {/* Red Traditional Seal & Buggy Mascot Stamp */}
+              <div className="flex items-center justify-between mt-2 px-1">
+                <div className="px-2 py-0.5 rounded-md border border-red-400 bg-red-900/60 text-red-300 text-[8px] font-black tracking-wider transform -rotate-6">
+                  {selectedTheme === "tech" ? "DEVER" : "ĐỖ ĐẠT"}
+                </div>
+                <div className="w-8 h-8 rounded-full bg-[#12203A] border border-[#fac775] p-0.5 shadow-md">
+                  <Image
+                    src={`/assets/buggy/${selectedMascot}.png`}
+                    alt="Buggy"
+                    width={28}
+                    height={28}
+                    className="object-contain"
+                  />
+                </div>
+              </div>
             </div>
-          ) : (
-            <p className="text-xs text-red-400">Không thể tạo ảnh, vui lòng thử lại.</p>
-          )}
+
+            {/* 3. Footer: Brand Logo & Hashtags */}
+            <div className="relative z-10 border-t border-white/15 pt-1.5">
+              <div className="text-[8px] font-bold text-white/80">
+                CLB LẬP TRÌNH FU-DEVER · FPTU
+              </div>
+              <div className="text-[7px] text-amber-300 font-mono">
+                #FUDEVER #DeployUocMo
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Actions */}
         <div className="mt-4 flex flex-col gap-2">
           <button
             onClick={handleDownload}
-            disabled={loading || !imageUrl}
+            disabled={isExporting}
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#993c1d] via-[#0091ea] to-[#fac775] hover:opacity-95 text-white font-black text-sm flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
           >
-            <Download className="w-4 h-4" />
-            <span>Tải Ảnh Về Máy (Chuẩn HD Story 9:16)</span>
+            {isExporting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Đang xuất ảnh HD 1080x1920...</span>
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                <span>Tải Ảnh Về Máy (Chuẩn HD Story 9:16)</span>
+              </>
+            )}
           </button>
 
           <div className="flex items-center justify-between gap-2 pt-1">
