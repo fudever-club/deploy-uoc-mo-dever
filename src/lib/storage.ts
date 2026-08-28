@@ -1,4 +1,4 @@
-import { Dream, DreamInput, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
+import { Dream, DreamInput, BroadcastAnnouncement, LiveReaction, MysteryDrop } from "@/types/dream";
 import { createClient, SupabaseClient, RealtimeChannel } from "@supabase/supabase-js";
 import { EventEmitter } from "events";
 import fs from "fs";
@@ -19,6 +19,8 @@ declare global {
   var __localDreams: Dream[] | undefined;
   // eslint-disable-next-line no-var
   var __activeAnnouncement: BroadcastAnnouncement | null | undefined;
+  // eslint-disable-next-line no-var
+  var __currentMysteryDrop: MysteryDrop | null | undefined;
   // eslint-disable-next-line no-var
   var __supabaseServerClient: SupabaseClient | undefined;
   // eslint-disable-next-line no-var
@@ -438,4 +440,142 @@ export async function generateMockBatch(count = 5): Promise<Dream[]> {
     created.push(d);
   }
   return created;
+}
+
+// ----------------------------------------------------
+// SECRET MYSTERY DROP SYSTEM (SINGLE-WINNER LOCK)
+// ----------------------------------------------------
+
+const DEFAULT_REWARDS = [
+  { name: "Sticker Buggy Hologram Phiên Bản Giới Hạn", emoji: "🐞", desc: "Bộ sticker chống nước phản quang độc quyền FU-DEVER" },
+  { name: "Móc Khóa FU-DEVER Cyber 2026", emoji: "🔑", desc: "Móc khóa mica dạ quang khắc logo FU-DEVER" },
+  { name: "Ly Trà Sữa Phúc Long 0% Đường", emoji: "🧋", desc: "Voucher 1 ly trà sữa tiếp năng lượng code đêm" },
+  { name: "Bình Giữ Nhiệt DEVER Space", emoji: "🪐", desc: "Bình giữ nhiệt kim loại khắc tên bạn tại Booth" },
+  { name: "Voucher Bí Mật Bàn Check-in", emoji: "🎁", desc: "Món quà bất ngờ từ Ban Chủ Nhiệm FU-DEVER" },
+];
+
+export function getActiveMysteryDrop(): MysteryDrop | null {
+  const drop = global.__currentMysteryDrop;
+  if (!drop) return null;
+  // If expired and not claimed, deactivate
+  if (Date.now() > drop.expiresAt && !drop.claimed) {
+    global.__currentMysteryDrop = null;
+    return null;
+  }
+  return drop;
+}
+
+export function triggerMysteryDrop(customOptions?: {
+  rewardName?: string;
+  rewardEmoji?: string;
+  description?: string;
+  durationSeconds?: number;
+}): MysteryDrop {
+  const randomPreset = DEFAULT_REWARDS[Math.floor(Math.random() * DEFAULT_REWARDS.length)];
+  const rewardName = customOptions?.rewardName || randomPreset.name;
+  const rewardEmoji = customOptions?.rewardEmoji || randomPreset.emoji;
+  const description = customOptions?.description || randomPreset.desc;
+  const duration = (customOptions?.durationSeconds || 25) * 1000;
+
+  const drop: MysteryDrop = {
+    id: `drop-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    rewardName,
+    rewardCode: `DEVER-${Math.floor(1000 + Math.random() * 9000)}`,
+    rewardEmoji,
+    description,
+    active: true,
+    claimed: false,
+    claimedBy: null,
+    claimedAt: null,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + duration,
+  };
+
+  global.__currentMysteryDrop = drop;
+
+  // Broadcast to Realtime Supabase
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    try {
+      supabase.channel("dreams-live-channel").send({
+        type: "broadcast",
+        event: "mystery_drop",
+        payload: drop,
+      });
+    } catch {
+      // ignore
+    }
+  }
+
+  realtimeBus.emit("mystery:drop", drop);
+  return drop;
+}
+
+export function claimMysteryDrop(
+  dropId: string,
+  claimantName: string
+): { success: boolean; drop?: MysteryDrop; error?: string; winner?: string } {
+  const drop = global.__currentMysteryDrop;
+
+  if (!drop || drop.id !== dropId) {
+    return {
+      success: false,
+      error: "Đợt thả đèn bí ẩn này đã kết thúc hoặc không tồn tại.",
+    };
+  }
+
+  // ATOMIC LOCK: If already claimed, reject all other claim requests
+  if (drop.claimed) {
+    return {
+      success: false,
+      error: `Rất tiếc! Bạn ${drop.claimedBy || "một bạn khác"} đã nhanh tay săn thành công trước bạn! Hãy đón chờ ngọn đèn bí ẩn tiếp theo nhé!`,
+      winner: drop.claimedBy || undefined,
+    };
+  }
+
+  if (Date.now() > drop.expiresAt) {
+    return {
+      success: false,
+      error: "Chiếc đèn đã bay đi mất rồi! Hẹn bạn ở đợt thả đèn tiếp theo.",
+    };
+  }
+
+  // Successfully claim (First Come First Served)
+  drop.claimed = true;
+  drop.claimedBy = claimantName.trim() || "Tân sinh viên K22";
+  drop.claimedAt = new Date().toISOString();
+
+  // Broadcast claim victory to /display and other clients
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    try {
+      supabase.channel("dreams-live-channel").send({
+        type: "broadcast",
+        event: "mystery_claimed",
+        payload: drop,
+      });
+    } catch {
+      // ignore
+    }
+  }
+
+  realtimeBus.emit("mystery:claimed", drop);
+  return { success: true, drop };
+}
+
+export function cancelMysteryDrop(): void {
+  global.__currentMysteryDrop = null;
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    try {
+      supabase.channel("dreams-live-channel").send({
+        type: "broadcast",
+        event: "mystery_cancel",
+        payload: null,
+      });
+    } catch {
+      // ignore
+    }
+  }
+  realtimeBus.emit("mystery:cancel", null);
 }

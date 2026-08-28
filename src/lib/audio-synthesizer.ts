@@ -236,3 +236,64 @@ export function playCelebrationFanfare(): void {
     osc.stop(now + note.time + note.dur);
   });
 }
+
+// Crackling Firework Explosion & Sparkle
+export function playFireworkBurstSound(): void {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+
+  // 1. Initial low boom
+  const boomOsc = ctx.createOscillator();
+  const boomGain = ctx.createGain();
+  boomOsc.type = "sine";
+  boomOsc.frequency.setValueAtTime(160, now);
+  boomOsc.frequency.exponentialRampToValueAtTime(40, now + 0.35);
+
+  boomGain.gain.setValueAtTime(0.25, now);
+  boomGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+  boomOsc.connect(boomGain);
+  boomGain.connect(ctx.destination);
+  boomOsc.start(now);
+  boomOsc.stop(now + 0.35);
+
+  // 2. High glitter crackles
+  [0.05, 0.12, 0.18, 0.26].forEach((delay) => {
+    const crackleOsc = ctx.createOscillator();
+    const crackleGain = ctx.createGain();
+    crackleOsc.type = "triangle";
+    crackleOsc.frequency.setValueAtTime(1200 + Math.random() * 800, now + delay);
+    crackleGain.gain.setValueAtTime(0.08, now + delay);
+    crackleGain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.08);
+    crackleOsc.connect(crackleGain);
+    crackleGain.connect(ctx.destination);
+    crackleOsc.start(now + delay);
+    crackleOsc.stop(now + delay + 0.08);
+  });
+}
+
+// Royal Mystery Drop magical crystal arrival
+export function playMysteryDropChime(): void {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const arpeggio = [587.33, 739.99, 880.0, 1174.66, 1479.98]; // D5, F#5, A5, D6, F#6
+  const now = ctx.currentTime;
+
+  arpeggio.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, now + i * 0.07);
+
+    gain.gain.setValueAtTime(0.001, now + i * 0.07);
+    gain.gain.linearRampToValueAtTime(0.2, now + i * 0.07 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.9);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + i * 0.07);
+    osc.stop(now + i * 0.07 + 0.9);
+  });
+}

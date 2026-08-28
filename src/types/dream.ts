@@ -67,3 +67,17 @@ export interface LiveReaction {
   x: number; // random percentage
   timestamp: number;
 }
+
+export interface MysteryDrop {
+  id: string;
+  rewardName: string;
+  rewardCode: string;
+  rewardEmoji: string;
+  description: string;
+  active: boolean;
+  claimed: boolean;
+  claimedBy: string | null;
+  claimedAt: string | null;
+  createdAt: number;
+  expiresAt: number;
+}

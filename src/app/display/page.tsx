@@ -30,6 +30,9 @@ import { StandeeQRModal } from "@/components/StandeeQRModal";
 import { LanternSkyCanvas } from "@/components/LanternSkyCanvas";
 import { ConstellationGalaxyView } from "@/components/ConstellationGalaxyView";
 import { FloatingLanternCardsSky, FlightMode } from "@/components/FloatingLanternCardsSky";
+import { FireworksCanvas } from "@/components/FireworksCanvas";
+import { MysteryDropBanner } from "@/components/MysteryDropBanner";
+import { LiveReaction } from "@/types/dream";
 
 export default function DisplaySkyPage() {
   const [selectedDream, setSelectedDream] = useState<Dream | null>(null);
@@ -39,6 +42,7 @@ export default function DisplaySkyPage() {
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>("all");
   const [spotlightIndex, setSpotlightIndex] = useState<number>(0);
   const [isAutoSpotlight, setIsAutoSpotlight] = useState<boolean>(true);
+  const [latestReaction, setLatestReaction] = useState<LiveReaction | null>(null);
 
   // Flight Mode: "carousel" (Xoay vòng 3D) vs "drift" (Trôi tự do) vs "galaxy" (Chòm sao)
   const [flightMode, setFlightMode] = useState<FlightMode>("carousel");
@@ -53,14 +57,25 @@ export default function DisplaySkyPage() {
     }
   }, [soundEnabled]);
 
-  const handleReaction = useCallback((reaction: { emoji: string }) => {
-    if (soundEnabled && audioUnlocked.current) {
-      playReactionSound(reaction.emoji);
-    }
-  }, [soundEnabled]);
+  const handleReaction = useCallback((reaction: { emoji: string; id?: string; x?: number; timestamp?: number }) => {
+    const fullReaction: LiveReaction = {
+      id: reaction.id || `react-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+      emoji: reaction.emoji,
+      x: typeof reaction.x === "number" ? reaction.x : Math.random() * 80 + 10,
+      timestamp: reaction.timestamp || Date.now(),
+    };
+    setLatestReaction(fullReaction);
+  }, []);
 
   // Unified Realtime Hook (Direct Supabase Channel + SSE + Resilient Adaptive Polling)
-  const { dreams, activeAnnouncement, reactions, connectionStatus } = useRealtimeDreams({
+  const {
+    dreams,
+    activeAnnouncement,
+    activeMysteryDrop,
+    setActiveMysteryDrop,
+    reactions,
+    connectionStatus,
+  } = useRealtimeDreams({
     onInsert: handleNewDream,
     onReaction: handleReaction,
   });
@@ -148,6 +163,19 @@ export default function DisplaySkyPage() {
           onSelectDream={(d) => setSelectedDream(d)}
         />
       )}
+
+      {/* 2.5 LIVE CROWD FIREWORKS & REACTIONS OVERLAY */}
+      <FireworksCanvas
+        latestReaction={latestReaction}
+        soundEnabled={soundEnabled}
+      />
+
+      {/* 2.6 SECRET MYSTERY DROP BANNER (SINGLE WINNER) */}
+      <MysteryDropBanner
+        drop={activeMysteryDrop}
+        onClose={() => setActiveMysteryDrop(null)}
+        soundEnabled={soundEnabled}
+      />
 
       {/* 3. TOP FLOATING CONTROL DOCK */}
       <div className="absolute top-4 inset-x-4 z-40 flex items-center justify-between pointer-events-none">

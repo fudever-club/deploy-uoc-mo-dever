@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Dream, BroadcastAnnouncement, LiveReaction } from "@/types/dream";
+import { Dream, BroadcastAnnouncement, LiveReaction, MysteryDrop } from "@/types/dream";
 import { createClient, SupabaseClient, RealtimeChannel } from "@supabase/supabase-js";
 
 interface UseRealtimeDreamsOptions {
@@ -10,6 +10,7 @@ interface UseRealtimeDreamsOptions {
   onDelete?: (id: string) => void;
   onAnnouncement?: (announcement: BroadcastAnnouncement | null) => void;
   onReaction?: (reaction: LiveReaction) => void;
+  onMysteryDrop?: (drop: MysteryDrop | null) => void;
 }
 
 export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
@@ -17,6 +18,7 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [totalAll, setTotalAll] = useState<number | null>(null);
   const [activeAnnouncement, setActiveAnnouncement] = useState<BroadcastAnnouncement | null>(null);
+  const [activeMysteryDrop, setActiveMysteryDrop] = useState<MysteryDrop | null>(null);
   const [reactions, setReactions] = useState<LiveReaction[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "supabase" | "sse" | "polling">("connecting");
   const [isLoaded, setIsLoaded] = useState(false);
@@ -55,6 +57,17 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
         setTotalAll(countAll);
 
         lastFetchedTimeRef.current = Date.now();
+      }
+
+      // Also check active mystery drop status
+      try {
+        const dropRes = await fetch("/api/mystery-drop", { cache: "no-store" });
+        const dropJson = await dropRes.json();
+        if (dropJson.success) {
+          setActiveMysteryDrop(dropJson.data || null);
+        }
+      } catch {
+        // ignore
       }
     } catch (err) {
       console.warn("Failed to fetch dreams:", err);
@@ -174,6 +187,20 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
               setReactions((prev) => [...prev.slice(-15), react]);
               optionsRef.current.onReaction?.(react);
             }
+          })
+          .on("broadcast", { event: "mystery_drop" }, (payload) => {
+            const drop = payload.payload as MysteryDrop;
+            setActiveMysteryDrop(drop);
+            optionsRef.current.onMysteryDrop?.(drop);
+          })
+          .on("broadcast", { event: "mystery_claimed" }, (payload) => {
+            const drop = payload.payload as MysteryDrop;
+            setActiveMysteryDrop(drop);
+            optionsRef.current.onMysteryDrop?.(drop);
+          })
+          .on("broadcast", { event: "mystery_cancel" }, () => {
+            setActiveMysteryDrop(null);
+            optionsRef.current.onMysteryDrop?.(null);
           })
           .subscribe((status) => {
             if (status === "SUBSCRIBED") {
@@ -313,6 +340,8 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
     setTotalCount,
     totalAll,
     activeAnnouncement,
+    activeMysteryDrop,
+    setActiveMysteryDrop,
     reactions,
     connectionStatus,
     isLoaded,

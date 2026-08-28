@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Dream, BroadcastAnnouncement } from "@/types/dream";
+import { Dream, BroadcastAnnouncement, MysteryDrop } from "@/types/dream";
 import { DREAM_CATEGORIES, EVENT_INFO } from "@/lib/constants";
 import { generateDreamsCSV } from "@/lib/csv-export";
 import {
@@ -22,6 +22,7 @@ import {
   PlusCircle,
   FileJson,
   BarChart3,
+  Gift,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
 import { WordCloudVisualizer } from "@/components/WordCloudVisualizer";
@@ -44,6 +45,10 @@ export default function AdminPage() {
   const [activeAnnouncement, setActiveAnnouncement] = useState<BroadcastAnnouncement | null>(null);
   const [sendingAnnouncement, setSendingAnnouncement] = useState(false);
 
+  // Mystery Drop State
+  const [activeMysteryDrop, setActiveMysteryDrop] = useState<MysteryDrop | null>(null);
+  const [triggeringDrop, setTriggeringDrop] = useState(false);
+
   // Simulation Status
   const [generatingMocks, setGeneratingMocks] = useState(false);
 
@@ -52,6 +57,9 @@ export default function AdminPage() {
     if (saved === "true") {
       setIsAuthenticated(true);
     }
+    fetchMysteryDrop();
+    const interval = setInterval(fetchMysteryDrop, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -218,6 +226,55 @@ export default function AdminPage() {
       console.error("Generate mocks error:", err);
     } finally {
       setGeneratingMocks(false);
+    }
+  };
+
+  const fetchMysteryDrop = async () => {
+    try {
+      const res = await fetch("/api/mystery-drop", { cache: "no-store" });
+      const json = await res.json();
+      if (json.success) {
+        setActiveMysteryDrop(json.data || null);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleTriggerMysteryDrop = async (rewardName?: string, rewardEmoji?: string) => {
+    setTriggeringDrop(true);
+    try {
+      const res = await fetch("/api/mystery-drop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "trigger",
+          rewardName,
+          rewardEmoji,
+          durationSeconds: 30,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setActiveMysteryDrop(json.data);
+      }
+    } catch (err) {
+      console.error("Trigger mystery drop error:", err);
+    } finally {
+      setTriggeringDrop(false);
+    }
+  };
+
+  const handleCancelMysteryDrop = async () => {
+    try {
+      await fetch("/api/mystery-drop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel" }),
+      });
+      setActiveMysteryDrop(null);
+    } catch {
+      // ignore
     }
   };
 
@@ -409,6 +466,88 @@ export default function AdminPage() {
             >
               <PlusCircle className={`w-3.5 h-3.5 ${generatingMocks ? "animate-spin" : ""}`} />
               <span>{generatingMocks ? "Đang tạo 5 ước mơ..." : "+ Tạo 5 ước mơ mẫu thử nghiệm"}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Mystery Drop Controller Card */}
+        <div className="bg-gradient-to-r from-[#12203A] via-[#1a2d4f] to-[#280505] p-5 rounded-3xl border-2 border-[#FAC775]/60 shadow-lg text-white space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/40 flex items-center justify-center text-lg">
+                🎁
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-white flex items-center gap-2">
+                  <span>Điều Phối Thả Đèn Lồng Bí Ẩn (Mystery Drop)</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/30 text-rose-300 border border-rose-400/40 font-bold uppercase">
+                    1 Người Săn
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-300">
+                  Thả chiếc đèn kim cương kèm mã QR đếm ngược lên màn hình lớn gian hàng.
+                </p>
+              </div>
+            </div>
+
+            {activeMysteryDrop && (
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1.5 ${
+                  activeMysteryDrop.claimed
+                    ? "bg-emerald-500/30 text-emerald-300 border border-emerald-400"
+                    : "bg-amber-400/30 text-amber-300 border border-amber-400 animate-pulse"
+                }`}>
+                  {activeMysteryDrop.claimed ? `🏆 Đã nhận: ${activeMysteryDrop.claimedBy}` : "⏳ Đang thả đèn trên màn hình"}
+                </span>
+                <button
+                  onClick={handleCancelMysteryDrop}
+                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white transition-colors cursor-pointer"
+                >
+                  Đóng
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            <button
+              onClick={() => handleTriggerMysteryDrop("Sticker Buggy Hologram", "🐞")}
+              disabled={triggeringDrop}
+              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-amber-400/30 text-left transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            >
+              <div className="text-xl mb-1">🐞</div>
+              <div className="text-xs font-bold text-white">Sticker Buggy</div>
+              <div className="text-[10px] text-slate-300">Hologram Giới Hạn</div>
+            </button>
+
+            <button
+              onClick={() => handleTriggerMysteryDrop("Móc Khóa FU-DEVER Cyber", "🔑")}
+              disabled={triggeringDrop}
+              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-amber-400/30 text-left transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            >
+              <div className="text-xl mb-1">🔑</div>
+              <div className="text-xs font-bold text-white">Móc Khóa Mica</div>
+              <div className="text-[10px] text-slate-300">Dạ quang DEVER</div>
+            </button>
+
+            <button
+              onClick={() => handleTriggerMysteryDrop("Ly Trà Sữa Phúc Long 0% Đường", "🧋")}
+              disabled={triggeringDrop}
+              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-amber-400/30 text-left transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            >
+              <div className="text-xl mb-1">🧋</div>
+              <div className="text-xs font-bold text-white">Trà Sữa Phúc Long</div>
+              <div className="text-[10px] text-slate-300">Tiếp năng lượng</div>
+            </button>
+
+            <button
+              onClick={() => handleTriggerMysteryDrop("Bình Giữ Nhiệt DEVER Space", "🪐")}
+              disabled={triggeringDrop}
+              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-amber-400/30 text-left transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            >
+              <div className="text-xl mb-1">🪐</div>
+              <div className="text-xs font-bold text-white">Bình Giữ Nhiệt</div>
+              <div className="text-[10px] text-slate-300">Khắc tên tại Booth</div>
             </button>
           </div>
         </div>
