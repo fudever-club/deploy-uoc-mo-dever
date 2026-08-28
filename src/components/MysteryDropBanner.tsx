@@ -101,7 +101,7 @@ export const MysteryDropBanner: React.FC<MysteryDropBannerProps> = ({
         )}
 
         {/* Pulsating Glowing Lantern Badge Top Center */}
-        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-rose-600 border-2 border-white shadow-xl flex items-center justify-center text-2xl animate-bounce">
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-rose-600 border-2 border-white shadow-xl flex items-center justify-center text-2xl animate-float">
           {drop.claimed ? "🏆" : "🎁"}
         </div>
 

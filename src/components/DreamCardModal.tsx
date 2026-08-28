@@ -336,7 +336,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                       />
                       <div className="overflow-hidden">
                         <div className="text-[10px] font-black text-white truncate">{stamp.label}</div>
-                        <div className="text-[8px] text-slate-300 truncate">{stamp.sublabel}</div>
+                        <div className="text-[9px] text-[#faeeda]/80 truncate">{stamp.sublabel}</div>
                       </div>
                     </button>
                   ))}

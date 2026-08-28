@@ -304,7 +304,7 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
       {/* Crowd Energy Combo Pill Top Right */}
       {crowdCombo > 0 && (
         <div className="absolute top-20 right-6 z-35 pointer-events-none flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#12203A]/90 border border-[#FAC775]/50 shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
-          <span className="text-sm animate-bounce">🔥</span>
+          <span className="text-sm animate-pulse">🔥</span>
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider">
               Năng Lượng Đám Đông
@@ -326,7 +326,7 @@ export const FireworksCanvas: React.FC<FireworksCanvasProps> = ({
       {showSupernovaBanner && (
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none text-center animate-in zoom-in-75 fade-in duration-500">
           <div className="px-8 py-5 rounded-3xl bg-gradient-to-r from-[#993C1D]/95 via-[#12203A]/95 to-[#712B13]/95 border-2 border-[#FAC775] shadow-[0_0_60px_rgba(250,199,117,0.7)] backdrop-blur-2xl">
-            <div className="text-4xl mb-2 animate-bounce">🎆 🚀 🏮</div>
+            <div className="text-4xl mb-2 animate-float">🎆 🚀 🏮</div>
             <h2 className="text-2xl sm:text-3xl font-black text-[#FAC775] drop-shadow-md font-display uppercase tracking-wider">
               CROWD SUPERNOVA!
             </h2>
