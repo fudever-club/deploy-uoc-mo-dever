@@ -50,7 +50,7 @@ export const ConstellationGalaxyView: React.FC<ConstellationGalaxyViewProps> = (
     const height = window.innerHeight;
 
     // Distribute dreams into circular nebula clusters by category
-    const categories: DreamCategory[] = ["career", "tech", "friendship", "academic", "club", "love"];
+    const categories: DreamCategory[] = ["career", "study", "travel", "family", "big_dream", "other"];
     const nodes: StarNode[] = [];
 
     const centerX = width / 2;

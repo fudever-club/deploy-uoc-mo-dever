@@ -30,51 +30,7 @@ const POEM_TEMPLATES: Record<DreamCategory, Array<{ title: string; lines: string
       badge: "🚀 Kiến Tạo Tương Lai",
     },
   ],
-  tech: [
-    {
-      title: "Khát Vọng Fullstack",
-      lines: [
-        "Thu sang trăng sáng đỉnh đồi,",
-        "Frontend, Backend cùng ngồi luyện công.",
-        "Bug tan, code chạy hanh thông,",
-        "Cùng nhau Deploy ước mơ nhiệm màu!",
-      ],
-      badge: "💻 Clean Code & Hackathon",
-    },
-    {
-      title: "Bản Lĩnh Kỹ Sư",
-      lines: [
-        "Trăng soi dòng lệnh tinh anh,",
-        "Server vững chãi, code thanh nhẹ nhàng.",
-        "Vào DEVER học đàng hoàng,",
-        "Mai sau thế giới ngỡ ngàng gọi tên!",
-      ],
-      badge: "⚡ Senior Tech Master",
-    },
-  ],
-  friendship: [
-    {
-      title: "Tri Kỷ Đồng Đội",
-      lines: [
-        "Đèn lồng gắn kết muôn phương,",
-        "Về cùng một mái thân thương DEVER.",
-        "Bên nhau chia sẻ ước mơ,",
-        "Thức đêm fix bug, làm thơ giải đề!",
-      ],
-      badge: "🤝 Anh Em Keo Sơn",
-    },
-    {
-      title: "Vòng Tay Đồng Môn",
-      lines: [
-        "Gặp nhau ngày hội tân sinh,",
-        "Tay cầm lồng gấm kết tình bạn thân.",
-        "Mai ngày sánh bước xa gần,",
-        "DEVER là chốn thanh xuân tuyệt vời!",
-      ],
-      badge: "✨ Thanh Xuân Rực Rỡ",
-    },
-  ],
-  academic: [
+  study: [
     {
       title: "Vinh Danh Bảng Vàng",
       lines: [
@@ -96,7 +52,83 @@ const POEM_TEMPLATES: Record<DreamCategory, Array<{ title: string; lines: string
       badge: "🎓 Học Bổng Toàn Phần",
     },
   ],
-  club: [
+  travel: [
+    {
+      title: "Khám Phá Muôn Nơi",
+      lines: [
+        "Trời thu bát ngát mây bay,",
+        "Hành trang tri thức mỗi ngày vươn xa.",
+        "Chinh phục thế giới bao la,",
+        "Dấu chân in khắp muôn vàn kỳ quan!",
+      ],
+      badge: "🌏 Chinh Phục Thế Giới",
+    },
+    {
+      title: "Khát Vọng Bay Xa",
+      lines: [
+        "Đèn lồng gửi gió ngàn phương,",
+        "Bước đi trải nghiệm dặm trường phong ba.",
+        "Tự tin vững bước tiến xa,",
+        "Mang danh DEVER rạng ngời năm châu!",
+      ],
+      badge: "✈️ Trải Nghiệm Thanh Xuân",
+    },
+  ],
+  family: [
+    {
+      title: "Gia Đình Sum Vầy",
+      lines: [
+        "Trăng rằm soi bóng bình an,",
+        "Gia đình hạnh phúc ngập tràn yêu thương.",
+        "Dẫu cho cách trở muôn phương,",
+        "Mùa thu đoàn tụ vấn vương nụ cười!",
+      ],
+      badge: "❤️ Trọn Vẹn Yêu Thương",
+    },
+    {
+      title: "Hiếu Nghĩa Thâm Sâu",
+      lines: [
+        "Đèn lồng thắp sáng tâm thành,",
+        "Cầu cho cha mẹ an lành ấm êm.",
+        "Học hành đỗ đạt ngày đêm,",
+        "Đáp đền công dưỡng ấm êm gia đình!",
+      ],
+      badge: "🌸 Hiếu Thảo Bình An",
+    },
+  ],
+  big_dream: [
+    {
+      title: "Ước Mơ Vĩ Đại",
+      lines: [
+        "Nuôi chí lớn, chạm ngàn sao,",
+        "Tự tay kiến tạo đỉnh cao nhiệm màu.",
+        "Cùng nhau chung sức đồng lòng,",
+        "Thay đổi thế giới, thỏa lòng ước mơ!",
+      ],
+      badge: "🚀 Thay Đổi Thế Giới",
+    },
+    {
+      title: "Khát Vọng Kỷ Nguyên Số",
+      lines: [
+        "Đèn lồng chở vạn ước mơ,",
+        "Vào nhà DEVER dệt nên sử vàng.",
+        "Sáng tạo công nghệ vẻ vang,",
+        "Vươn tầm quốc tế đàng hoàng vinh quang!",
+      ],
+      badge: "⚡ Kỳ Tích DEVER",
+    },
+  ],
+  other: [
+    {
+      title: "Phúc Lành Mùa Trăng",
+      lines: [
+        "Đèn lồng soi sáng đêm thu,",
+        "Bình an may mắn tựa như trăng rằm.",
+        "Vui tươi rạng rỡ quanh năm,",
+        "Vạn sự như ý trăm phần hanh thông!",
+      ],
+      badge: "✨ May Mắn Cát Tường",
+    },
     {
       title: "Tự Hào DEVER",
       lines: [
@@ -107,38 +139,6 @@ const POEM_TEMPLATES: Record<DreamCategory, Array<{ title: string; lines: string
       ],
       badge: "🐞 Nhà Chung DEVER",
     },
-    {
-      title: "Thắp Lửa Đam Mê",
-      lines: [
-        "Ngôi nhà lập trình thân yêu,",
-        "Trao nhau tri thức bao điều sâu xa.",
-        "Cùng nhau bước tới phương xa,",
-        "DEVER vững mạnh cả nhà cùng vui!",
-      ],
-      badge: "🔥 Nhiệt Huyết Trẻ",
-    },
-  ],
-  love: [
-    {
-      title: "Duyên Lành Dưới Trăng",
-      lines: [
-        "Trăng rằm soi bóng hồ tây,",
-        "Đèn lồng trao gửi đong đầy nhớ thương.",
-        "Cùng nhau chung một giảng đường,",
-        "Sánh đôi ngày hội ngát hương nụ cười!",
-      ],
-      badge: "❤️ Duyên Nợ Cùng Bàn",
-    },
-    {
-      title: "Hẹn Ước Mùa Trăng",
-      lines: [
-        "Thu về trăng sáng lung linh,",
-        "Mong tìm tri kỷ đồng hành cùng dev.",
-        "Tình yêu như thuật toán êm,",
-        "Trọn đời hạnh phúc ấm êm ngọt ngào!",
-      ],
-      badge: "🌸 Tình Đầu Sinh Viên",
-    },
   ],
 };
 
@@ -148,13 +148,14 @@ export function generatePoem(name?: string, category: DreamCategory = "career"):
 
   const personalizedLines = [...picked.lines];
   if (name && name.trim()) {
-    personalizedLines[0] = `Đèn lồng thắp sáng tên ${name.trim()},`;
+    const trimmed = name.trim();
+    personalizedLines[0] = `Mừng ${trimmed} thắp ước mơ,`;
   }
 
   return {
     title: picked.title,
     lines: personalizedLines,
-    meaning: `Bài thơ gieo quẻ Trung Thu chúc ${name || "bạn"} vạn sự hanh thông và bay cao cùng FU-DEVER!`,
+    meaning: "Chúc bạn vững bước kiên cường trên con đường chinh phục đỉnh cao công nghệ cùng FU-DEVER!",
     badge: picked.badge,
   };
 }

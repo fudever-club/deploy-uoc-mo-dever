@@ -13,13 +13,13 @@ describe("FU-DEVER Mid-Autumn Poetry Generator", () => {
   });
 
   it("handles empty names gracefully with default phrasing", () => {
-    const poem = generatePoem("", "tech");
+    const poem = generatePoem("", "study");
     expect(poem.lines).toHaveLength(4);
     expect(poem.title).toBeTypeOf("string");
   });
 
-  it("supports all 6 dream categories", () => {
-    const categories: DreamCategory[] = ["career", "tech", "friendship", "academic", "club", "love"];
+  it("supports all 6 official dream categories", () => {
+    const categories: DreamCategory[] = ["career", "study", "travel", "family", "big_dream", "other"];
     categories.forEach((cat) => {
       const poem = generatePoem("Sinh viên K22", cat);
       expect(poem.lines.length).toBeGreaterThanOrEqual(4);
