@@ -191,6 +191,7 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
 
   const isHoveredRef = useRef(false);
   const hoveredDreamIdRef = useRef<string | null>(null);
+  const currentSpeedFactorRef = useRef(1.0);
 
   const animFrameRef = useRef<number | null>(null);
   const orbitBaseAngleRef = useRef(0);
@@ -296,11 +297,15 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
       const isHovered = isHoveredRef.current;
       const hoveredId = hoveredDreamIdRef.current;
 
+      // Smooth inertia lerping speed: 0.22x slow-mo on hover, 1.0x normally
+      const targetSpeed = isHovered ? 0.22 : 1.0;
+      currentSpeedFactorRef.current +=
+        (targetSpeed - currentSpeedFactorRef.current) * Math.min(1, 0.12 * (delta / 16));
+      const speedFactor = currentSpeedFactorRef.current;
+
       if (mode === "carousel") {
-        // Reduced rotation speed to x0.8 of original: 0.00035 * 0.8 = 0.00028
-        if (!isHovered) {
-          orbitBaseAngleRef.current += 0.00028 * delta;
-        }
+        // Base rotation speed 0.8x original (0.00028 * speedFactor * delta)
+        orbitBaseAngleRef.current += 0.00028 * speedFactor * delta;
         const baseAngle = orbitBaseAngleRef.current;
         const total = physicsMap.size;
         let idx = 0;
@@ -326,10 +331,8 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
           const depthMultiplier = 0.72 + (sinT + 1) * 0.26;
           item.currentScale = depthMultiplier;
 
-          if (!isHovered) {
-            item.swayOffset += item.swaySpeed * delta * 0.8;
-            item.bobOffset += item.bobSpeed * delta * 0.8;
-          }
+          item.swayOffset += item.swaySpeed * speedFactor * delta * 0.8;
+          item.bobOffset += item.bobSpeed * speedFactor * delta * 0.8;
 
           const bobPx = Math.sin(item.bobOffset) * 5;
           const swayDeg = Math.sin(item.swayOffset) * 4;
@@ -338,13 +341,26 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
           if (el) {
             const isThisHovered = item.id === hoveredId;
             const zIndex = isThisHovered ? 999 : Math.floor((sinT + 1) * 25) + 10;
-            const opacity = isThisHovered ? 1 : Math.max(0.65, Math.min(1, (sinT + 1.25) / 2.25));
 
-            el.style.transform = `translate3d(${posX}px, ${posY + bobPx}px, 0) translate(-50%, -50%) scale(${
-              isThisHovered ? depthMultiplier * 1.08 : depthMultiplier
-            })`;
+            // Spotlight focus: hovered card stands out 100%, background cards softly dim
+            let opacity = Math.max(0.65, Math.min(1, (sinT + 1.25) / 2.25));
+            if (isThisHovered) {
+              opacity = 1;
+            } else if (isHovered) {
+              opacity = opacity * 0.45;
+            }
+
+            const scale = isThisHovered ? depthMultiplier * 1.15 : depthMultiplier;
+            const filter = isThisHovered
+              ? "drop-shadow(0 0 24px rgba(250, 199, 117, 0.85)) drop-shadow(0 15px 35px rgba(0, 0, 0, 0.6))"
+              : isHovered
+              ? "blur(0.5px)"
+              : "none";
+
+            el.style.transform = `translate3d(${posX}px, ${posY + bobPx}px, 0) translate(-50%, -50%) scale(${scale})`;
             el.style.zIndex = `${zIndex}`;
             el.style.opacity = `${opacity}`;
+            el.style.filter = filter;
           }
 
           const swayEl = swayElements.get(item.id);
@@ -355,20 +371,18 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
       } else {
         // DRIFT MODE
         physicsMap.forEach((item) => {
-          if (!isHovered) {
-            item.swayOffset += item.swaySpeed * delta * 0.8;
-            item.bobOffset += item.bobSpeed * delta * 0.8;
+          item.swayOffset += item.swaySpeed * speedFactor * delta * 0.8;
+          item.bobOffset += item.bobSpeed * speedFactor * delta * 0.8;
 
-            item.x += item.vx * (delta / 16) * 0.8;
-            item.y += item.vy * (delta / 16) * 0.8;
+          item.x += item.vx * (delta / 16) * 0.8 * speedFactor;
+          item.y += item.vy * (delta / 16) * 0.8 * speedFactor;
 
-            if (item.y < -12) {
-              item.y = 104;
-              item.x = Math.random() * 80 + 10;
-            }
-            if (item.x < -8) item.x = 104;
-            if (item.x > 104) item.x = -8;
+          if (item.y < -12) {
+            item.y = 104;
+            item.x = Math.random() * 80 + 10;
           }
+          if (item.x < -8) item.x = 104;
+          if (item.x > 104) item.x = -8;
 
           const posX = (item.x / 100) * width;
           const posY = (item.y / 100) * height;
@@ -379,13 +393,25 @@ export const FloatingLanternCardsSky: React.FC<FloatingLanternCardsSkyProps> = (
           if (el) {
             const isThisHovered = item.id === hoveredId;
             const zIndex = isThisHovered ? 999 : item.depth === "foreground" ? 35 : item.depth === "midground" ? 25 : 15;
-            const opacity = isThisHovered ? 1 : item.depth === "foreground" ? 1 : item.depth === "midground" ? 0.88 : 0.72;
 
-            el.style.transform = `translate3d(${posX}px, ${posY + bobPx}px, 0) translate(-50%, -50%) scale(${
-              isThisHovered ? item.baseScale * 1.08 : item.baseScale
-            })`;
+            let opacity = item.depth === "foreground" ? 1 : item.depth === "midground" ? 0.88 : 0.72;
+            if (isThisHovered) {
+              opacity = 1;
+            } else if (isHovered) {
+              opacity = opacity * 0.45;
+            }
+
+            const scale = isThisHovered ? item.baseScale * 1.15 : item.baseScale;
+            const filter = isThisHovered
+              ? "drop-shadow(0 0 24px rgba(250, 199, 117, 0.85)) drop-shadow(0 15px 35px rgba(0, 0, 0, 0.6))"
+              : isHovered
+              ? "blur(0.5px)"
+              : "none";
+
+            el.style.transform = `translate3d(${posX}px, ${posY + bobPx}px, 0) translate(-50%, -50%) scale(${scale})`;
             el.style.zIndex = `${zIndex}`;
             el.style.opacity = `${opacity}`;
+            el.style.filter = filter;
           }
 
           const swayEl = swayElements.get(item.id);
