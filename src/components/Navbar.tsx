@@ -4,12 +4,15 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Sparkles, Monitor, Shield, QrCode, Trophy } from "lucide-react";
+import { Sparkles, Monitor, Shield, QrCode, Trophy, Info } from "lucide-react";
 import { StandeeQRModal } from "./StandeeQRModal";
+import { AboutModal } from "./AboutModal";
+import { playTactileClick } from "@/lib/audio-synthesizer";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
 
   // In display mode, hide the top navbar for clean fullscreen presentation
   if (pathname === "/display") {
@@ -19,7 +22,7 @@ export const Navbar: React.FC = () => {
   return (
     <>
       <header className="w-full sticky top-3 z-40 px-4 transition-all">
-        <div className="max-w-4xl mx-auto h-14 px-4 rounded-full bg-white/85 backdrop-blur-xl border border-[#fac775]/40 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center justify-between">
+        <div className="max-w-5xl mx-auto h-14 px-3 sm:px-4 rounded-full bg-white/90 backdrop-blur-xl border border-[#fac775]/50 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center justify-between">
           {/* Brand Logo & Name */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="relative w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#993c1d] to-[#12203a] shadow-xs p-1 border border-[#fac775]/50 group-hover:scale-105 transition-transform">
@@ -93,6 +96,19 @@ export const Navbar: React.FC = () => {
               <span className="hidden md:inline">Minigame</span>
             </Link>
 
+            {/* Official About FU-DEVER Trigger Button */}
+            <button
+              onClick={() => {
+                playTactileClick();
+                setShowAboutModal(true);
+              }}
+              className="px-2.5 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-[#993c1d] hover:bg-amber-50 flex items-center gap-1 transition-all cursor-pointer"
+              title="Về CLB Lập Trình FU-DEVER"
+            >
+              <Info className="w-3.5 h-3.5 text-[#993c1d]" />
+              <span className="hidden md:inline">Về CLB</span>
+            </button>
+
             <Link
               href="/admin"
               className={`px-2.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-all ${
@@ -110,6 +126,7 @@ export const Navbar: React.FC = () => {
       </header>
 
       <StandeeQRModal isOpen={showQRModal} onClose={() => setShowQRModal(false)} />
+      <AboutModal isOpen={showAboutModal} onClose={() => setShowAboutModal(false)} />
     </>
   );
 };
