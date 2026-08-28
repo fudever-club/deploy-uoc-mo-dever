@@ -1,5 +1,5 @@
 import { Dream } from "@/types/dream";
-import { DREAM_CATEGORIES, EVENT_INFO, getBuggyMascotUrl } from "./constants";
+import { DREAM_CATEGORIES, EVENT_INFO, getBuggyMascotUrl, getDeverStampInfo } from "./constants";
 
 export interface RenderCardOptions {
   width?: number;
@@ -258,38 +258,43 @@ export async function renderDreamCardToDataUrl(
     console.warn("Mascot draw error:", e);
   }
 
-  // Traditional Seal Stamp
+  // Traditional DEVER Seal Stamp (Top Right)
+  const stampInfo = getDeverStampInfo(dream.stampVariant, theme);
   ctx.save();
-  ctx.translate(cardX + 50, cardY + 45);
-  ctx.rotate(-0.1);
-  ctx.strokeStyle =
-    theme === "tech"
-      ? "#00f5d4"
-      : theme === "gold"
-      ? "#ffd166"
-      : "#B22222";
-  ctx.fillStyle =
-    theme === "tech"
-      ? "rgba(0, 245, 212, 0.18)"
-      : theme === "gold"
-      ? "rgba(255, 209, 102, 0.22)"
-      : "rgba(178, 34, 34, 0.2)";
-  ctx.lineWidth = 2.5;
+  ctx.translate(cardX + cardW - 75, cardY + 50);
+  ctx.rotate((6 * Math.PI) / 180);
+
+  ctx.strokeStyle = stampInfo.color;
+  ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.roundRect(0, 0, 95, 42, 8);
-  ctx.fill();
+  ctx.arc(0, 0, 36, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.fillStyle =
-    theme === "tech"
-      ? "#00f5d4"
-      : theme === "gold"
-      ? "#ffd166"
-      : "#ff4d4d";
-  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(theme === "tech" ? "DEVER" : theme === "gold" ? "HOÀNG KIM" : "ĐỖ ĐẠT", 47.5, 21);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(0, 0, 32, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = `${stampInfo.color}20`;
+  ctx.beginPath();
+  ctx.arc(0, 0, 32, 0, Math.PI * 2);
+  ctx.fill();
+
+  try {
+    const stampImg = new Image();
+    stampImg.crossOrigin = "anonymous";
+    stampImg.src = stampInfo.image;
+    await new Promise<void>((resolve) => {
+      stampImg.onload = () => {
+        ctx.drawImage(stampImg, -26, -26, 52, 52);
+        resolve();
+      };
+      stampImg.onerror = () => resolve();
+      setTimeout(resolve, 600);
+    });
+  } catch {
+    // ignore
+  }
   ctx.restore();
 
   // Dreamer Name
@@ -644,22 +649,60 @@ export async function renderBoardingPassCardToDataUrl(
     // ignore
   }
 
-  // 6. RUBBER VISA STAMP (VERIFIED BY FU-DEVER)
+  // 6. AUTHENTIC DEVER RUBBER VISA STAMP
+  const stampInfo = getDeverStampInfo(dream.stampVariant, theme);
   ctx.save();
-  ctx.translate(passX + 170, wishY + wishH - 70);
-  ctx.rotate((-12 * Math.PI) / 180);
-  ctx.strokeStyle = "#e11d48";
-  ctx.lineWidth = 4;
-  ctx.strokeRect(-120, -40, 240, 80);
-  ctx.fillStyle = "rgba(225, 29, 72, 0.12)";
-  ctx.fillRect(-120, -40, 240, 80);
+  ctx.translate(passX + 175, wishY + wishH - 75);
+  ctx.rotate((-13 * Math.PI) / 180);
 
-  ctx.fillStyle = "#e11d48";
-  ctx.textAlign = "center";
-  ctx.font = "black 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace";
-  ctx.fillText("★ FU-DEVER APPROVED ★", 0, -8);
-  ctx.font = "bold 16px monospace";
-  ctx.fillText("CLUB DAY 2026 · ONBOARDED", 0, 20);
+  // Outer double stamp border
+  ctx.strokeStyle = stampInfo.color;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.roundRect(-135, -55, 270, 110, 16);
+  ctx.stroke();
+
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(-128, -48, 256, 96, 12);
+  ctx.stroke();
+
+  // Semi-transparent ink tint
+  ctx.fillStyle = `${stampInfo.color}15`;
+  ctx.beginPath();
+  ctx.roundRect(-128, -48, 256, 96, 12);
+  ctx.fill();
+
+  // Draw Official Stamp Emblem Image (on the left)
+  const stampSize = 74;
+  try {
+    const stampImg = new Image();
+    stampImg.crossOrigin = "anonymous";
+    stampImg.src = stampInfo.image;
+    await new Promise<void>((resolve) => {
+      stampImg.onload = () => {
+        ctx.drawImage(stampImg, -120, -37, stampSize, stampSize);
+        resolve();
+      };
+      stampImg.onerror = () => resolve();
+      setTimeout(resolve, 800);
+    });
+  } catch {
+    // fallback
+  }
+
+  // Text on the right of stamp
+  ctx.textAlign = "left";
+  ctx.fillStyle = stampInfo.color;
+  ctx.font = "black 17px -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace";
+  ctx.fillText("★ FU-DEVER VERIFIED ★", -35, -12);
+
+  ctx.font = "bold 14px monospace";
+  ctx.fillText("ONBOARDED · CLUB DAY 2026", -35, 12);
+
+  ctx.font = "bold 11px monospace";
+  ctx.fillText(stampInfo.label.toUpperCase(), -35, 32);
+
   ctx.restore();
 
   // 7. PERFORATED DASHED LINE

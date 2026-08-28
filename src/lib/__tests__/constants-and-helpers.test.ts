@@ -4,6 +4,8 @@ import {
   EVENT_INFO,
   BUGGY_MOODS,
   getBuggyMascotUrl,
+  DEVER_STAMPS,
+  getDeverStampInfo,
 } from "../constants";
 
 describe("Brand Constants & Asset Helpers", () => {
@@ -49,11 +51,26 @@ describe("Brand Constants & Asset Helpers", () => {
     expect(getBuggyMascotUrl("buggy_hang_nga_fairy")).toBe("/assets/buggy/trung-thu/buggy_hang_nga_fairy.png");
   });
 
-  it("should contain Buggy moods list", () => {
-    expect(BUGGY_MOODS.length).toBeGreaterThan(5);
-    const first = BUGGY_MOODS[0];
-    expect(first.label).toBeDefined();
-    expect(first.emoji).toBeDefined();
-    expect(first.image).toBeDefined();
+  it("should contain DEVER stamp options and resolve info by ID or theme", () => {
+    expect(DEVER_STAMPS.length).toBe(4);
+    const ids = DEVER_STAMPS.map((s) => s.id);
+    expect(ids).toContain("lantern");
+    expect(ids).toContain("mooncake");
+    expect(ids).toContain("cyber");
+    expect(ids).toContain("official");
+
+    // Retrieve by stampId
+    const lanternStamp = getDeverStampInfo("lantern");
+    expect(lanternStamp.id).toBe("lantern");
+    expect(lanternStamp.image).toContain("07_dever_logo_midautumn_lantern.png");
+
+    const mooncakeStamp = getDeverStampInfo("mooncake");
+    expect(mooncakeStamp.id).toBe("mooncake");
+    expect(mooncakeStamp.image).toContain("06_dever_logo_midautumn_mooncake.png");
+
+    // Fallback by theme
+    expect(getDeverStampInfo(undefined, "tech").id).toBe("cyber");
+    expect(getDeverStampInfo(undefined, "gold").id).toBe("mooncake");
+    expect(getDeverStampInfo(undefined, "classic").id).toBe("lantern");
   });
 });

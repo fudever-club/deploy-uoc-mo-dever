@@ -75,6 +75,60 @@ export function getBuggyMascotUrl(mascot: number | string | undefined): string {
   return `/assets/buggy/${numStr}`;
 }
 
+export interface DeverStampOption {
+  id: string;
+  label: string;
+  sublabel: string;
+  image: string;
+  color: string;
+  accentText: string;
+}
+
+export const DEVER_STAMPS: DeverStampOption[] = [
+  {
+    id: "lantern",
+    label: "Dấu Mộc Đèn Lồng",
+    sublabel: "Họa tiết Lễ hội Trung Thu",
+    image: "/assets/buggy/trung-thu/07_dever_logo_midautumn_lantern.png",
+    color: "#e11d48",
+    accentText: "★ FU-DEVER LANTERN APPROVED ★",
+  },
+  {
+    id: "mooncake",
+    label: "Dấu Mộc Bánh Nướng",
+    sublabel: "Hoàng Kim Trăng Rằm",
+    image: "/assets/buggy/trung-thu/06_dever_logo_midautumn_mooncake.png",
+    color: "#d97706",
+    accentText: "★ FU-DEVER IMPERIAL SEAL ★",
+  },
+  {
+    id: "cyber",
+    label: "Dấu Mộc Cyber Space",
+    sublabel: "Kỷ nguyên Số Neon",
+    image: "/assets/buggy/trung-thu/09_dever_logo_original_icon.png",
+    color: "#0284c7",
+    accentText: "★ FU-DEVER CYBERSPACE 2026 ★",
+  },
+  {
+    id: "official",
+    label: "Dấu Mộc Ban Chủ Nhiệm",
+    sublabel: "Con Dấu Chính Thức CLB",
+    image: "/assets/logo/logo-dever.png",
+    color: "#0f172a",
+    accentText: "★ FU-DEVER OFFICIAL VERIFIED ★",
+  },
+];
+
+export function getDeverStampInfo(stampId?: string, theme?: string): DeverStampOption {
+  if (stampId) {
+    const found = DEVER_STAMPS.find((s) => s.id === stampId);
+    if (found) return found;
+  }
+  if (theme === "tech") return DEVER_STAMPS[2];
+  if (theme === "gold") return DEVER_STAMPS[1];
+  return DEVER_STAMPS[0];
+}
+
 export interface MidAutumnBuggyReward {
   id: string;
   name: string;

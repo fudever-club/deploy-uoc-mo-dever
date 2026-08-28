@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { Dream, CardTheme } from "@/types/dream";
-import { DREAM_CATEGORIES, getBuggyMascotUrl } from "@/lib/constants";
+import { DREAM_CATEGORIES, getBuggyMascotUrl, DEVER_STAMPS, getDeverStampInfo } from "@/lib/constants";
 import { downloadDreamCard, renderDreamCardToDataUrl, renderBoardingPassCardToDataUrl } from "@/lib/dream-card-canvas";
 import { LanternSVG, LanternShape } from "@/components/LanternSVG";
 import { playTactileClick } from "@/lib/audio-synthesizer";
-import { Download, Share2, X, Sparkles, Check, Palette, Ticket, Layers } from "lucide-react";
+import { Download, Share2, X, Sparkles, Check, Palette, Ticket, Layers, Stamp } from "lucide-react";
 import Image from "next/image";
 
 interface DreamCardModalProps {
@@ -36,6 +36,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
   const [selectedMascot, setSelectedMascot] = useState<number | string>(
     dream.mascotIndex || "11"
   );
+  const [selectedStamp, setSelectedStamp] = useState<string>(dream.stampVariant || "lantern");
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -43,6 +44,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
 
   const categoryInfo = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
   const shape = (dream.lanternShape as LanternShape) || "hoian_lotus";
+  const currentStamp = getDeverStampInfo(selectedStamp, selectedTheme);
 
   const handleDownload = async () => {
     playTactileClick();
@@ -52,6 +54,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
         ...dream,
         theme: selectedTheme,
         mascotIndex: selectedMascot,
+        stampVariant: selectedStamp,
       };
       const dataUrl =
         cardFormat === "boarding_pass"
@@ -75,6 +78,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
         ...dream,
         theme: selectedTheme,
         mascotIndex: selectedMascot,
+        stampVariant: selectedStamp,
       };
       const dataUrl =
         cardFormat === "boarding_pass"
@@ -254,6 +258,44 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
               ))}
             </div>
           </div>
+
+          {/* DEVER Stamp Selector */}
+          <div>
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#fac775] uppercase tracking-wider mb-1.5">
+              <Stamp className="w-3.5 h-3.5" />
+              <span>Con dấu DEVER đóng mộc:</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              {DEVER_STAMPS.map((stamp) => (
+                <button
+                  key={stamp.id}
+                  type="button"
+                  onClick={() => {
+                    playTactileClick();
+                    setSelectedStamp(stamp.id);
+                  }}
+                  className={`p-1.5 rounded-xl border flex items-center gap-1.5 text-left transition-all cursor-pointer ${
+                    selectedStamp === stamp.id
+                      ? "bg-[#fac775]/25 border-[#fac775] shadow-xs scale-[1.02] ring-1 ring-[#fac775]"
+                      : "bg-white/5 border-transparent hover:bg-white/10 opacity-75 hover:opacity-100"
+                  }`}
+                  title={stamp.sublabel}
+                >
+                  <Image
+                    src={stamp.image}
+                    alt={stamp.label}
+                    width={26}
+                    height={26}
+                    className="object-contain shrink-0"
+                  />
+                  <div className="overflow-hidden">
+                    <div className="text-[10px] font-black text-white truncate">{stamp.label}</div>
+                    <div className="text-[8px] text-slate-300 truncate">{stamp.sublabel}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* CRISP REAL-TIME LIVE 9:16 DREAM CARD / BOARDING PASS PREVIEW */}
@@ -315,7 +357,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                   <span className="text-[#0091ea]">DEVER DEV</span>
                 </div>
 
-                {/* Wish Content Snippet */}
+                {/* Wish Content Snippet & Stamp */}
                 <div className="p-1.5 rounded bg-amber-50/70 border border-amber-200/80 relative">
                   <span className="text-[7px] text-[#993c1d] font-bold block uppercase mb-0.5">
                     📜 Lời nguyện cất cánh:
@@ -324,15 +366,31 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
                     &ldquo;{dream.content}&rdquo;
                   </p>
 
-                  {/* Mascot sticker */}
-                  <div className="absolute right-1 bottom-1 w-6 h-6 rounded-full bg-white border border-amber-300 p-0.5 shadow-xs">
-                    <Image
-                      src={getBuggyMascotUrl(selectedMascot)}
-                      alt="Buggy"
-                      width={20}
-                      height={20}
-                      className="object-contain"
-                    />
+                  <div className="flex items-center justify-between mt-1 pt-1 border-t border-amber-200/60">
+                    {/* DEVER Stamp on Ticket */}
+                    <div className="flex items-center gap-1 p-0.5 px-1 rounded border border-rose-500/50 bg-rose-50/90 rotate-[-4deg] max-w-[120px] shadow-xs">
+                      <Image
+                        src={currentStamp.image}
+                        alt={currentStamp.label}
+                        width={16}
+                        height={16}
+                        className="object-contain shrink-0"
+                      />
+                      <span className="text-[6px] font-black text-rose-700 truncate">
+                        {currentStamp.label}
+                      </span>
+                    </div>
+
+                    {/* Mascot sticker */}
+                    <div className="w-6 h-6 rounded-full bg-white border border-amber-300 p-0.5 shadow-xs shrink-0">
+                      <Image
+                        src={getBuggyMascotUrl(selectedMascot)}
+                        alt="Buggy"
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -403,6 +461,17 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({ dream, isOpen, o
 
               {/* 1. Header: Lantern & Event Tag */}
               <div className="relative z-10 flex flex-col items-center">
+                {/* Top Right DEVER Stamp Emblem */}
+                <div className="absolute right-0 top-0 w-8 h-8 rounded-full border-2 border-[#fac775] p-0.5 bg-black/40 rotate-[8deg] shadow-xs flex items-center justify-center">
+                  <Image
+                    src={currentStamp.image}
+                    alt={currentStamp.label}
+                    width={24}
+                    height={24}
+                    className="object-contain"
+                  />
+                </div>
+
                 <div className="relative mb-1">
                   <LanternSVG shape={shape} size={42} glow={true} />
                 </div>

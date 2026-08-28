@@ -34,6 +34,7 @@ export interface Dream {
   mascotIndex?: number | string;
   theme?: CardTheme;
   lanternShape?: string;
+  stampVariant?: string;
 }
 
 export interface DreamInput {
@@ -44,6 +45,7 @@ export interface DreamInput {
   mascotIndex?: number | string;
   theme?: CardTheme;
   lanternShape?: string;
+  stampVariant?: string;
 }
 
 export interface LanternItem extends Dream {
