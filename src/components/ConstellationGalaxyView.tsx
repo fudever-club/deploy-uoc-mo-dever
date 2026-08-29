@@ -267,37 +267,45 @@ export const ConstellationGalaxyView: React.FC<ConstellationGalaxyViewProps> = (
         className="w-full h-full block cursor-pointer"
       />
 
-      {/* Category Filter Pills on Galaxy */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 p-1.5 rounded-full bg-[#12203A]/85 backdrop-blur-md border border-[#fac775]/40 shadow-xl overflow-x-auto max-w-[95vw]">
-        <button
-          onClick={() => setActiveCategory("all")}
-          className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-            activeCategory === "all"
-              ? "bg-[#fac775] text-[#12203a] shadow-xs"
-              : "text-white/70 hover:text-white hover:bg-white/10"
-          }`}
-        >
-          🌌 Toàn Vũ Trụ ({dreams.length})
-        </button>
+      {/* Category Filter Pills on Galaxy (Bottom Center, matching Lanterns mode) */}
+      <div className="absolute bottom-4 sm:bottom-6 inset-x-0 z-30 flex justify-center pointer-events-none px-3 sm:px-4">
+        <div className="flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-[#12203A]/90 backdrop-blur-xl border border-[#fac775]/40 shadow-2xl pointer-events-auto overflow-x-auto max-w-full scrollbar-none">
+          <button
+            onClick={() => {
+              playTactileClick();
+              setActiveCategory("all");
+            }}
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all shrink-0 cursor-pointer ${
+              activeCategory === "all"
+                ? "bg-[#fac775] text-[#12203a] shadow-xs"
+                : "text-[#faeeda]/80 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            🌌 Toàn Vũ Trụ ({dreams.length})
+          </button>
 
-        {DREAM_CATEGORIES.map((cat) => {
-          const count = dreams.filter((d) => d.tag === cat.id).length;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 transition-all ${
-                activeCategory === cat.id
-                  ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <span>{cat.emoji}</span>
-              <span className="hidden sm:inline">{cat.shortLabel}</span>
-              <span className="text-[10px] opacity-75">({count})</span>
-            </button>
-          );
-        })}
+          {DREAM_CATEGORIES.map((cat) => {
+            const count = dreams.filter((d) => d.tag === cat.id).length;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  playTactileClick();
+                  setActiveCategory(cat.id);
+                }}
+                className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all shrink-0 cursor-pointer ${
+                  activeCategory === cat.id
+                    ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
+                    : "text-[#faeeda]/70 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <span>{cat.emoji}</span>
+                <span className="hidden md:inline">{cat.shortLabel}</span>
+                <span className="text-[10px] opacity-75">({count})</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Hovered Dream Tooltip Bubble */}

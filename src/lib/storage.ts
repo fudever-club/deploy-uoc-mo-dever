@@ -364,10 +364,51 @@ export function broadcastReaction(emoji: string, count = 1): LiveReaction {
   return reaction;
 }
 
+const ANNOUNCEMENT_STORAGE_FILE = path.join(process.cwd(), "data", "announcement.json");
+
+// Load announcement from persistent storage if available
+function loadLocalAnnouncement(): BroadcastAnnouncement | null {
+  if (global.__activeAnnouncement !== undefined) {
+    return global.__activeAnnouncement;
+  }
+  try {
+    ensureDataDir();
+    if (fs.existsSync(ANNOUNCEMENT_STORAGE_FILE)) {
+      const data = fs.readFileSync(ANNOUNCEMENT_STORAGE_FILE, "utf-8");
+      const parsed = JSON.parse(data);
+      if (parsed && typeof parsed === "object" && parsed.active) {
+        global.__activeAnnouncement = parsed;
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to load local announcement file:", err);
+  }
+  global.__activeAnnouncement = null;
+  return null;
+}
+
+function saveLocalAnnouncement(ann: BroadcastAnnouncement | null) {
+  global.__activeAnnouncement = ann;
+  try {
+    ensureDataDir();
+    if (ann === null) {
+      if (fs.existsSync(ANNOUNCEMENT_STORAGE_FILE)) {
+        fs.unlinkSync(ANNOUNCEMENT_STORAGE_FILE);
+      }
+    } else {
+      fs.writeFileSync(ANNOUNCEMENT_STORAGE_FILE, JSON.stringify(ann, null, 2), "utf-8");
+    }
+  } catch (err) {
+    console.warn("Failed to save local announcement file:", err);
+  }
+}
+
 // Announcements Management
 export function setBroadcastAnnouncement(message: string | null): BroadcastAnnouncement | null {
   if (!message || message.trim().length === 0) {
-    global.__activeAnnouncement = null;
+    saveLocalAnnouncement(null);
+
     const supabase = getSupabaseClient();
     if (supabase) {
       try {
@@ -391,7 +432,7 @@ export function setBroadcastAnnouncement(message: string | null): BroadcastAnnou
     timestamp: new Date().toISOString(),
   };
 
-  global.__activeAnnouncement = announcement;
+  saveLocalAnnouncement(announcement);
 
   const supabase = getSupabaseClient();
   if (supabase) {
@@ -411,7 +452,7 @@ export function setBroadcastAnnouncement(message: string | null): BroadcastAnnou
 }
 
 export function getActiveAnnouncement(): BroadcastAnnouncement | null {
-  return global.__activeAnnouncement || null;
+  return loadLocalAnnouncement();
 }
 
 // Batch Mock Generator for Booth Testing

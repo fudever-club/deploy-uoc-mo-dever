@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createDream, getDreams, getDreamsCount } from "@/lib/storage";
+import { createDream, getDreams, getDreamsCount, getActiveAnnouncement } from "@/lib/storage";
 import { DreamInput } from "@/types/dream";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
       getDreamsCount(false),
       getDreamsCount(true),
     ]);
+    const activeAnnouncement = getActiveAnnouncement();
 
     return NextResponse.json(
       {
@@ -23,6 +24,7 @@ export async function GET(req: NextRequest) {
         total: includeHidden ? totalAll : totalVisible,
         totalVisible,
         totalAll,
+        activeAnnouncement,
       },
       {
         headers: {

@@ -56,6 +56,11 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
         const countAll = typeof json.totalAll === "number" ? json.totalAll : count;
         setTotalAll(countAll);
 
+        if ("activeAnnouncement" in json) {
+          const ann = json.activeAnnouncement as BroadcastAnnouncement | null;
+          setActiveAnnouncement(ann && ann.active !== false ? ann : null);
+        }
+
         lastFetchedTimeRef.current = Date.now();
       }
 
@@ -177,9 +182,10 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
             }
           )
           .on("broadcast", { event: "announcement" }, (payload) => {
-            const ann = payload.payload as BroadcastAnnouncement;
-            setActiveAnnouncement(ann);
-            optionsRef.current.onAnnouncement?.(ann);
+            const ann = payload.payload as BroadcastAnnouncement | null;
+            const finalAnn = ann && ann.active !== false ? ann : null;
+            setActiveAnnouncement(finalAnn);
+            optionsRef.current.onAnnouncement?.(finalAnn);
           })
           .on("broadcast", { event: "reaction" }, (payload) => {
             const react = payload.payload as LiveReaction;
@@ -229,8 +235,9 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
         es.addEventListener("connected", (event) => {
           try {
             const payload = JSON.parse(event.data);
-            if (payload.activeAnnouncement) {
-              setActiveAnnouncement(payload.activeAnnouncement);
+            if ("activeAnnouncement" in payload) {
+              const ann = payload.activeAnnouncement as BroadcastAnnouncement | null;
+              setActiveAnnouncement(ann && ann.active !== false ? ann : null);
             }
           } catch {
             // ignore
@@ -294,8 +301,9 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
         es.addEventListener("announcement", (event) => {
           try {
             const announcement = JSON.parse(event.data) as BroadcastAnnouncement | null;
-            setActiveAnnouncement(announcement);
-            optionsRef.current.onAnnouncement?.(announcement);
+            const finalAnn = announcement && announcement.active !== false ? announcement : null;
+            setActiveAnnouncement(finalAnn);
+            optionsRef.current.onAnnouncement?.(finalAnn);
           } catch (e) {
             console.error("SSE parse announcement error:", e);
           }

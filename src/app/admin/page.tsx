@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { createClient, SupabaseClient, RealtimeChannel } from "@supabase/supabase-js";
 import { Dream, BroadcastAnnouncement, MysteryDrop } from "@/types/dream";
 import { DREAM_CATEGORIES, EVENT_INFO } from "@/lib/constants";
 import { generateDreamsCSV } from "@/lib/csv-export";
@@ -23,6 +24,7 @@ import {
   FileJson,
   BarChart3,
   Gift,
+  VolumeX,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
 import { WordCloudVisualizer } from "@/components/WordCloudVisualizer";
@@ -32,6 +34,10 @@ export default function AdminPage() {
   const [passcode, setPasscode] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(false);
+
+  // Supabase realtime channel for instant browser-to-browser admin commands
+  const supabaseChannelRef = useRef<RealtimeChannel | null>(null);
+  const supabaseClientRef = useRef<SupabaseClient | null>(null);
 
   // Data & Filters
   const [dreams, setDreams] = useState<Dream[]>([]);
@@ -51,6 +57,27 @@ export default function AdminPage() {
 
   // Simulation Status
   const [generatingMocks, setGeneratingMocks] = useState(false);
+
+  useEffect(() => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (supabaseUrl && supabaseAnonKey) {
+      try {
+        const client = createClient(supabaseUrl, supabaseAnonKey);
+        supabaseClientRef.current = client;
+        const channel = client.channel("dreams-live-channel");
+        channel.subscribe();
+        supabaseChannelRef.current = channel;
+      } catch (e) {
+        console.warn("Admin Supabase realtime init error:", e);
+      }
+    }
+    return () => {
+      if (supabaseChannelRef.current && supabaseClientRef.current) {
+        supabaseClientRef.current.removeChannel(supabaseChannelRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const saved = sessionStorage.getItem("admin_authenticated");
@@ -193,6 +220,27 @@ export default function AdminPage() {
     setSendingAnnouncement(true);
     const textToSend = clear ? "" : announcementMsg.trim();
     try {
+      // 1. Direct instant Supabase broadcast from browser client
+      if (supabaseChannelRef.current) {
+        try {
+          supabaseChannelRef.current.send({
+            type: "broadcast",
+            event: "announcement",
+            payload: clear
+              ? null
+              : {
+                  id: `ann-${Date.now()}`,
+                  message: textToSend,
+                  active: true,
+                  timestamp: new Date().toISOString(),
+                },
+          });
+        } catch {
+          // ignore
+        }
+      }
+
+      // 2. Persist to API storage
       const res = await fetch("/api/admin/announcement", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -200,7 +248,7 @@ export default function AdminPage() {
       });
       const json = await res.json();
       if (json.success) {
-        setActiveAnnouncement(json.data);
+        setActiveAnnouncement(json.data || null);
         if (clear) setAnnouncementMsg("");
       }
     } catch (err) {
@@ -437,9 +485,12 @@ export default function AdminPage() {
               {activeAnnouncement?.active && (
                 <button
                   onClick={() => handleSetAnnouncement(true)}
-                  className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
+                  disabled={sendingAnnouncement}
+                  className="px-3.5 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                  title="Tắt phát sóng thông báo này trên màn hình Display"
                 >
-                  Tắt
+                  <VolumeX className="w-3.5 h-3.5" />
+                  <span>Tắt phát sóng</span>
                 </button>
               )}
             </div>
