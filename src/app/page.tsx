@@ -189,7 +189,7 @@ export default function WishSubmissionPage() {
   return (
     <div
       suppressHydrationWarning
-      className="min-h-full flex-1 flex flex-col items-center justify-center px-2.5 sm:px-4 py-4 sm:py-10 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative overflow-x-clip max-w-full"
+      className="min-h-full flex-1 flex flex-col items-center justify-start px-2.5 sm:px-4 pt-3 pb-24 sm:pb-12 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative overflow-x-clip max-w-full"
     >
       {/* Decorative Warm Ambient Light Orbs */}
       <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-[#fac775]/25 blur-3xl pointer-events-none overflow-hidden" />
@@ -464,10 +464,10 @@ export default function WishSubmissionPage() {
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Viết điều bạn mong ước (VD: Đạt GPA 3.8, vô địch Hackathon, trở thành Lead Dev và có nhiều bạn thân tại DEVER!)..."
-                  rows={3}
+                  rows={4}
                   maxLength={300}
                   required
-                  className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#993c1d] focus:ring-3 focus:ring-[#993c1d]/15 outline-none text-base sm:text-sm text-slate-800 transition-all resize-none font-sans leading-relaxed"
+                  className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#993c1d] focus:ring-3 focus:ring-[#993c1d]/15 outline-none text-base sm:text-sm text-slate-800 transition-all resize-none font-sans leading-relaxed min-h-[105px]"
                 />
                 <div className="flex items-center justify-between text-[10px] text-slate-400 mt-0.5 font-medium">
                   <span className="text-slate-500">💡 Gợi ý: Viết ngắn gọn, súc tích để thẻ hiển thị đẹp nhất!</span>
