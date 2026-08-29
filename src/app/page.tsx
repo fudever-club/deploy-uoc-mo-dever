@@ -189,7 +189,7 @@ export default function WishSubmissionPage() {
   return (
     <div
       suppressHydrationWarning
-      className="min-h-full flex-1 flex flex-col items-center justify-start px-2.5 sm:px-4 pt-3 pb-24 sm:pb-12 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative overflow-x-clip max-w-full"
+      className="min-h-full flex-1 flex flex-col items-center justify-center px-2.5 sm:px-4 py-3 sm:py-6 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative overflow-x-clip max-w-full"
     >
       {/* Decorative Warm Ambient Light Orbs */}
       <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-[#fac775]/25 blur-3xl pointer-events-none overflow-hidden" />
@@ -472,29 +472,6 @@ export default function WishSubmissionPage() {
                 <div className="flex items-center justify-between text-[10px] text-slate-400 mt-0.5 font-medium">
                   <span className="text-slate-500">💡 Gợi ý: Viết ngắn gọn, súc tích để thẻ hiển thị đẹp nhất!</span>
                   <span>{content.length}/300 ký tự</span>
-                </div>
-              </div>
-
-              {/* LIVE MINI PREVIEW CARD WITH SELECTED LANTERN */}
-              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#12203A] to-[#0a1222] border border-[#fac775]/40 text-[#faeeda] shadow-inner relative overflow-hidden flex items-center gap-2.5 sm:gap-3">
-                <div className="shrink-0 flex flex-col items-center">
-                  <LanternSVG shape={lanternShape} size={38} glow={true} className="animate-glow" />
-                  <div className="w-0.5 h-2.5 bg-[#fac775]" />
-                  <div className="w-2 h-2 rounded-full bg-[#993c1d] border border-[#fac775]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#fac775] font-bold mb-0.5">
-                    <span className="truncate">Thẻ treo: {name || "Ẩn danh K22"}</span>
-                    <span>{DREAM_CATEGORIES.find((c) => c.id === tag)?.emoji}</span>
-                  </div>
-                  <p className="text-[11px] sm:text-xs text-white/90 italic font-medium line-clamp-2 whitespace-pre-line leading-tight">
-                    &ldquo;{content || "Nội dung ước mơ của bạn sẽ xuất hiện lung linh tại đây..."}&rdquo;
-                  </p>
-                  {generatedPoem && (
-                    <div className="mt-0.5 text-[9px] sm:text-[10px] text-amber-300 font-bold truncate">
-                      🏮 {generatedPoem.badge}
-                    </div>
-                  )}
                 </div>
               </div>
 
