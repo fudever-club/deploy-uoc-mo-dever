@@ -12,7 +12,7 @@ import {
   Plane,
   ExternalLink,
 } from "lucide-react";
-import { Dream } from "@/types/dream";
+import { Dream, CardTheme } from "@/types/dream";
 import {
   DEVER_STAMPS,
   getBuggyMascotUrl,
@@ -35,8 +35,8 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [selectedTheme, setSelectedTheme] = useState<string>(dream.theme || "classic");
-  const [selectedMascot, setSelectedMascot] = useState<string>(dream.mascotIndex || "11");
+  const [selectedTheme, setSelectedTheme] = useState<CardTheme>((dream.theme as CardTheme) || "classic");
+  const [selectedMascot, setSelectedMascot] = useState<string>(String(dream.mascotIndex || "11"));
   const [selectedStamp, setSelectedStamp] = useState<string>(dream.stampVariant || "lantern");
   const [cardFormat, setCardFormat] = useState<"boarding_pass" | "postcard">("boarding_pass");
   const [isExporting, setIsExporting] = useState(false);
@@ -289,9 +289,9 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: "classic", label: "Thư Gấm Đỏ", color: "from-[#993c1d] to-[#712b13]", border: "border-[#fac775]" },
-                  { id: "tech", label: "Cyber Space", color: "from-[#0055a5] to-[#0091ea]", border: "border-[#00f5d4]" },
-                  { id: "gold", label: "Hoàng Kim", color: "from-[#b8860b] via-[#ffd166] to-[#b8860b]", border: "border-[#ffe8a3]" },
+                  { id: "classic" as CardTheme, label: "Thư Gấm Đỏ", color: "from-[#993c1d] to-[#712b13]", border: "border-[#fac775]" },
+                  { id: "tech" as CardTheme, label: "Cyber Space", color: "from-[#0055a5] to-[#0091ea]", border: "border-[#00f5d4]" },
+                  { id: "gold" as CardTheme, label: "Hoàng Kim", color: "from-[#b8860b] via-[#ffd166] to-[#b8860b]", border: "border-[#ffe8a3]" },
                 ].map((t) => (
                   <button
                     key={t.id}
