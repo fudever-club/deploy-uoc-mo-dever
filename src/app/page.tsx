@@ -196,9 +196,9 @@ export default function WishSubmissionPage() {
       <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-[#993c1d]/15 blur-3xl pointer-events-none overflow-hidden" />
       <div className="absolute top-1/2 -right-20 w-60 h-60 rounded-full bg-[#0091ea]/10 blur-3xl pointer-events-none overflow-hidden" />
 
-      <div suppressHydrationWarning className="w-full max-w-lg mx-auto relative z-10">
+      <div suppressHydrationWarning className="w-full max-w-[440px] mx-auto relative z-10">
         {/* STEP PROGRESS BAR */}
-        <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-3.5 sm:mb-5">
           <div
             className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold transition-all ${
               step === "intro"
