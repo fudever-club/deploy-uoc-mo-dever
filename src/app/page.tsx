@@ -249,6 +249,7 @@ export default function WishSubmissionPage() {
                   alt="Linh vật Buggy FU-DEVER"
                   width={64}
                   height={64}
+                  style={{ width: "auto", height: "auto" }}
                   className="object-contain drop-shadow-md animate-float"
                   priority
                 />
@@ -513,6 +514,7 @@ export default function WishSubmissionPage() {
                           alt={mood.label}
                           width={26}
                           height={26}
+                          style={{ width: "auto", height: "auto" }}
                           className="object-contain"
                         />
                         <span className="text-[9px] sm:text-[10px] font-bold text-slate-700 truncate max-w-full">
