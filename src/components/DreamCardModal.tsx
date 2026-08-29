@@ -329,8 +329,8 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
                   { id: "02_buggy_mooncake_feast.png", label: "Ăn Bánh", src: "/assets/buggy/trung-thu/02_buggy_mooncake_feast.png" },
                   { id: "03_buggy_lion_dance.png", label: "Múa Lân", src: "/assets/buggy/trung-thu/03_buggy_lion_dance.png" },
                   { id: "05_buggy_moon_rabbit_hug.png", label: "Thỏ Ngọc", src: "/assets/buggy/trung-thu/05_buggy_moon_rabbit_hug.png" },
-                  { id: "07", label: "Cool Ngầu 😎", src: "/assets/buggy/07.png" },
-                  { id: "01", label: "Cà Phê Coder ☕", src: "/assets/buggy/01.png" },
+                  { id: "6", label: "Cool Ngầu 😎", src: "/assets/buggy/6.png" },
+                  { id: "8", label: "Cà Phê Code ☕", src: "/assets/buggy/8.png" },
                 ].map((m) => (
                   <button
                     key={m.id}

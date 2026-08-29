@@ -32,6 +32,35 @@ function cleanVietnameseText(text: string): string {
 }
 
 /**
+ * Helper to draw an image while strictly maintaining its natural aspect ratio (prevents squashing/distortion)
+ */
+function drawImageAspectFit(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number,
+  y: number,
+  maxW: number,
+  maxH: number
+) {
+  const naturalW = img.naturalWidth || img.width || 1;
+  const naturalH = img.naturalHeight || img.height || 1;
+  const aspect = naturalW / naturalH;
+
+  let drawW = maxW;
+  let drawH = maxH;
+
+  if (maxW / maxH > aspect) {
+    drawW = maxH * aspect;
+  } else {
+    drawH = maxW / aspect;
+  }
+
+  const drawX = x + (maxW - drawW) / 2;
+  const drawY = y + (maxH - drawH) / 2;
+  ctx.drawImage(img, drawX, drawY, drawW, drawH);
+}
+
+/**
  * ----------------------------------------------------
  * STYLE 1: THIỆP LỤA HOA ĐĂNG & THƯ GẤM HOÀNG GIA
  * ----------------------------------------------------
@@ -190,14 +219,14 @@ export async function renderDreamCardToDataUrl(
   ctx.arc(width / 2, bannerY + 128, 5, 0, Math.PI * 2);
   ctx.fill();
 
-  // 5. UPPER SECTION: PASSENGER NAMEPLATE & POSTAGE STAMP (y: 320 -> 520, height 200px)
-  const upperY = bannerY + 150;
+  // 5. UPPER SECTION: PASSENGER NAMEPLATE & POSTAGE STAMP (y: 310 -> 510, height 200px)
+  const upperY = bannerY + 145;
   const stampBoxW = 200;
   const stampBoxH = 200;
   const stampBoxX = cardX + cardW - stampBoxW - 40;
   const stampBoxY = upperY;
 
-  // Nameplate Cartouche Box on Left (Aligned height with stamp box)
+  // Nameplate Cartouche Box on Left (Equal height with stamp box)
   const rawName = dream.name && dream.name.trim().length > 0 ? dream.name.trim() : "TÂN SINH VIÊN K22";
   const cleanName = cleanVietnameseText(rawName);
   const nameBoxX = cardX + 40;
@@ -265,7 +294,7 @@ export async function renderDreamCardToDataUrl(
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // Stamp Mascot Image
+  // Stamp Mascot Image (100% Exact Aspect Ratio - ZERO distortion)
   try {
     const mascotSrc = getBuggyMascotUrl(mascotIndex);
     const mascotImg = new Image();
@@ -273,7 +302,14 @@ export async function renderDreamCardToDataUrl(
     mascotImg.src = mascotSrc;
     await new Promise<void>((resolve) => {
       mascotImg.onload = () => {
-        ctx.drawImage(mascotImg, stampBoxX + 25, stampBoxY + 18, stampBoxW - 50, stampBoxH - 68);
+        drawImageAspectFit(
+          ctx,
+          mascotImg,
+          stampBoxX + 16,
+          stampBoxY + 14,
+          stampBoxW - 32,
+          stampBoxH - 52
+        );
         resolve();
       };
       mascotImg.onerror = () => resolve();
@@ -317,7 +353,7 @@ export async function renderDreamCardToDataUrl(
     stampImg.src = stampInfo.image;
     await new Promise<void>((resolve) => {
       stampImg.onload = () => {
-        ctx.drawImage(stampImg, -30, -30, 60, 60);
+        drawImageAspectFit(ctx, stampImg, -30, -30, 60, 60);
         resolve();
       };
       stampImg.onerror = () => resolve();
@@ -328,11 +364,11 @@ export async function renderDreamCardToDataUrl(
   }
   ctx.restore();
 
-  // 8. DREAM MANIFESTO BOX (LỜI NGUYỆN CẤT CÁNH) (y: 560 -> 1260, height: 700px)
+  // 8. DREAM MANIFESTO BOX (LỜI NGUYỆN CẤT CÁNH) (y: 535 -> 1495, height 960px)
   const quoteBoxX = cardX + 40;
-  const quoteBoxY = upperY + 230;
+  const quoteBoxY = upperY + 225;
   const quoteBoxW = cardW - 80;
-  const quoteBoxH = 700;
+  const quoteBoxH = 960;
 
   ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
   ctx.beginPath();
@@ -346,15 +382,15 @@ export async function renderDreamCardToDataUrl(
   ctx.fillStyle = primaryGold;
   ctx.textAlign = "center";
   ctx.font = `bold 22px ${FONT_SANS}`;
-  ctx.fillText("✦ LỜI NGUYỆN CẤT CÁNH CÙNG HOA ĐĂNG ✦", width / 2, quoteBoxY + 52);
+  ctx.fillText("✦ LỜI NGUYỆN CẤT CÁNH CÙNG HOA ĐĂNG ✦", width / 2, quoteBoxY + 54);
 
   // Format and wrap clean Vietnamese text
   const cleanContent = cleanVietnameseText(dream.content);
   const maxContentW = quoteBoxW - 100;
 
-  let fontSize = 34;
-  if (cleanContent.length > 200) fontSize = 26;
-  else if (cleanContent.length > 100) fontSize = 30;
+  let fontSize = 36;
+  if (cleanContent.length > 200) fontSize = 28;
+  else if (cleanContent.length > 100) fontSize = 32;
 
   ctx.font = `600 ${fontSize}px ${FONT_SANS}`;
   ctx.fillStyle = "#ffffff";
@@ -376,25 +412,24 @@ export async function renderDreamCardToDataUrl(
 
   const lineH = fontSize * 1.65;
   const totalH = contentLines.length * lineH;
-  const startTextY = quoteBoxY + 110 + Math.max(0, (quoteBoxH - 180 - totalH) / 2);
+  const startTextY = quoteBoxY + 120 + Math.max(0, (quoteBoxH - 220 - totalH) / 2);
 
-  contentLines.slice(0, 6).forEach((l, idx) => {
+  contentLines.slice(0, 8).forEach((l, idx) => {
     ctx.fillText(l, width / 2, startTextY + idx * lineH);
   });
 
-  // 9. FOOTER SECTION (y: 1320 -> 1750, ample breathing room before card border y=1850)
-  const footerY = quoteBoxY + quoteBoxH + 50;
+  // 9. FOOTER SECTION AT BOTTOM OF CARD FRAME (x1.2 Prominent Logo, anchored at y: 1530 -> 1800)
+  const logoW = 140;
+  const logoH = 140;
+  const footerLogoY = quoteBoxY + quoteBoxH + 35; // y = 1530
 
-  // FU-DEVER Emblem
-  const logoW = 110;
-  const logoH = 110;
   try {
     const logoImg = new Image();
     logoImg.crossOrigin = "anonymous";
     logoImg.src = "/assets/logo/logo-dever-white.png";
     await new Promise<void>((resolve) => {
       logoImg.onload = () => {
-        ctx.drawImage(logoImg, (width - logoW) / 2, footerY, logoW, logoH);
+        drawImageAspectFit(ctx, logoImg, (width - logoW) / 2, footerLogoY, logoW, logoH);
         resolve();
       };
       logoImg.onerror = () => resolve();
@@ -402,17 +437,17 @@ export async function renderDreamCardToDataUrl(
     });
   } catch {
     ctx.fillStyle = primaryGold;
-    ctx.font = `900 30px ${FONT_SANS}`;
-    ctx.fillText("FU-DEVER", width / 2, footerY + 50);
+    ctx.font = `900 34px ${FONT_SANS}`;
+    ctx.fillText("FU-DEVER", width / 2, footerLogoY + 60);
   }
 
   ctx.fillStyle = theme === "gold" ? "#ffe8a3" : "#faeeda";
   ctx.font = `bold 24px ${FONT_SANS}`;
-  ctx.fillText(cleanVietnameseText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), width / 2, footerY + logoH + 34);
+  ctx.fillText(cleanVietnameseText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), width / 2, footerLogoY + logoH + 32);
 
   ctx.fillStyle = primaryGold;
   ctx.font = `bold 20px ${FONT_SANS}`;
-  ctx.fillText(EVENT_INFO.hashtags.join("    "), width / 2, footerY + logoH + 72);
+  ctx.fillText(EVENT_INFO.hashtags.join("    "), width / 2, footerLogoY + logoH + 68);
 
   return canvas.toDataURL("image/png");
 }
@@ -472,7 +507,7 @@ export async function renderBoardingPassCardToDataUrl(
     ctx.fill();
   }
 
-  // 2. BOARDING PASS TICKET BODY CONTAINER
+  // 2. BOARDING PASS TICKET BODY CONTAINER (y: 70 -> 1850)
   const passX = 65;
   const passY = 70;
   const passW = width - 130;
@@ -644,7 +679,7 @@ export async function renderBoardingPassCardToDataUrl(
   ctx.font = `900 22px ${FONT_SANS}`;
   ctx.fillText("DEVER PLANET (DEV)", passX + passW - 65, routeY + 45);
 
-  // 6. DREAM MANIFESTO / MISSION STATEMENT BOX (y: 600 -> 1260, height: 660px)
+  // 6. DREAM MANIFESTO / MISSION STATEMENT BOX (y: 600 -> 1260, height: 470px)
   const wishY = routeY + 105;
   const wishH = 470;
 
@@ -699,14 +734,14 @@ export async function renderBoardingPassCardToDataUrl(
     ctx.fillText(line, passX + passW / 2, wishTextStartY + idx * wishLineH);
   });
 
-  // Mascot Buggy Badge on Bottom Right of Manifesto
+  // Mascot Buggy Badge on Bottom Right of Manifesto (Aspect Ratio Preserved)
   try {
     const mascotImg = new Image();
     mascotImg.crossOrigin = "anonymous";
     mascotImg.src = getBuggyMascotUrl(mascotIndex);
     await new Promise<void>((resolve) => {
       mascotImg.onload = () => {
-        ctx.drawImage(mascotImg, passX + passW - 200, wishY + wishH - 165, 145, 145);
+        drawImageAspectFit(ctx, mascotImg, passX + passW - 205, wishY + wishH - 165, 145, 145);
         resolve();
       };
       mascotImg.onerror = () => resolve();
@@ -750,7 +785,7 @@ export async function renderBoardingPassCardToDataUrl(
     stampImg.src = stampInfo.image;
     await new Promise<void>((resolve) => {
       stampImg.onload = () => {
-        ctx.drawImage(stampImg, -stampHalfW + 16, -stampIconSize / 2, stampIconSize, stampIconSize);
+        drawImageAspectFit(ctx, stampImg, -stampHalfW + 16, -stampIconSize / 2, stampIconSize, stampIconSize);
         resolve();
       };
       stampImg.onerror = () => resolve();
