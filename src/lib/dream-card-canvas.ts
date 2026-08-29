@@ -18,7 +18,7 @@ export interface RenderCardOptions {
   height?: number;
 }
 
-// Robust Vietnamese-friendly typography constants (prevents glyph splitting on Windows Canvas)
+// Robust typography constants (prevents glyph splitting on Windows Canvas)
 const FONT_SANS = "-apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 const FONT_MONO = "'JetBrains Mono', 'SF Mono', 'Fira Code', 'Courier New', monospace";
 const FONT_SERIF = "'Playfair Display', 'Merriweather', 'Times New Roman', serif";
@@ -51,6 +51,7 @@ export async function renderDreamCardToDataUrl(
 
   const theme = dream.theme || "classic";
   const mascotIndex = dream.mascotIndex || "11";
+  const category = DREAM_CATEGORIES.find((c) => c.id === dream.tag);
   const stampInfo = getDeverStampInfo(dream.stampVariant, theme);
 
   // Theme Palette Tokens
@@ -59,8 +60,8 @@ export async function renderDreamCardToDataUrl(
   let bgBot = "#12203A";
   let primaryGold = "#FAC775";
   let secondaryGold = "#FFD166";
-  let cardBgGradStart = "rgba(42, 16, 16, 0.88)";
-  let cardBgGradEnd = "rgba(18, 32, 58, 0.94)";
+  let cardBgGradStart = "rgba(42, 16, 16, 0.92)";
+  let cardBgGradEnd = "rgba(18, 32, 58, 0.96)";
 
   if (theme === "tech") {
     bgTop = "#040914";
@@ -68,16 +69,16 @@ export async function renderDreamCardToDataUrl(
     bgBot = "#020813";
     primaryGold = "#00F5D4";
     secondaryGold = "#0091EA";
-    cardBgGradStart = "rgba(4, 25, 48, 0.90)";
-    cardBgGradEnd = "rgba(2, 10, 24, 0.95)";
+    cardBgGradStart = "rgba(4, 25, 48, 0.92)";
+    cardBgGradEnd = "rgba(2, 10, 24, 0.97)";
   } else if (theme === "gold") {
     bgTop = "#1a0f00";
     bgMid = "#382004";
     bgBot = "#150a00";
     primaryGold = "#FFD166";
     secondaryGold = "#FAC775";
-    cardBgGradStart = "rgba(60, 34, 4, 0.90)";
-    cardBgGradEnd = "rgba(24, 12, 0, 0.96)";
+    cardBgGradStart = "rgba(60, 34, 4, 0.92)";
+    cardBgGradEnd = "rgba(24, 12, 0, 0.97)";
   }
 
   // 1. BACKGROUND WITH SILK TEXTURE & GOLD DUST
@@ -100,15 +101,15 @@ export async function renderDreamCardToDataUrl(
   }
 
   // 2. MAIN SILK SCROLL CONTAINER
-  const cardX = 75;
-  const cardY = 100;
-  const cardW = width - 150;
-  const cardH = height - 200;
+  const cardX = 70;
+  const cardY = 85;
+  const cardW = width - 140;
+  const cardH = height - 170;
 
   // Outer decorative glow
   ctx.save();
   ctx.shadowColor = primaryGold;
-  ctx.shadowBlur = 28;
+  ctx.shadowBlur = 30;
   ctx.fillStyle = `${primaryGold}15`;
   ctx.beginPath();
   ctx.roundRect(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 38);
@@ -126,7 +127,7 @@ export async function renderDreamCardToDataUrl(
 
   // Double Gold Border
   ctx.strokeStyle = primaryGold;
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 4.5;
   ctx.stroke();
 
   ctx.strokeStyle = `${secondaryGold}66`;
@@ -160,7 +161,7 @@ export async function renderDreamCardToDataUrl(
   drawCornerCloud(cardX + cardW - 26, cardY + cardH - 26, -1, -1);
 
   // 4. HEADER: IMPERIAL EVENT BANNER
-  const bannerY = cardY + 65;
+  const bannerY = cardY + 60;
   ctx.textAlign = "center";
   ctx.fillStyle = primaryGold;
   ctx.font = `bold 22px ${FONT_SANS}`;
@@ -168,44 +169,103 @@ export async function renderDreamCardToDataUrl(
 
   ctx.fillStyle = theme === "gold" ? "#ffe8a3" : "#ffffff";
   ctx.font = `900 52px ${FONT_SANS}`;
-  ctx.fillText(cleanVietnameseText("DEPLOY ƯỚC MƠ"), width / 2, bannerY + 58);
+  ctx.fillText(cleanVietnameseText("DEPLOY ƯỚC MƠ"), width / 2, bannerY + 60);
 
   ctx.fillStyle = `${primaryGold}dd`;
   ctx.font = `bold 22px ${FONT_SANS}`;
-  ctx.fillText(cleanVietnameseText("NGÀY HỘI CLB FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), width / 2, bannerY + 98);
+  ctx.fillText(cleanVietnameseText("NGÀY HỘI CLB FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), width / 2, bannerY + 102);
 
   // Filigree divider line
   ctx.strokeStyle = `${primaryGold}55`;
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(cardX + 80, bannerY + 125);
-  ctx.lineTo(width / 2 - 40, bannerY + 125);
-  ctx.moveTo(width / 2 + 40, bannerY + 125);
-  ctx.lineTo(cardX + cardW - 80, bannerY + 125);
+  ctx.moveTo(cardX + 80, bannerY + 130);
+  ctx.lineTo(width / 2 - 40, bannerY + 130);
+  ctx.moveTo(width / 2 + 40, bannerY + 130);
+  ctx.lineTo(cardX + cardW - 80, bannerY + 130);
   ctx.stroke();
 
   ctx.fillStyle = primaryGold;
   ctx.beginPath();
-  ctx.arc(width / 2, bannerY + 125, 5, 0, Math.PI * 2);
+  ctx.arc(width / 2, bannerY + 130, 5, 0, Math.PI * 2);
   ctx.fill();
 
-  // 5. POSTAGE STAMP ON TOP RIGHT
-  const stampBoxW = 160;
+  // 5. UPPER SECTION: PASSENGER NAMEPLATE & POSTAGE STAMP
+  const upperY = bannerY + 155;
+  const stampBoxW = 200;
   const stampBoxH = 200;
-  const stampBoxX = cardX + cardW - stampBoxW - 45;
-  const stampBoxY = bannerY + 155;
+  const stampBoxX = cardX + cardW - stampBoxW - 40;
+  const stampBoxY = upperY;
 
+  // Nameplate Cartouche Box on Left
+  const rawName = dream.name && dream.name.trim().length > 0 ? dream.name.trim() : "TÂN SINH VIÊN K22";
+  const cleanName = cleanVietnameseText(rawName);
+  const nameBoxX = cardX + 40;
+  const nameBoxY = upperY;
+  const nameBoxW = cardW - stampBoxW - 90;
+  const nameBoxH = 180;
+
+  ctx.fillStyle = `${primaryGold}15`;
+  ctx.beginPath();
+  ctx.roundRect(nameBoxX, nameBoxY, nameBoxW, nameBoxH, 18);
+  ctx.fill();
+  ctx.strokeStyle = `${primaryGold}88`;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Nameplate Header & Category Tag
+  ctx.textAlign = "left";
+  ctx.fillStyle = `${primaryGold}ee`;
+  ctx.font = `bold 16px ${FONT_SANS}`;
+  ctx.fillText("📜 HÀNH KHÁCH / KÝ DANH:", nameBoxX + 24, nameBoxY + 34);
+
+  // Category Tag Pill
+  if (category) {
+    ctx.textAlign = "right";
+    ctx.fillStyle = `${secondaryGold}ee`;
+    ctx.font = `bold 16px ${FONT_SANS}`;
+    const catShort = `${category.emoji} ${category.shortLabel}`;
+    ctx.fillText(catShort, nameBoxX + nameBoxW - 24, nameBoxY + 34);
+  }
+
+  // Dynamic Name Typography with Width Clamping
+  ctx.textAlign = "left";
+  ctx.fillStyle = theme === "gold" ? "#ffd166" : "#ffffff";
+  let nameFontSize = 34;
+  ctx.font = `900 ${nameFontSize}px ${FONT_SANS}`;
+  const maxNameW = nameBoxW - 48;
+  while (ctx.measureText(cleanName.toUpperCase()).width > maxNameW && nameFontSize > 18) {
+    nameFontSize -= 2;
+    ctx.font = `900 ${nameFontSize}px ${FONT_SANS}`;
+  }
+  ctx.fillText(cleanName.toUpperCase(), nameBoxX + 24, nameBoxY + 86);
+
+  // Subtitle info
+  ctx.fillStyle = `${primaryGold}aa`;
+  ctx.font = `bold 15px ${FONT_MONO}`;
+  ctx.fillText("✦ SỐ HIỆU ƯỚC MƠ: #FU-DEVER-K22 ✦", nameBoxX + 24, nameBoxY + 134);
+
+  // 6. POSTAGE STAMP ON RIGHT
   ctx.save();
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.roundRect(stampBoxX, stampBoxY, stampBoxW, stampBoxH, 10);
+  ctx.roundRect(stampBoxX, stampBoxY, stampBoxW, stampBoxH, 14);
   ctx.fill();
 
   ctx.strokeStyle = "#cbd5e1";
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // Stamp Mascot
+  // Stamp inner dotted line
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.roundRect(stampBoxX + 8, stampBoxY + 8, stampBoxW - 16, stampBoxH - 16, 8);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Stamp Mascot Image
   try {
     const mascotSrc = getBuggyMascotUrl(mascotIndex);
     const mascotImg = new Image();
@@ -213,7 +273,7 @@ export async function renderDreamCardToDataUrl(
     mascotImg.src = mascotSrc;
     await new Promise<void>((resolve) => {
       mascotImg.onload = () => {
-        ctx.drawImage(mascotImg, stampBoxX + 18, stampBoxY + 18, stampBoxW - 36, stampBoxH - 65);
+        ctx.drawImage(mascotImg, stampBoxX + 25, stampBoxY + 18, stampBoxW - 50, stampBoxH - 68);
         resolve();
       };
       mascotImg.onerror = () => resolve();
@@ -227,16 +287,16 @@ export async function renderDreamCardToDataUrl(
   ctx.fillStyle = "#0f172a";
   ctx.textAlign = "center";
   ctx.font = `900 13px ${FONT_MONO}`;
-  ctx.fillText("★ VIP DEV ★", stampBoxX + stampBoxW / 2, stampBoxY + stampBoxH - 14);
+  ctx.fillText("★ VIP DEV ★", stampBoxX + stampBoxW / 2, stampBoxY + stampBoxH - 16);
   ctx.restore();
 
-  // 6. IMPERIAL VERMILION SEAL DAMPENED ACROSS STAMP
+  // 7. IMPERIAL VERMILION SEAL (Cleanly Anchored at stamp intersection)
   ctx.save();
-  ctx.translate(stampBoxX - 15, stampBoxY + stampBoxH - 30);
-  ctx.rotate((-14 * Math.PI) / 180);
+  ctx.translate(stampBoxX - 10, stampBoxY + stampBoxH - 25);
+  ctx.rotate((-8 * Math.PI) / 180);
 
   ctx.strokeStyle = stampInfo.color;
-  ctx.lineWidth = 3.5;
+  ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.arc(0, 0, 50, 0, Math.PI * 2);
   ctx.stroke();
@@ -268,43 +328,19 @@ export async function renderDreamCardToDataUrl(
   }
   ctx.restore();
 
-  // 7. PASSENGER CARTOUCHE NAMEPLATE
-  const rawName = dream.name && dream.name.trim().length > 0 ? dream.name.trim() : "TÂN SINH VIÊN K22";
-  const cleanName = cleanVietnameseText(rawName);
-  const nameBoxX = cardX + 45;
-  const nameBoxY = bannerY + 155;
-  const nameBoxW = cardW - stampBoxW - 110;
+  // 8. DREAM MANIFESTO BOX (LỜI NGUYỆN CẤT CÁNH)
+  const quoteBoxX = cardX + 40;
+  const quoteBoxY = upperY + 215;
+  const quoteBoxW = cardW - 80;
+  const quoteBoxH = cardH - 590;
 
-  ctx.fillStyle = `${primaryGold}18`;
-  ctx.beginPath();
-  ctx.roundRect(nameBoxX, nameBoxY, nameBoxW, 95, 18);
-  ctx.fill();
-  ctx.strokeStyle = `${primaryGold}88`;
-  ctx.lineWidth = 1.8;
-  ctx.stroke();
-
-  ctx.textAlign = "left";
-  ctx.fillStyle = `${primaryGold}dd`;
-  ctx.font = `bold 17px ${FONT_SANS}`;
-  ctx.fillText("📜 HÀNH KHÁCH / KÝ DANH:", nameBoxX + 22, nameBoxY + 34);
-
-  ctx.fillStyle = theme === "gold" ? "#ffd166" : "#ffffff";
-  ctx.font = `900 34px ${FONT_SANS}`;
-  ctx.fillText(cleanName.toUpperCase(), nameBoxX + 22, nameBoxY + 75);
-
-  // 8. DREAM MANIFESTO BOX
-  const quoteBoxX = cardX + 45;
-  const quoteBoxY = bannerY + 285;
-  const quoteBoxW = cardW - 90;
-  const quoteBoxH = cardH - 560;
-
-  ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
   ctx.beginPath();
   ctx.roundRect(quoteBoxX, quoteBoxY, quoteBoxW, quoteBoxH, 22);
   ctx.fill();
 
   ctx.strokeStyle = `${primaryGold}44`;
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 1.8;
   ctx.stroke();
 
   ctx.fillStyle = primaryGold;
@@ -338,27 +374,27 @@ export async function renderDreamCardToDataUrl(
   });
   if (curLine) contentLines.push(curLine);
 
-  const lineH = fontSize * 1.6;
+  const lineH = fontSize * 1.65;
   const totalH = contentLines.length * lineH;
-  const startTextY = quoteBoxY + 120 + Math.max(0, (quoteBoxH - 180 - totalH) / 2);
+  const startTextY = quoteBoxY + 110 + Math.max(0, (quoteBoxH - 160 - totalH) / 2);
 
-  contentLines.forEach((l, idx) => {
+  contentLines.slice(0, 6).forEach((l, idx) => {
     ctx.fillText(l, width / 2, startTextY + idx * lineH);
   });
 
   // 9. FOOTER SECTION
-  const footerY = cardY + cardH - 170;
+  const footerY = cardY + cardH - 165;
 
   // FU-DEVER Emblem
-  const logoW = 120;
-  const logoH = 120;
+  const logoW = 115;
+  const logoH = 115;
   try {
     const logoImg = new Image();
     logoImg.crossOrigin = "anonymous";
     logoImg.src = "/assets/logo/logo-dever-white.png";
     await new Promise<void>((resolve) => {
       logoImg.onload = () => {
-        ctx.drawImage(logoImg, (width - logoW) / 2, footerY - 10, logoW, logoH);
+        ctx.drawImage(logoImg, (width - logoW) / 2, footerY - 15, logoW, logoH);
         resolve();
       };
       logoImg.onerror = () => resolve();
@@ -367,16 +403,16 @@ export async function renderDreamCardToDataUrl(
   } catch {
     ctx.fillStyle = primaryGold;
     ctx.font = `900 32px ${FONT_SANS}`;
-    ctx.fillText("FU-DEVER", width / 2, footerY + 50);
+    ctx.fillText("FU-DEVER", width / 2, footerY + 45);
   }
 
   ctx.fillStyle = theme === "gold" ? "#ffe8a3" : "#faeeda";
   ctx.font = `bold 24px ${FONT_SANS}`;
-  ctx.fillText(cleanVietnameseText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), width / 2, footerY + logoH + 30);
+  ctx.fillText(cleanVietnameseText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), width / 2, footerY + logoH + 25);
 
   ctx.fillStyle = primaryGold;
   ctx.font = `bold 20px ${FONT_SANS}`;
-  ctx.fillText(EVENT_INFO.hashtags.join("    "), width / 2, footerY + logoH + 68);
+  ctx.fillText(EVENT_INFO.hashtags.join("    "), width / 2, footerY + logoH + 62);
 
   return canvas.toDataURL("image/png");
 }
@@ -437,12 +473,12 @@ export async function renderBoardingPassCardToDataUrl(
   }
 
   // 2. BOARDING PASS TICKET BODY CONTAINER
-  const passX = 80;
-  const passY = 90;
-  const passW = width - 160;
-  const passH = height - 180;
-  const notchY = passY + 1280; // Perforation notch position
-  const notchRadius = 32;
+  const passX = 75;
+  const passY = 80;
+  const passW = width - 150;
+  const passH = height - 160;
+  const notchY = passY + 1250; // Perforation notch position
+  const notchRadius = 34;
 
   // Draw Ticket Shape with smooth inward notches
   const drawTicketOutline = () => {
@@ -511,51 +547,79 @@ export async function renderBoardingPassCardToDataUrl(
   // Header Typography
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "left";
-  ctx.font = `900 44px ${FONT_SANS}`;
+  ctx.font = `900 42px ${FONT_SANS}`;
   ctx.fillText("FU-DEVER SPACEWAYS", passX + 50, passY + 80);
 
   ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
-  ctx.font = `bold 22px ${FONT_SANS}`;
-  ctx.fillText(cleanVietnameseText("BOARDING PASS · VÉ LÊN TÀU VŨ TRỤ K22"), passX + 50, passY + 128);
+  ctx.font = `bold 20px ${FONT_SANS}`;
+  ctx.fillText(cleanVietnameseText("BOARDING PASS · VÉ LÊN TÀU VŨ TRỤ K22"), passX + 50, passY + 126);
 
   ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-  ctx.font = `bold 16px ${FONT_MONO}`;
-  ctx.fillText("FLIGHT OPERATED BY FU-DEVER AERO", passX + 50, passY + 160);
+  ctx.font = `bold 15px ${FONT_MONO}`;
+  ctx.fillText("FLIGHT OPERATED BY FU-DEVER AERO", passX + 50, passY + 158);
 
   ctx.textAlign = "right";
   ctx.fillStyle = "#ffd166";
-  ctx.font = `900 36px ${FONT_MONO}`;
+  ctx.font = `900 34px ${FONT_MONO}`;
   ctx.fillText("FIRST CLASS", passX + passW - 50, passY + 95);
 
   ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
   ctx.font = `bold 18px ${FONT_MONO}`;
-  ctx.fillText("VIP DREAMER", passX + passW - 50, passY + 140);
+  ctx.fillText("VIP DREAMER", passX + passW - 50, passY + 138);
 
-  // 4. FLIGHT PARAMETER MATRIX
-  const gridY = passY + headerH + 45;
+  // 4. FLIGHT PARAMETER MATRIX (2 Rows with Dedicated Safe Widths)
+  const gridY1 = passY + headerH + 45;
 
-  const drawField = (label: string, value: string, x: number, y: number, isAccent = false) => {
+  // Row 1: 3 Columns
+  const drawCol1 = (label: string, value: string, x: number) => {
     ctx.textAlign = "left";
-    ctx.font = `bold 17px ${FONT_SANS}`;
+    ctx.font = `bold 16px ${FONT_SANS}`;
     ctx.fillStyle = "#64748b";
-    ctx.fillText(cleanVietnameseText(label), x, y);
+    ctx.fillText(cleanVietnameseText(label), x, gridY1);
 
-    ctx.font = `900 30px ${FONT_SANS}`;
-    ctx.fillStyle = isAccent ? "#993c1d" : "#0f172a";
-    ctx.fillText(cleanVietnameseText(value), x, y + 38);
+    ctx.font = `900 28px ${FONT_SANS}`;
+    ctx.fillStyle = "#0f172a";
+    ctx.fillText(cleanVietnameseText(value), x, gridY1 + 36);
   };
 
-  drawField("FLIGHT / CHUYẾN BAY", "DEVER-K22", passX + 50, gridY);
-  drawField("GATE / CỔNG", "01 (FPTU DAD)", passX + 340, gridY);
-  drawField("SEAT / GHẾ", "22A (VIP DEV)", passX + 630, gridY);
+  drawCol1("FLIGHT / CHUYẾN BAY", "DEVER-K22", passX + 50);
+  drawCol1("GATE / CỔNG", "01 (FPTU DAD)", passX + 350);
+  drawCol1("SEAT / GHẾ", "22A (VIP DEV)", passX + 640);
 
-  const gridY2 = gridY + 95;
-  drawField("PASSENGER / HÀNH KHÁCH", passengerName, passX + 50, gridY2, true);
-  drawField("TAG / CHUYÊN MỤC", `${category?.emoji || "✨"} ${category?.label || "Ước Mơ"}`, passX + 540, gridY2);
+  // Row 2: 2 Bounded Columns (Passenger on left max 500px, Category on right)
+  const gridY2 = gridY1 + 95;
+
+  // Passenger Col
+  ctx.textAlign = "left";
+  ctx.font = `bold 16px ${FONT_SANS}`;
+  ctx.fillStyle = "#64748b";
+  ctx.fillText("PASSENGER / HÀNH KHÁCH", passX + 50, gridY2);
+
+  // Dynamic Passenger Name with measureText clamp so it NEVER touches Category Col
+  let passFontSize = 28;
+  ctx.font = `900 ${passFontSize}px ${FONT_SANS}`;
+  const maxPassW = 460;
+  while (ctx.measureText(passengerName).width > maxPassW && passFontSize > 18) {
+    passFontSize -= 2;
+    ctx.font = `900 ${passFontSize}px ${FONT_SANS}`;
+  }
+  ctx.fillStyle = "#993c1d";
+  ctx.fillText(passengerName, passX + 50, gridY2 + 36);
+
+  // Category Col (Uses shortLabel to avoid right edge blowout)
+  const catX = passX + 560;
+  ctx.font = `bold 16px ${FONT_SANS}`;
+  ctx.fillStyle = "#64748b";
+  ctx.fillText("CATEGORY / CHUYÊN MỤC", catX, gridY2);
+
+  ctx.font = `900 26px ${FONT_SANS}`;
+  ctx.fillStyle = "#0f172a";
+  const catShort = `${category?.emoji || "✨"} ${category?.shortLabel || "Ước Mơ"}`;
+  ctx.fillText(cleanVietnameseText(catShort), catX, gridY2 + 36);
 
   // 5. ROUTE FLIGHT PATH BANNER
-  const routeY = gridY2 + 90;
-  const routeH = 80;
+  const routeY = gridY2 + 88;
+  const routeH = 75;
 
   ctx.fillStyle = "#f8fafc";
   ctx.beginPath();
@@ -567,24 +631,24 @@ export async function renderBoardingPassCardToDataUrl(
 
   ctx.textAlign = "left";
   ctx.fillStyle = "#0f172a";
-  ctx.font = `900 24px ${FONT_SANS}`;
-  ctx.fillText("FPTU DA NANG (DAD)", passX + 65, routeY + 48);
+  ctx.font = `900 22px ${FONT_SANS}`;
+  ctx.fillText("FPTU DA NANG (DAD)", passX + 65, routeY + 45);
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#993c1d";
-  ctx.font = `bold 24px ${FONT_MONO}`;
-  ctx.fillText("✈ ─── 🚀 ─── 🏮", passX + passW / 2, routeY + 48);
+  ctx.font = `bold 22px ${FONT_MONO}`;
+  ctx.fillText("✈ ─── 🚀 ─── 🏮", passX + passW / 2, routeY + 45);
 
   ctx.textAlign = "right";
   ctx.fillStyle = "#0091ea";
-  ctx.font = `900 24px ${FONT_SANS}`;
-  ctx.fillText("DEVER PLANET (DEV)", passX + passW - 65, routeY + 48);
+  ctx.font = `900 22px ${FONT_SANS}`;
+  ctx.fillText("DEVER PLANET (DEV)", passX + passW - 65, routeY + 45);
 
   // 6. DREAM MANIFESTO / MISSION STATEMENT BOX
-  const wishY = routeY + 110;
-  const wishH = 430;
+  const wishY = routeY + 105;
+  const wishH = 440;
 
-  ctx.fillStyle = "#fffdf7";
+  ctx.fillStyle = "#fffdf9";
   ctx.beginPath();
   ctx.roundRect(passX + 40, wishY, passW - 80, wishH, 20);
   ctx.fill();
@@ -595,19 +659,19 @@ export async function renderBoardingPassCardToDataUrl(
 
   ctx.fillStyle = "#993c1d";
   ctx.textAlign = "left";
-  ctx.font = `900 21px ${FONT_SANS}`;
-  ctx.fillText(cleanVietnameseText("📜 LỜI NGUYỆN CẤT CÁNH / MISSION STATEMENT:"), passX + 65, wishY + 45);
+  ctx.font = `900 20px ${FONT_SANS}`;
+  ctx.fillText(cleanVietnameseText("📜 LỜI NGUYỆN CẤT CÁNH / MISSION STATEMENT:"), passX + 65, wishY + 42);
 
   // Quotation marks decoration
-  ctx.fillStyle = "rgba(153, 60, 29, 0.25)";
-  ctx.font = `900 64px ${FONT_SERIF}`;
-  ctx.fillText("“", passX + 60, wishY + 105);
+  ctx.fillStyle = "rgba(153, 60, 29, 0.22)";
+  ctx.font = `900 58px ${FONT_SERIF}`;
+  ctx.fillText("“", passX + 60, wishY + 98);
 
-  // Text Wrapping with clean Vietnamese typography
-  const wishMaxW = passW - 170;
-  let wishFontSize = 32;
+  // Text Wrapping with clean Vietnamese typography strictly in upper 62% of box
+  const wishMaxW = passW - 160;
+  let wishFontSize = 30;
   if (rawWish.length > 180) wishFontSize = 24;
-  else if (rawWish.length > 90) wishFontSize = 28;
+  else if (rawWish.length > 90) wishFontSize = 27;
 
   ctx.font = `600 ${wishFontSize}px ${FONT_SANS}`;
   ctx.fillStyle = "#1e293b";
@@ -628,7 +692,8 @@ export async function renderBoardingPassCardToDataUrl(
   if (curWishLine) wishLines.push(curWishLine);
 
   const wishLineH = wishFontSize * 1.55;
-  const wishTextStartY = wishY + 120 + Math.max(0, (wishH - 240 - wishLines.length * wishLineH) / 2);
+  const wishMaxUpperH = wishH - 180;
+  const wishTextStartY = wishY + 105 + Math.max(0, (wishMaxUpperH - wishLines.length * wishLineH) / 2);
 
   wishLines.slice(0, 5).forEach((line, idx) => {
     ctx.fillText(line, passX + passW / 2, wishTextStartY + idx * wishLineH);
@@ -651,36 +716,41 @@ export async function renderBoardingPassCardToDataUrl(
     // ignore
   }
 
-  // Authentic Rubber Visa Stamp on Bottom Left of Manifesto
+  // Authentic Rectangular Visa Stamp on Bottom Left of Manifesto (Rotated -5deg for crisp alignment)
   ctx.save();
-  ctx.translate(passX + 185, wishY + wishH - 85);
-  ctx.rotate((-12 * Math.PI) / 180);
+  ctx.translate(passX + 225, wishY + wishH - 80);
+  ctx.rotate((-5 * Math.PI) / 180);
+
+  const stampW = 340;
+  const stampH = 115;
+  const stampHalfW = stampW / 2;
+  const stampHalfH = stampH / 2;
 
   ctx.strokeStyle = stampInfo.color;
   ctx.lineWidth = 4;
   ctx.beginPath();
-  ctx.roundRect(-140, -55, 280, 110, 16);
+  ctx.roundRect(-stampHalfW, -stampHalfH, stampW, stampH, 14);
   ctx.stroke();
 
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.roundRect(-133, -48, 266, 96, 12);
+  ctx.roundRect(-stampHalfW + 6, -stampHalfH + 6, stampW - 12, stampH - 12, 10);
   ctx.stroke();
 
-  ctx.fillStyle = `${stampInfo.color}15`;
+  ctx.fillStyle = `${stampInfo.color}18`;
   ctx.beginPath();
-  ctx.roundRect(-133, -48, 266, 96, 12);
+  ctx.roundRect(-stampHalfW + 6, -stampHalfH + 6, stampW - 12, stampH - 12, 10);
   ctx.fill();
 
-  // Stamp Emblem
-  const stampIconSize = 72;
+  // Stamp Emblem on Left
+  const stampIconSize = 68;
   try {
     const stampImg = new Image();
     stampImg.crossOrigin = "anonymous";
     stampImg.src = stampInfo.image;
     await new Promise<void>((resolve) => {
       stampImg.onload = () => {
-        ctx.drawImage(stampImg, -125, -36, stampIconSize, stampIconSize);
+        ctx.drawImage(stampImg, -stampHalfW + 16, -stampIconSize / 2, stampIconSize, stampIconSize);
         resolve();
       };
       stampImg.onerror = () => resolve();
@@ -690,16 +760,19 @@ export async function renderBoardingPassCardToDataUrl(
     // fallback
   }
 
+  // Stamp Text on Right with Perfect Baseline Math & High-Contrast Typography
   ctx.textAlign = "left";
   ctx.fillStyle = stampInfo.color;
-  ctx.font = `900 18px ${FONT_MONO}`;
-  ctx.fillText("★ FU-DEVER VERIFIED ★", -40, -10);
+  const stampTextX = -stampHalfW + stampIconSize + 28;
 
-  ctx.font = `bold 14px ${FONT_MONO}`;
-  ctx.fillText("ONBOARDED · CLUB DAY 2026", -40, 14);
+  ctx.font = `900 17px ${FONT_MONO}`;
+  ctx.fillText("★ FU-DEVER VERIFIED ★", stampTextX, -16);
+
+  ctx.font = `bold 13px ${FONT_MONO}`;
+  ctx.fillText("ONBOARDED · CLUB DAY 2026", stampTextX, 8);
 
   ctx.font = `bold 12px ${FONT_MONO}`;
-  ctx.fillText(stampInfo.label.toUpperCase(), -40, 34);
+  ctx.fillText("OFFICIAL EMBLEM · APPROVED", stampTextX, 28);
   ctx.restore();
 
   // 7. PERFORATED DASHED TEAR LINE
@@ -719,19 +792,19 @@ export async function renderBoardingPassCardToDataUrl(
   // Boarding Instruction Pill
   ctx.fillStyle = "#f1f5f9";
   ctx.beginPath();
-  ctx.roundRect(passX + 50, stubY, passW - 100, 48, 12);
+  ctx.roundRect(passX + 50, stubY, passW - 100, 46, 12);
   ctx.fill();
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#475569";
-  ctx.font = `bold 16px ${FONT_MONO}`;
-  ctx.fillText("BOARDING TIME: 18:30 · PLEASE BE AT BOOTH GATE 10 MINS BEFORE TAKEOFF", passX + passW / 2, stubY + 30);
+  ctx.font = `bold 15px ${FONT_MONO}`;
+  ctx.fillText("BOARDING TIME: 18:30 · PLEASE BE AT BOOTH GATE 10 MINS BEFORE TAKEOFF", passX + passW / 2, stubY + 28);
 
   // Vector Barcode Generator
-  const barcodeY = stubY + 70;
+  const barcodeY = stubY + 68;
   const barcodeX = passX + 60;
   const barcodeW = passW - 120;
-  const barcodeH = 105;
+  const barcodeH = 100;
 
   ctx.fillStyle = "#0f172a";
   let currentBX = barcodeX;
@@ -749,16 +822,16 @@ export async function renderBoardingPassCardToDataUrl(
   ctx.textAlign = "center";
   ctx.fillStyle = "#334155";
   ctx.font = `bold 20px ${FONT_MONO}`;
-  ctx.fillText(`SN: DEVER-K22-FPTU-${Date.now().toString(36).toUpperCase()}`, passX + passW / 2, barcodeY + barcodeH + 35);
+  ctx.fillText("SN: DEVER-K22-FPTU-2026", passX + passW / 2, barcodeY + barcodeH + 32);
 
   // Footer Branding & Social Hashtags
   ctx.fillStyle = "#0f172a";
   ctx.font = `900 24px ${FONT_SANS}`;
-  ctx.fillText(cleanVietnameseText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), passX + passW / 2, barcodeY + barcodeH + 82);
+  ctx.fillText(cleanVietnameseText("CLB LẬP TRÌNH FU-DEVER · ĐẠI HỌC FPT ĐÀ NẴNG"), passX + passW / 2, barcodeY + barcodeH + 78);
 
   ctx.fillStyle = "#993c1d";
   ctx.font = `bold 20px ${FONT_SANS}`;
-  ctx.fillText(EVENT_INFO.hashtags.join("    "), passX + passW / 2, barcodeY + barcodeH + 122);
+  ctx.fillText(EVENT_INFO.hashtags.join("    "), passX + passW / 2, barcodeY + barcodeH + 116);
 
   return canvas.toDataURL("image/png");
 }
