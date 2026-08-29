@@ -239,30 +239,59 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
           </div>
         )}
 
-        {/* 2-COLUMN LAYOUT: CUSTOMIZER (LEFT) + WYSIWYG PREVIEW (RIGHT) */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-center">
-          {/* LEFT COLUMN: CUSTOMIZATION CONTROLS */}
-          <div className="md:col-span-7 space-y-3.5 sm:space-y-4 text-left">
+        {/* 2-COLUMN / MOBILE-FIRST LAYOUT: PREVIEW ON TOP FOR MOBILE, CUSTOMIZER AS CHIPS */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-6 items-start">
+          {/* WYSIWYG REAL-TIME PREVIEW (First on Mobile, Right on Desktop) */}
+          <div className="md:col-span-5 order-first md:order-last flex flex-col items-center justify-center">
+            <div className="relative w-full max-w-[280px] sm:max-w-none aspect-[9/16] max-h-[360px] sm:max-h-[520px] rounded-2xl border-2 border-[#fac775]/60 bg-[#060c18] flex items-center justify-center p-1.5 sm:p-2 shadow-2xl overflow-hidden">
+              {isLoadingPreview && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/75 z-20 backdrop-blur-xs">
+                  <Sparkles className="w-6 h-6 text-amber-400 animate-spin" />
+                  <span className="text-[11px] text-amber-200 font-bold">Đang cập nhật thiệp...</span>
+                </div>
+              )}
+
+              {previewDataUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={previewDataUrl}
+                  alt="Story Card Preview"
+                  className="w-auto h-full max-h-[350px] sm:max-h-[500px] aspect-[9/16] object-contain rounded-xl shadow-2xl transition-all duration-200 animate-in zoom-in-95 fade-in select-none"
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-slate-400">
+                  <Eye className="w-8 h-8 opacity-40" />
+                  <span className="text-xs">Đang tải bản xem trước...</span>
+                </div>
+              )}
+            </div>
+            <span className="text-[10px] text-[#fac775]/80 font-mono mt-1 text-center">
+              ✦ Chuẩn Story 9:16 (1080×1920) ✦
+            </span>
+          </div>
+
+          {/* CUSTOMIZATION CONTROLS */}
+          <div className="md:col-span-7 space-y-3 sm:space-y-4 text-left">
             {/* 1. Format Switcher */}
             <div>
-              <label className="block text-[11px] sm:text-xs font-bold text-[#fac775] uppercase tracking-wider mb-1.5">
-                1. Chọn định dạng thẻ (9:16):
+              <label className="block text-[11px] font-bold text-[#fac775] uppercase tracking-wider mb-1">
+                1. Định dạng thẻ (9:16):
               </label>
-              <div className="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-xl border border-white/10">
+              <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/40 rounded-xl border border-white/10">
                 <button
                   type="button"
                   onClick={() => {
                     playTactileClick();
                     setCardFormat("boarding_pass");
                   }}
-                  className={`py-2 px-2.5 rounded-lg text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  className={`min-h-[40px] py-1.5 px-2 rounded-lg text-[11px] sm:text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     cardFormat === "boarding_pass"
-                      ? "bg-gradient-to-r from-[#0091ea] to-[#00f5d4] text-[#051329] shadow-md scale-[1.02]"
+                      ? "bg-gradient-to-r from-[#0091ea] to-[#00f5d4] text-[#051329] shadow-md scale-[1.01]"
                       : "text-white/70 hover:text-white"
                   }`}
                 >
                   <Plane className="w-3.5 h-3.5" />
-                  <span>Vé Lên Tàu Vũ Trụ K22</span>
+                  <span>Vé Tàu Vũ Trụ</span>
                 </button>
                 <button
                   type="button"
@@ -270,27 +299,27 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
                     playTactileClick();
                     setCardFormat("postcard");
                   }}
-                  className={`py-2 px-2.5 rounded-lg text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  className={`min-h-[40px] py-1.5 px-2 rounded-lg text-[11px] sm:text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     cardFormat === "postcard"
-                      ? "bg-gradient-to-r from-[#993c1d] via-[#fac775] to-[#993c1d] text-[#12203A] shadow-md scale-[1.02]"
+                      ? "bg-gradient-to-r from-[#993c1d] via-[#fac775] to-[#993c1d] text-[#12203A] shadow-md scale-[1.01]"
                       : "text-white/70 hover:text-white"
                   }`}
                 >
                   <Scroll className="w-3.5 h-3.5" />
-                  <span>Thiệp Lụa Hoa Đăng</span>
+                  <span>Thiệp Hoa Đăng</span>
                 </button>
               </div>
             </div>
 
             {/* 2. Theme Selector */}
             <div>
-              <label className="block text-[11px] sm:text-xs font-bold text-[#fac775] uppercase tracking-wider mb-1.5">
-                🎨 2. Chọn phong cách màu sắc:
+              <label className="block text-[11px] font-bold text-[#fac775] uppercase tracking-wider mb-1">
+                🎨 2. Màu sắc chủ đạo:
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {[
-                  { id: "classic" as CardTheme, label: "Thư Gấm Đỏ", color: "from-[#993c1d] to-[#712b13]", border: "border-[#fac775]" },
-                  { id: "tech" as CardTheme, label: "Cyber Space", color: "from-[#0055a5] to-[#0091ea]", border: "border-[#00f5d4]" },
+                  { id: "classic" as CardTheme, label: "Gấm Đỏ", color: "from-[#993c1d] to-[#712b13]", border: "border-[#fac775]" },
+                  { id: "tech" as CardTheme, label: "Cyber", color: "from-[#0055a5] to-[#0091ea]", border: "border-[#00f5d4]" },
                   { id: "gold" as CardTheme, label: "Hoàng Kim", color: "from-[#b8860b] via-[#ffd166] to-[#b8860b]", border: "border-[#ffe8a3]" },
                 ].map((t) => (
                   <button
@@ -299,9 +328,9 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
                       playTactileClick();
                       setSelectedTheme(t.id);
                     }}
-                    className={`py-2 px-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                    className={`min-h-[40px] py-1.5 px-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all border cursor-pointer ${
                       selectedTheme === t.id
-                        ? `bg-gradient-to-r ${t.color} text-white ${t.border} shadow-lg scale-102 ring-2 ring-white/30`
+                        ? `bg-gradient-to-r ${t.color} text-white ${t.border} shadow-md scale-[1.02] ring-2 ring-white/30`
                         : "bg-white/5 text-[#faeeda]/80 border-white/10 hover:bg-white/10"
                     }`}
                   >
@@ -314,23 +343,23 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
               </div>
             </div>
 
-            {/* 3. Mascot Buggy Picker */}
+            {/* 3. Mascot Buggy Picker (Horizontal Scroll on mobile) */}
             <div>
-              <label className="block text-[11px] sm:text-xs font-bold text-[#fac775] uppercase tracking-wider mb-1.5">
-                3. Chọn linh vật Buggy gắn kèm:
+              <label className="block text-[11px] font-bold text-[#fac775] uppercase tracking-wider mb-1">
+                3. Linh vật Buggy:
               </label>
-              <div className="grid grid-cols-5 gap-1.5 max-h-28 overflow-y-auto pr-1">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
                 {[
                   { id: "11", label: "Thả Tim ❤️", src: "/assets/buggy/11.png" },
                   { id: "19", label: "Bắn Tim 🥰", src: "/assets/buggy/19.png" },
-                  { id: "04_buggy_chu_cuoi_coder.png", label: "Chú Cuội Coder", src: "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png" },
-                  { id: "10_buggy_hang_nga_fairy.png", label: "Hằng Nga Tiên Nữ", src: "/assets/buggy/trung-thu/10_buggy_hang_nga_fairy.png" },
+                  { id: "04_buggy_chu_cuoi_coder.png", label: "Chú Cuội", src: "/assets/buggy/trung-thu/04_buggy_chu_cuoi_coder.png" },
+                  { id: "10_buggy_hang_nga_fairy.png", label: "Hằng Nga", src: "/assets/buggy/trung-thu/10_buggy_hang_nga_fairy.png" },
                   { id: "01_buggy_lantern_parade.png", label: "Rước Đèn", src: "/assets/buggy/trung-thu/01_buggy_lantern_parade.png" },
                   { id: "02_buggy_mooncake_feast.png", label: "Ăn Bánh", src: "/assets/buggy/trung-thu/02_buggy_mooncake_feast.png" },
                   { id: "03_buggy_lion_dance.png", label: "Múa Lân", src: "/assets/buggy/trung-thu/03_buggy_lion_dance.png" },
                   { id: "05_buggy_moon_rabbit_hug.png", label: "Thỏ Ngọc", src: "/assets/buggy/trung-thu/05_buggy_moon_rabbit_hug.png" },
                   { id: "6", label: "Cool Ngầu 😎", src: "/assets/buggy/6.png" },
-                  { id: "8", label: "Cà Phê Code ☕", src: "/assets/buggy/8.png" },
+                  { id: "8", label: "Cà Phê ☕", src: "/assets/buggy/8.png" },
                 ].map((m) => (
                   <button
                     key={m.id}
@@ -338,20 +367,20 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
                       playTactileClick();
                       setSelectedMascot(m.id);
                     }}
-                    className={`p-1 rounded-xl flex flex-col items-center gap-1 border transition-all cursor-pointer ${
+                    className={`min-w-[54px] min-h-[50px] p-1 rounded-xl flex flex-col items-center justify-center gap-0.5 border transition-all cursor-pointer shrink-0 ${
                       selectedMascot === m.id
-                        ? "bg-[#fac775]/25 border-[#fac775] ring-2 ring-[#fac775]/60 scale-105"
-                        : "bg-white/5 border-white/10 hover:bg-white/10 opacity-70 hover:opacity-100"
+                        ? "bg-[#fac775]/30 border-[#fac775] ring-2 ring-[#fac775]/60 scale-105"
+                        : "bg-white/5 border-white/10 hover:bg-white/10 opacity-75 hover:opacity-100"
                     }`}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={getBuggyMascotUrl(m.id)}
                       alt={m.label}
-                      className="w-7 h-7 object-contain drop-shadow-md"
+                      className="w-6 h-6 object-contain drop-shadow-xs"
                     />
                     <span className="text-[9px] font-bold text-slate-200 truncate w-full text-center">
-                      {m.label}
+                      {m.label.split(" ")[0]}
                     </span>
                   </button>
                 ))}
@@ -360,10 +389,10 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
 
             {/* 4. DEVER Seal & Stamp Selector */}
             <div>
-              <label className="block text-[11px] sm:text-xs font-bold text-[#fac775] uppercase tracking-wider mb-1.5">
-                🔏 4. Chọn con dấu DEVER đóng mộc:
+              <label className="block text-[11px] font-bold text-[#fac775] uppercase tracking-wider mb-1">
+                🔏 4. Con dấu DEVER:
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {DEVER_STAMPS.map((stamp) => (
                   <button
                     key={stamp.id}
@@ -371,7 +400,7 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
                       playTactileClick();
                       setSelectedStamp(stamp.id);
                     }}
-                    className={`p-2 rounded-xl flex items-center gap-2 border text-left transition-all cursor-pointer ${
+                    className={`min-h-[44px] p-1.5 sm:p-2 rounded-xl flex items-center gap-1.5 border text-left transition-all cursor-pointer ${
                       selectedStamp === stamp.id
                         ? "bg-white/20 border-[#fac775] ring-2 ring-[#fac775]/50 shadow-md"
                         : "bg-white/5 border-white/10 hover:bg-white/10 opacity-75 hover:opacity-100"
@@ -381,11 +410,11 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
                     <img
                       src={stamp.image}
                       alt={stamp.label}
-                      className="w-7 h-7 object-contain drop-shadow-md shrink-0"
+                      className="w-6 h-6 object-contain drop-shadow-xs shrink-0"
                     />
                     <div className="min-w-0">
-                      <div className="text-[11px] font-bold text-white truncate">{stamp.label}</div>
-                      <div className="text-[9px] text-[#faeeda]/60 truncate">{stamp.sublabel}</div>
+                      <div className="text-[10px] sm:text-[11px] font-bold text-white truncate">{stamp.label}</div>
+                      <div className="text-[8px] sm:text-[9px] text-[#faeeda]/60 truncate">{stamp.sublabel}</div>
                     </div>
                   </button>
                 ))}
@@ -400,17 +429,17 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
                   id="btn-download-dream-card"
                   onClick={handleDownload}
                   disabled={isExporting}
-                  className="flex-1 py-3 px-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#993c1d] via-[#0091ea] to-[#fac775] hover:opacity-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex-1 min-h-[48px] py-3 px-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#993c1d] via-[#0091ea] to-[#fac775] hover:opacity-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isExporting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Đang tạo ảnh HD...</span>
+                      <span>Đang lưu ảnh...</span>
                     </>
                   ) : (
                     <>
                       <Download className="w-4 h-4" />
-                      <span>Lưu Ảnh Story (1080x1920)</span>
+                      <span>Lưu Ảnh Story (HD)</span>
                     </>
                   )}
                 </button>
@@ -420,18 +449,18 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
                   id="btn-share-facebook-story"
                   onClick={handleFacebookShare}
                   disabled={isExporting}
-                  className="py-3 px-3.5 rounded-xl sm:rounded-2xl bg-[#1877F2] hover:bg-[#166fe5] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-[0.98] transition-all cursor-pointer shrink-0"
+                  className="min-h-[48px] py-3 px-3.5 rounded-xl sm:rounded-2xl bg-[#1877F2] hover:bg-[#166fe5] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-[0.98] transition-all cursor-pointer shrink-0"
                   title="Tải ảnh và mở Facebook Story"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Đăng Story FB</span>
+                  <span>Story FB</span>
                 </button>
               </div>
 
               {/* 3. Secondary Universal Share / Copy */}
               <button
                 onClick={handleUniversalShare}
-                className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-[#faeeda] font-semibold text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                className="w-full min-h-[38px] py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-[#faeeda] font-semibold text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
                 {copied ? (
                   <>
@@ -441,40 +470,11 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
                 ) : (
                   <>
                     <Share2 className="w-3.5 h-3.5 text-[#fac775]" />
-                    <span>Chia sẻ qua Zalo / Instagram / Khác (Sao chép link)</span>
+                    <span>Chia sẻ Zalo / Instagram / TikTok (Sao chép)</span>
                   </>
                 )}
               </button>
             </div>
-          </div>
-
-          {/* RIGHT COLUMN: 100% WYSIWYG REAL-TIME PREVIEW */}
-          <div className="md:col-span-5 flex flex-col items-center justify-center">
-            <div className="relative w-full aspect-[9/16] max-h-[480px] sm:max-h-[540px] rounded-2xl border-2 border-[#fac775]/50 bg-[#060c18] flex items-center justify-center p-2 shadow-2xl overflow-hidden">
-              {isLoadingPreview && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/70 z-20 backdrop-blur-xs">
-                  <Sparkles className="w-7 h-7 text-amber-400 animate-spin" />
-                  <span className="text-xs text-amber-200 font-bold">Đang kiến tạo thẻ Story HD...</span>
-                </div>
-              )}
-
-              {previewDataUrl ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={previewDataUrl}
-                  alt="Story Card Preview"
-                  className="w-auto h-full max-h-[510px] aspect-[9/16] object-contain rounded-xl shadow-2xl transition-all duration-300 animate-in zoom-in-95 fade-in select-none"
-                />
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-slate-400">
-                  <Eye className="w-8 h-8 opacity-40" />
-                  <span className="text-xs">Đang tải bản xem trước...</span>
-                </div>
-              )}
-            </div>
-            <span className="text-[10px] text-[#fac775]/70 font-mono mt-1.5 text-center">
-              ✦ Chuẩn tỷ lệ 9:16 (1080x1920) Instagram / Facebook / TikTok Story ✦
-            </span>
           </div>
         </div>
       </div>

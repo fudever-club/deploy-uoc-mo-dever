@@ -44,57 +44,33 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Navigation Links */}
-          <nav className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
+          <nav className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             <Link
               href="/"
-              className={`px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all ${
+              onClick={() => playTactileClick()}
+              className={`min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 pathname === "/"
                   ? "bg-gradient-to-r from-[#993c1d] to-[#712b13] text-white shadow-sm"
                   : "text-slate-600 hover:text-[#993c1d] hover:bg-[#fac775]/20"
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="hidden sm:inline">Gửi ước mơ</span>
-              <span className="sm:hidden text-[11px]">Gửi</span>
+              <span>Gửi ước mơ</span>
             </Link>
 
             <Link
               href="/display"
-              className={`px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all ${
+              onClick={() => playTactileClick()}
+              className={`min-h-[38px] px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 pathname === "/display"
                   ? "bg-[#fac775] text-[#12203a] shadow-sm"
                   : "text-slate-600 hover:text-[#993c1d] hover:bg-[#fac775]/20"
               }`}
+              title="Màn hình bầu trời đèn lồng trực tiếp"
             >
               <Monitor className="w-3.5 h-3.5 text-[#0091ea] shrink-0" />
               <span className="hidden sm:inline">Bầu trời</span>
-              <span className="sm:hidden text-[11px]">Sky</span>
-            </Link>
-
-            <Link
-              href="/standee"
-              className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-full text-xs font-semibold items-center gap-1 transition-all hidden xs:flex ${
-                pathname === "/standee"
-                  ? "bg-[#0091ea] text-white"
-                  : "text-slate-600 hover:text-[#0091ea] hover:bg-slate-100"
-              }`}
-              title="Poster Standee"
-            >
-              <QrCode className="w-3.5 h-3.5 shrink-0" />
-              <span className="hidden md:inline">Standee</span>
-            </Link>
-
-            <Link
-              href="/admin/lucky-draw"
-              className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-full text-xs font-semibold items-center gap-1 transition-all hidden sm:flex ${
-                pathname === "/admin/lucky-draw"
-                  ? "bg-amber-500 text-white"
-                  : "text-slate-600 hover:text-amber-700 hover:bg-slate-100"
-              }`}
-              title="Vòng quay may mắn"
-            >
-              <Trophy className="w-3.5 h-3.5 shrink-0" />
-              <span className="hidden md:inline">Minigame</span>
+              <span className="sm:hidden text-[11px]">Sky 🏮</span>
             </Link>
 
             {/* Official About FU-DEVER Trigger Button */}
@@ -104,17 +80,18 @@ export const Navbar: React.FC = () => {
                 playTactileClick();
                 setShowAboutModal(true);
               }}
-              className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-[#993c1d] hover:bg-slate-100 flex items-center gap-1 transition-all cursor-pointer"
+              className="min-h-[38px] min-w-[38px] p-2 rounded-full text-xs font-semibold text-slate-600 hover:text-[#993c1d] hover:bg-slate-100 flex items-center justify-center gap-1 transition-all cursor-pointer"
               title="Về CLB Lập Trình FU-DEVER"
               aria-label="Về CLB FU-DEVER"
             >
-              <Info className="w-3.5 h-3.5 text-[#993c1d] shrink-0" />
+              <Info className="w-4 h-4 text-[#993c1d] shrink-0" />
               <span className="hidden md:inline">Về CLB</span>
             </button>
 
             <Link
               href="/admin"
-              className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-all ${
+              onClick={() => playTactileClick()}
+              className={`min-h-[38px] min-w-[38px] p-2 rounded-full text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
                 pathname === "/admin"
                   ? "bg-[#12203a] text-[#fac775]"
                   : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
@@ -122,7 +99,7 @@ export const Navbar: React.FC = () => {
               title="Quản trị viên"
               aria-label="Admin"
             >
-              <Shield className="w-3.5 h-3.5 shrink-0" />
+              <Shield className="w-4 h-4 shrink-0" />
               <span className="hidden md:inline">Admin</span>
             </Link>
           </nav>

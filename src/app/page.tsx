@@ -71,23 +71,38 @@ export default function WishSubmissionPage() {
   // AI Poem Generator state
   const [generatedPoem, setGeneratedPoem] = useState<{ title: string; lines: string[]; badge: string } | null>(null);
 
+  // Haptic feedback helper for mobile touch ergonomics
+  const triggerHaptic = (pattern: number | number[] = 35) => {
+    if (typeof window !== "undefined" && typeof navigator !== "undefined" && navigator.vibrate) {
+      try {
+        navigator.vibrate(pattern);
+      } catch {
+        // ignore on unsupported browsers
+      }
+    }
+  };
+
   const handleBuggyTap = () => {
     playTactileClick();
+    triggerHaptic(25);
     const nextCount = buggyTapCount + 1;
     setBuggyTapCount(nextCount);
     if (nextCount >= 5) {
       setBuggyTapCount(0);
       setShowBuggyGame(true);
+      triggerHaptic([40, 60, 80]);
     }
   };
 
   const handleApplyPrompt = (promptText: string) => {
     playTactileClick();
+    triggerHaptic(30);
     setContent(promptText);
   };
 
   const handleGeneratePoem = () => {
     playPoemMagicSound();
+    triggerHaptic([30, 40, 50]);
     const poem = generatePoem(name, tag);
     setGeneratedPoem(poem);
     setContent(poem.lines.join("\n"));
@@ -99,15 +114,18 @@ export default function WishSubmissionPage() {
 
     if (!content.trim()) {
       setErrorMsg("Vui lòng viết nội dung ước mơ của bạn nhé!");
+      triggerHaptic([80, 50, 80]);
       return;
     }
 
     if (!consent) {
       setErrorMsg("Vui lòng đồng ý chia sẻ ước mơ để tiếp tục!");
+      triggerHaptic([80, 50, 80]);
       return;
     }
 
     setIsSubmitting(true);
+    triggerHaptic(40);
 
     try {
       const res = await fetch("/api/dreams", {
@@ -133,19 +151,21 @@ export default function WishSubmissionPage() {
       setTotalCount((prev) => (prev !== null ? prev + 1 : 1));
       setStep("thankyou");
 
-      // Ascending audio chime
+      // Ascending audio chime & celebration haptic pulse
       playLanternAscendChime();
+      triggerHaptic([60, 50, 100, 50, 150]);
 
       // Confetti burst
       confetti({
-        particleCount: 110,
-        spread: 85,
+        particleCount: 120,
+        spread: 90,
         origin: { y: 0.6 },
         colors: ["#FAC775", "#993C1D", "#0091EA", "#00F5D4", "#FAEEDA"],
       });
     } catch (err: unknown) {
       console.error("Submission failed:", err);
       setErrorMsg(err instanceof Error ? err.message : "Đã có lỗi xảy ra, vui lòng thử lại.");
+      triggerHaptic([100, 50, 100]);
     } finally {
       setIsSubmitting(false);
     }
@@ -153,10 +173,11 @@ export default function WishSubmissionPage() {
 
   const resetForm = () => {
     playTactileClick();
+    triggerHaptic(30);
     setName("");
     setContent("");
     setTag("career");
-    setMascotIndex(1);
+    setMascotIndex("11");
     setTheme("classic");
     setLanternShape("hoian_lotus");
     setConsent(true);
@@ -385,17 +406,17 @@ export default function WishSubmissionPage() {
 
               {/* Quick Prompts & AI Poem Engine */}
               <div>
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                   <div className="flex items-center gap-1">
                     <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                    <span className="truncate">Gợi ý ước mơ:</span>
+                    <span className="truncate">Gợi ý 1 chạm (Nhấn để điền):</span>
                   </div>
 
                   {/* AI Poem Generator Button */}
                   <button
                     type="button"
                     onClick={handleGeneratePoem}
-                    className="px-2 sm:px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
+                    className="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
                     title="Gieo vần thơ Trung Thu DEVER"
                   >
                     <Feather className="w-3 h-3" />
@@ -403,13 +424,14 @@ export default function WishSubmissionPage() {
                   </button>
                 </div>
 
-                <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                {/* Horizontal Scrollable Touch Chips on Mobile */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
                   {INSPIRATION_PROMPTS.map((p, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => handleApplyPrompt(p)}
-                      className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-50/80 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[10px] sm:text-[11px] font-medium transition-all text-left truncate max-w-full cursor-pointer active:scale-95"
+                      className="px-3 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 active:bg-amber-200 text-amber-900 border border-amber-300/80 text-[11px] font-medium transition-all text-left whitespace-nowrap shrink-0 cursor-pointer active:scale-95 shadow-2xs"
                     >
                       {p}
                     </button>
@@ -419,9 +441,24 @@ export default function WishSubmissionPage() {
 
               {/* Field: Content */}
               <div>
-                <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Nội dung ước mơ <span className="text-[#993c1d]">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Nội dung ước mơ <span className="text-[#993c1d]">*</span>
+                  </label>
+                  {content.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playTactileClick();
+                        triggerHaptic(20);
+                        setContent("");
+                      }}
+                      className="text-[10px] text-red-500 hover:text-red-700 font-semibold cursor-pointer"
+                    >
+                      Xóa nội dung
+                    </button>
+                  )}
+                </div>
                 <textarea
                   id="content-input"
                   value={content}
@@ -430,10 +467,11 @@ export default function WishSubmissionPage() {
                   rows={3}
                   maxLength={300}
                   required
-                  className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#993c1d] focus:ring-3 focus:ring-[#993c1d]/15 outline-none text-xs sm:text-sm text-slate-800 transition-all resize-none font-sans"
+                  className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#993c1d] focus:ring-3 focus:ring-[#993c1d]/15 outline-none text-base sm:text-sm text-slate-800 transition-all resize-none font-sans leading-relaxed"
                 />
-                <div className="text-right text-[10px] text-slate-400 mt-0.5 font-medium">
-                  {content.length}/300 ký tự
+                <div className="flex items-center justify-between text-[10px] text-slate-400 mt-0.5 font-medium">
+                  <span className="text-slate-500">💡 Gợi ý: Viết ngắn gọn, súc tích để thẻ hiển thị đẹp nhất!</span>
+                  <span>{content.length}/300 ký tự</span>
                 </div>
               </div>
 
@@ -483,9 +521,10 @@ export default function WishSubmissionPage() {
                         type="button"
                         onClick={() => {
                           playTactileClick();
+                          triggerHaptic(20);
                           setMascotIndex(mood.id);
                         }}
-                        className={`p-1 sm:p-1.5 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                        className={`min-h-[44px] p-1 sm:p-1.5 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
                           String(mascotIndex) === String(mood.id)
                             ? "bg-[#fac775]/40 border-2 border-[#993c1d] scale-105 shadow-xs"
                             : "bg-slate-100 hover:bg-slate-200 border border-slate-200"
@@ -518,9 +557,10 @@ export default function WishSubmissionPage() {
                       type="button"
                       onClick={() => {
                         playTactileClick();
+                        triggerHaptic(20);
                         setTheme("classic");
                       }}
-                      className={`py-2 px-1 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
+                      className={`min-h-[44px] py-2 px-1 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
                         theme === "classic"
                           ? "bg-gradient-to-r from-[#993c1d] to-[#712b13] text-white border border-[#fac775] shadow-xs"
                           : "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200"
@@ -532,9 +572,10 @@ export default function WishSubmissionPage() {
                       type="button"
                       onClick={() => {
                         playTactileClick();
+                        triggerHaptic(20);
                         setTheme("tech");
                       }}
-                      className={`py-2 px-1 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
+                      className={`min-h-[44px] py-2 px-1 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
                         theme === "tech"
                           ? "bg-gradient-to-r from-[#0091ea] to-[#0055a5] text-white border border-[#00f5d4] shadow-xs"
                           : "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200"
@@ -546,9 +587,10 @@ export default function WishSubmissionPage() {
                       type="button"
                       onClick={() => {
                         playTactileClick();
+                        triggerHaptic(20);
                         setTheme("gold");
                       }}
-                      className={`py-2 px-1 rounded-xl text-[11px] sm:text-xs font-black transition-all cursor-pointer ${
+                      className={`min-h-[44px] py-2 px-1 rounded-xl text-[11px] sm:text-xs font-black transition-all cursor-pointer ${
                         theme === "gold"
                           ? "bg-gradient-to-r from-[#b8860b] via-[#ffd166] to-[#b8860b] text-[#2b1700] border border-[#fff3d1] shadow-[0_0_10px_rgba(255,209,102,0.5)]"
                           : "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200"
@@ -581,7 +623,7 @@ export default function WishSubmissionPage() {
                 id="btn-submit-dream"
                 type="submit"
                 disabled={isSubmitting || !content.trim()}
-                className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-2xl bg-gradient-to-r from-[#993c1d] via-[#712b13] to-[#993c1d] hover:opacity-95 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(153,60,29,0.35)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="w-full min-h-[48px] py-3.5 sm:py-4 px-4 sm:px-6 rounded-2xl bg-gradient-to-r from-[#993c1d] via-[#712b13] to-[#993c1d] hover:opacity-95 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(153,60,29,0.35)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
@@ -596,6 +638,34 @@ export default function WishSubmissionPage() {
                 )}
               </button>
             </form>
+          </div>
+        )}
+
+        {/* MOBILE STICKY FLOATING QUICK SUBMIT BAR (Triggered when user has typed content) */}
+        {step === "form" && content.trim().length > 0 && (
+          <div className="fixed bottom-3 inset-x-3 z-40 sm:hidden animate-in slide-in-from-bottom duration-300 pointer-events-auto pb-safe">
+            <div className="p-2 rounded-2xl bg-[#12203A]/95 backdrop-blur-xl border-2 border-[#fac775] shadow-[0_10px_30px_rgba(0,0,0,0.4)] flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 pl-2 text-white min-w-0">
+                <LanternSVG shape={lanternShape} size={24} glow={false} className="shrink-0" />
+                <div className="flex flex-col text-left min-w-0">
+                  <span className="text-[11px] font-bold text-[#fac775] truncate">{name || "Tân sinh viên K22"}</span>
+                  <span className="text-[9px] text-white/70 truncate">{content.length}/300 ký tự</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#993c1d] to-[#fac775] text-white font-black text-xs uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+              >
+                {isSubmitting ? (
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
+                <span>Thả Ngay 🏮</span>
+              </button>
+            </div>
           </div>
         )}
 

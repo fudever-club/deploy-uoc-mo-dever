@@ -42,6 +42,15 @@ export const ReactionBar: React.FC = () => {
   }, []);
 
   const handleSendReaction = (emoji: string) => {
+    // Mobile haptic feedback pulse
+    if (typeof window !== "undefined" && typeof navigator !== "undefined" && navigator.vibrate) {
+      try {
+        navigator.vibrate(25);
+      } catch {
+        // ignore
+      }
+    }
+
     // Instant local audio throttle (max 1 sound per 90ms)
     const now = Date.now();
     if (now - lastSoundTimeRef.current > 90) {
@@ -82,7 +91,7 @@ export const ReactionBar: React.FC = () => {
           <button
             key={item.emoji}
             onClick={() => handleSendReaction(item.emoji)}
-            className={`p-2 rounded-xl text-xl hover:bg-[#faeeda] active:scale-135 transition-transform cursor-pointer select-none ${
+            className={`min-w-[44px] min-h-[44px] p-2 rounded-xl text-2xl hover:bg-[#faeeda] active:scale-135 transition-transform cursor-pointer select-none flex items-center justify-center ${
               lastSent === item.emoji ? "scale-135 bg-[#fac775]/40 shadow-xs" : ""
             }`}
             title={item.label}
