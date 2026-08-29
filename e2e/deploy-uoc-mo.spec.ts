@@ -25,7 +25,7 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     await nameInput.fill("Phan Quang Nhật K22");
 
     // Test AI Poetry generator button
-    const poemBtn = page.locator("button:has-text('Gieo Vần Thơ DEVER')");
+    const poemBtn = page.locator("button:has-text('Gieo Vần Thơ')");
     await expect(poemBtn).toBeVisible();
     await poemBtn.scrollIntoViewIfNeeded();
     await poemBtn.click();
@@ -64,11 +64,11 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
   test("2. Public Lantern Sky Display & Flight Modes (/display)", async ({ page }) => {
     await page.goto("/display");
     await page.waitForLoadState("domcontentloaded");
-    await expect(page.locator("text=Deploy Ước Mơ · Club Day 2026")).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("h1")).toContainText(/Deploy Ước Mơ/i, { timeout: 10000 });
     await expect(page.locator("#counter-pill")).toBeVisible();
 
     // Toggle Constellation Galaxy Mode
-    const galaxyBtn = page.locator("button:has-text('Chòm Sao')");
+    const galaxyBtn = page.locator("button[title*='Chòm Sao']");
     if (await galaxyBtn.isVisible()) {
       await galaxyBtn.click();
       await expect(page.locator("button:has-text('Toàn Vũ Trụ')")).toBeVisible();

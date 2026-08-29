@@ -177,64 +177,53 @@ export default function DisplaySkyPage() {
         soundEnabled={soundEnabled}
       />
 
-      {/* 3. TOP FLOATING CONTROL DOCK */}
-      <div className="absolute top-4 inset-x-4 z-40 flex items-center justify-between pointer-events-none">
-        {/* Brand Header & Home Link */}
+      {/* 3. TOP BRANDING & ACTION CONTROLS DOCK */}
+      <div className="absolute top-2.5 sm:top-6 inset-x-2.5 sm:inset-x-6 z-30 flex items-center justify-between pointer-events-none gap-1.5 sm:gap-2 max-w-full">
+        {/* Brand Link Left */}
         <Link
           href="/"
-          onClick={() => playTactileClick()}
-          className="flex items-center gap-3 pointer-events-auto group hover:opacity-95 transition-opacity select-none cursor-pointer"
-          title="Quay về trang chủ Deploy Ước Mơ"
+          className="flex items-center gap-2 sm:gap-3 group pointer-events-auto bg-[#12203A]/80 hover:bg-[#12203A] border border-[#fac775]/40 rounded-full py-1 sm:py-1.5 px-2.5 sm:px-3.5 backdrop-blur-md shadow-xl transition-all cursor-pointer shrink-0 max-w-[60%] sm:max-w-none"
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#993c1d] to-[#12203A] p-1 border-2 border-[#fac775] shadow-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+          <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#993c1d] to-[#12203a] border border-[#fac775] p-1 group-hover:scale-105 transition-transform shrink-0">
             <Image
               src="/assets/logo/logo-dever-white.png"
               alt="FU-DEVER Logo"
-              width={32}
-              height={32}
+              width={24}
+              height={24}
               className="object-contain"
             />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#fac775] text-[#712b13] uppercase tracking-wider">
-                CLB LẬP TRÌNH FU-DEVER
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-1 leading-none mb-0.5">
+              <span className="text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded-full bg-[#fac775] text-[#712b13] uppercase tracking-wider shrink-0">
+                FU-DEVER
               </span>
-              <span className="hidden sm:inline-block text-[11px] text-[#fac775]/90 font-semibold">
-                FPT University Da Nang
-              </span>
-              {/* Connection Status Badge */}
-              <span
-                className="hidden md:inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-400/40 text-emerald-300 font-mono"
-                title={`Kết nối Realtime: ${connectionStatus}`}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <Wifi className="w-2.5 h-2.5" />
-                <span>{connectionStatus === "supabase" ? "SUPABASE" : connectionStatus === "sse" ? "SSE LIVE" : "LIVE"}</span>
+              <span className="hidden sm:inline-block text-[11px] text-[#fac775]/90 font-semibold truncate">
+                FPT University
               </span>
             </div>
-            <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight drop-shadow-md flex items-center gap-1.5 font-display">
-              <span>Deploy Ước Mơ · Club Day 2026</span>
-              <span className="text-xs">🏮</span>
+            <h1 className="text-xs sm:text-base font-extrabold text-white tracking-tight drop-shadow-md flex items-center gap-1 font-display truncate">
+              <span className="truncate">Deploy Ước Mơ</span>
+              <span className="text-xs shrink-0">🏮</span>
             </h1>
           </div>
         </Link>
 
         {/* Action Controls Dock */}
-        <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
+        <div className="flex items-center gap-1 sm:gap-2 pointer-events-auto shrink-0">
           {/* Back to Home Button */}
           <Link
             href="/"
             onClick={() => playTactileClick()}
-            className="px-3 py-2 rounded-full bg-gradient-to-r from-[#993c1d] to-[#712b13] hover:opacity-95 border border-[#fac775]/50 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md group cursor-pointer"
+            className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-[#993c1d] to-[#712b13] hover:opacity-95 border border-[#fac775]/50 text-white text-xs font-bold flex items-center gap-1 transition-all shadow-md group cursor-pointer shrink-0"
             title="Quay về trang gửi ước mơ K22"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#fac775] group-hover:-translate-x-0.5 transition-transform" />
+            <ArrowLeft className="w-3.5 h-3.5 text-[#fac775] group-hover:-translate-x-0.5 transition-transform shrink-0" />
             <span className="hidden sm:inline">Trang Chủ</span>
           </Link>
 
           {/* FLIGHT MOTION MODE SWITCHER */}
-          <div className="flex items-center p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg">
+          <div className="flex items-center p-0.5 sm:p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg shrink-0">
             <button
               onClick={() => {
                 playTactileClick();
@@ -287,14 +276,13 @@ export default function DisplaySkyPage() {
           </div>
 
           {/* Dream Counter Badge */}
-          <div id="counter-pill" className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg">
-            <Sparkles className="w-4 h-4 text-[#fac775] animate-pulse" />
-            <span className="text-sm font-extrabold text-white">
+          <div id="counter-pill" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg shrink-0">
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#fac775] animate-pulse" />
+            <span className="text-xs sm:text-sm font-extrabold text-white">
               {visibleDreams.length}
             </span>
-            <span className="text-xs text-[#faeeda]/90 font-medium">
-              <span className="inline sm:hidden">ước mơ</span>
-              <span className="hidden sm:inline">ước mơ đã bay lên</span>
+            <span className="text-[10px] sm:text-xs text-[#faeeda]/90 font-medium hidden sm:inline">
+              ước mơ
             </span>
           </div>
 
