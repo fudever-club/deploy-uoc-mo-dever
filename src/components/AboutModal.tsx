@@ -36,6 +36,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               alt="FU-DEVER Official Logo"
               width={46}
               height={46}
+              style={{ width: "auto", height: "auto" }}
               className="object-contain"
             />
           </div>
@@ -97,6 +98,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               alt="Linh vật Buggy"
               width={34}
               height={34}
+              style={{ width: "auto", height: "auto" }}
               className="object-contain"
             />
           </div>

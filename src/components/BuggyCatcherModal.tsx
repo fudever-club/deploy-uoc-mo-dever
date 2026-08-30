@@ -149,6 +149,7 @@ export const BuggyCatcherModal: React.FC<BuggyCatcherModalProps> = ({ isOpen, on
                 alt="Buggy Mascot"
                 width={56}
                 height={56}
+                style={{ width: "auto", height: "auto" }}
                 className="object-contain animate-float"
               />
             </div>
@@ -216,6 +217,7 @@ export const BuggyCatcherModal: React.FC<BuggyCatcherModalProps> = ({ isOpen, on
                       alt="Buggy Bonus"
                       width={item.size}
                       height={item.size}
+                      style={{ width: "auto", height: "auto" }}
                       className="object-contain drop-shadow-[0_0_12px_#00F5D4]"
                     />
                   ) : item.type === "gold" ? (

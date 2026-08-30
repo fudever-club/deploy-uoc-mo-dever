@@ -117,6 +117,7 @@ export const MysteryDropBanner: React.FC<MysteryDropBannerProps> = ({
                     alt="Quét mã nhận quà"
                     width={130}
                     height={130}
+                    style={{ width: "auto", height: "auto" }}
                     className="rounded-lg object-contain"
                   />
                 ) : (

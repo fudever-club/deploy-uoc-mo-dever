@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Dream, BroadcastAnnouncement, LiveReaction, MysteryDrop } from "@/types/dream";
-import { createClient, SupabaseClient, RealtimeChannel } from "@supabase/supabase-js";
+import { RealtimeChannel } from "@supabase/supabase-js";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
 
 interface UseRealtimeDreamsOptions {
   onInsert?: (dream: Dream) => void;
@@ -106,18 +107,7 @@ export function useRealtimeDreams(options: UseRealtimeDreamsOptions = {}) {
   useEffect(() => {
     fetchDreams();
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    let supabaseClient: SupabaseClient | null = null;
-
-    if (supabaseUrl && supabaseAnonKey) {
-      try {
-        supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
-      } catch (err) {
-        console.warn("Supabase client initialization failed:", err);
-      }
-    }
+    const supabaseClient = getSupabaseBrowserClient();
 
     if (supabaseClient) {
       // 1. DIRECT SUPABASE REALTIME (0 Vercel compute load, works across all serverless instances globally)

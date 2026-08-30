@@ -190,6 +190,7 @@ export default function DisplaySkyPage() {
               alt="FU-DEVER Logo"
               width={24}
               height={24}
+              style={{ width: "auto", height: "auto" }}
               className="object-contain"
             />
           </div>
@@ -458,6 +459,7 @@ export default function DisplaySkyPage() {
                 alt="Mascot"
                 width={48}
                 height={48}
+                style={{ width: "auto", height: "auto" }}
                 className="object-contain animate-float"
               />
             </div>

@@ -101,6 +101,7 @@ export const StandeeQRModal: React.FC<StandeeQRModalProps> = ({ isOpen, onClose 
               alt="Standee QR Code"
               width={200}
               height={200}
+              style={{ width: "auto", height: "auto" }}
               className="rounded-lg"
               unoptimized
             />

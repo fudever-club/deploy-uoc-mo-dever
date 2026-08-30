@@ -189,7 +189,7 @@ export default function WishSubmissionPage() {
   return (
     <div
       suppressHydrationWarning
-      className="min-h-screen flex-1 flex flex-col items-center justify-start px-2.5 sm:px-4 py-4 sm:py-8 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative max-w-full"
+      className="min-h-screen flex-1 flex flex-col items-center justify-start px-2.5 sm:px-4 py-4 pb-28 sm:pb-8 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative max-w-full"
     >
       {/* Decorative Warm Ambient Light Orbs */}
       <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-[#fac775]/25 blur-3xl pointer-events-none overflow-hidden" />
@@ -617,34 +617,6 @@ export default function WishSubmissionPage() {
                 )}
               </button>
             </form>
-          </div>
-        )}
-
-        {/* MOBILE STICKY FLOATING QUICK SUBMIT BAR (Triggered when user has typed content) */}
-        {step === "form" && content.trim().length > 0 && (
-          <div className="fixed bottom-3 inset-x-3 z-40 sm:hidden animate-in slide-in-from-bottom duration-300 pointer-events-auto pb-safe">
-            <div className="p-2 rounded-2xl bg-[#12203A]/95 backdrop-blur-xl border-2 border-[#fac775] shadow-[0_10px_30px_rgba(0,0,0,0.4)] flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 pl-2 text-white min-w-0">
-                <LanternSVG shape={lanternShape} size={24} glow={false} className="shrink-0" />
-                <div className="flex flex-col text-left min-w-0">
-                  <span className="text-[11px] font-bold text-[#fac775] truncate">{name || "Tân sinh viên K22"}</span>
-                  <span className="text-[9px] text-white/70 truncate">{content.length}/300 ký tự</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#993c1d] to-[#fac775] text-white font-black text-xs uppercase tracking-wider shadow-md active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
-              >
-                {isSubmitting ? (
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Send className="w-3.5 h-3.5" />
-                )}
-                <span>Thả Ngay 🏮</span>
-              </button>
-            </div>
           </div>
         )}
 

@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { createClient, SupabaseClient, RealtimeChannel } from "@supabase/supabase-js";
+import { SupabaseClient, RealtimeChannel } from "@supabase/supabase-js";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
 import { Dream, BroadcastAnnouncement, MysteryDrop } from "@/types/dream";
 import { DREAM_CATEGORIES, EVENT_INFO } from "@/lib/constants";
 import { generateDreamsCSV } from "@/lib/csv-export";
@@ -59,11 +60,9 @@ export default function AdminPage() {
   const [generatingMocks, setGeneratingMocks] = useState(false);
 
   useEffect(() => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (supabaseUrl && supabaseAnonKey) {
+    const client = getSupabaseBrowserClient();
+    if (client) {
       try {
-        const client = createClient(supabaseUrl, supabaseAnonKey);
         supabaseClientRef.current = client;
         const channel = client.channel("dreams-live-channel");
         channel.subscribe();

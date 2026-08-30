@@ -193,6 +193,7 @@ export default function StandeeGeneratorPage() {
                 alt="Standee QR"
                 width={190}
                 height={190}
+                style={{ width: "auto", height: "auto" }}
                 className="rounded-xl"
                 unoptimized
               />

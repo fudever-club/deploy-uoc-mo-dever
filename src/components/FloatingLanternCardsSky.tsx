@@ -128,6 +128,7 @@ const SingleLanternCard = memo(function SingleLanternCard({
               alt="Buggy Sticker"
               width={20}
               height={20}
+              style={{ width: "auto", height: "auto" }}
               className="object-contain"
               priority={false}
             />

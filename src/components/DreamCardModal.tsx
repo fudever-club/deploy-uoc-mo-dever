@@ -81,6 +81,17 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
     };
   }, [dream, selectedTheme, selectedMascot, selectedStamp, cardFormat]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleDownload = async () => {
@@ -208,27 +219,29 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto overflow-x-hidden">
       <div className="relative w-full max-w-4xl bg-[#12203A] border-2 border-[#fac775]/50 rounded-2xl sm:rounded-3xl shadow-2xl p-3.5 sm:p-6 text-[#faeeda] my-auto max-w-full overflow-x-hidden">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 rounded-full bg-white/10 hover:bg-white/20 text-[#fac775] transition-colors cursor-pointer z-30"
-          aria-label="Đóng"
-        >
-          <X className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
-
-        {/* Modal Header */}
-        <div className="text-center md:text-left mb-3 sm:mb-4 pr-8 md:pr-0">
-          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fac775]/20 text-[#fac775] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-1 border border-[#fac775]/30">
-            <Sparkles className="w-3 h-3 text-amber-400" />
-            <span>Story Card Studio (9:16)</span>
+        {/* Modal Header & Close Button */}
+        <div className="flex items-start justify-between gap-2 mb-3 sm:mb-4 relative">
+          <div className="flex-1 min-w-0 pr-2">
+            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fac775]/20 text-[#fac775] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-1 border border-[#fac775]/30">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>Story Card Studio (9:16)</span>
+            </div>
+            <h3 className="text-lg sm:text-2xl font-black text-white font-display leading-tight">
+              Thiệp Ước Mơ & Vé Lên Tàu Vũ Trụ K22
+            </h3>
+            <p className="text-[11px] sm:text-xs text-[#faeeda]/80 mt-0.5">
+              Tùy biến phong cách thẻ & lưu ảnh chất lượng cao đăng Story Instagram / Facebook / TikTok
+            </p>
           </div>
-          <h3 className="text-lg sm:text-2xl font-black text-white font-display">
-            Thiệp Ước Mơ & Vé Lên Tàu Vũ Trụ K22
-          </h3>
-          <p className="text-[11px] sm:text-xs text-[#faeeda]/80">
-            Tùy biến phong cách thẻ & lưu ảnh chất lượng cao đăng Story Instagram / Facebook / TikTok
-          </p>
+
+          <button
+            id="btn-close-card-modal"
+            onClick={onClose}
+            className="relative z-10 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-[#fac775] transition-colors cursor-pointer shrink-0"
+            aria-label="Đóng"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Notification Toast */}

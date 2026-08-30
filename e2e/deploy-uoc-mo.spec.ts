@@ -55,9 +55,11 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     await expect(page.locator("button:has-text('Lưu Ảnh Story')")).toBeVisible();
 
     // Close modal
-    const closeBtn = page.locator("button[aria-label='Đóng']");
+    const closeBtn = page.locator("#btn-close-card-modal");
     if (await closeBtn.isVisible()) {
-      await closeBtn.click();
+      await closeBtn.click({ force: true });
+    } else {
+      await page.keyboard.press("Escape");
     }
   });
 

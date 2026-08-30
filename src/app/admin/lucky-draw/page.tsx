@@ -167,6 +167,7 @@ export default function LuckyDrawPage() {
               alt="Buggy Chu Cuoi"
               width={64}
               height={64}
+              style={{ width: "auto", height: "auto" }}
               className="object-contain animate-float"
             />
           </div>
@@ -227,6 +228,7 @@ export default function LuckyDrawPage() {
                         alt={(winnerReward || currentReward)!.name}
                         width={56}
                         height={56}
+                        style={{ width: "auto", height: "auto" }}
                         className="object-contain drop-shadow-md"
                       />
                     </div>
@@ -347,6 +349,7 @@ export default function LuckyDrawPage() {
                   alt={reward.name}
                   width={70}
                   height={70}
+                  style={{ width: "auto", height: "auto" }}
                   className="object-contain drop-shadow-md"
                 />
               </div>
@@ -422,6 +425,7 @@ export default function LuckyDrawPage() {
                 alt={previewReward.name}
                 width={160}
                 height={160}
+                style={{ width: "auto", height: "auto" }}
                 className="object-contain drop-shadow-xl"
               />
             </div>
