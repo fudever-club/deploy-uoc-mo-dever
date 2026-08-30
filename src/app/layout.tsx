@@ -61,7 +61,7 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`h-full ${beVietnamPro.variable} ${plusJakartaSans.variable}`}
+      className={`${beVietnamPro.variable} ${plusJakartaSans.variable}`}
       suppressHydrationWarning
     >
       <body
@@ -69,7 +69,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Navbar />
-        <main suppressHydrationWarning className="flex-1 flex flex-col">{children}</main>
+        <main suppressHydrationWarning className="flex-1 flex flex-col w-full">{children}</main>
       </body>
     </html>
   );

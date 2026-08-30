@@ -189,7 +189,7 @@ export default function WishSubmissionPage() {
   return (
     <div
       suppressHydrationWarning
-      className="min-h-full flex-1 flex flex-col items-center justify-center px-2.5 sm:px-4 py-3 sm:py-6 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative overflow-x-clip max-w-full"
+      className="min-h-screen flex-1 flex flex-col items-center justify-start px-2.5 sm:px-4 py-4 sm:py-8 bg-radial from-[#fffcf7] via-[#fff5e3] to-[#f5ead6] relative max-w-full"
     >
       {/* Decorative Warm Ambient Light Orbs */}
       <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-[#fac775]/25 blur-3xl pointer-events-none overflow-hidden" />
