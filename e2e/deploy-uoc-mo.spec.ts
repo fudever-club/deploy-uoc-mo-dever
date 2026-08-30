@@ -22,7 +22,7 @@ test.describe("Deploy Ước Mơ — End to End User Flows", () => {
     const submitBtn = page.locator("#btn-submit-dream");
 
     await expect(nameInput).toBeVisible({ timeout: 10000 });
-    await nameInput.fill("Phan Quang Nhật K22");
+    await nameInput.fill("Đặng Quang Nhật K22");
 
     // Test AI Poetry generator button
     const poemBtn = page.locator("button:has-text('Gieo Vần Thơ')");
