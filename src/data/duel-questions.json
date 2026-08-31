@@ -1,0 +1,397 @@
+[
+  {
+    "id": "it-01",
+    "topic": "logic_it",
+    "question": "Trong lập trình mảng (Array), phần tử đầu tiên thường có vị trí index là bao nhiêu?",
+    "options": ["0", "1", "-1", "null"],
+    "correctIndex": 0,
+    "explanation": "Đa số các ngôn ngữ lập trình hiện đại (C/C++, Java, JS, Python) đều dùng chỉ số bắt đầu từ 0 (0-indexed)."
+  },
+  {
+    "id": "it-02",
+    "topic": "logic_it",
+    "question": "Câu lệnh Git nào dùng để đẩy các commit từ local repository lên remote repository trên GitHub?",
+    "options": ["git push", "git pull", "git upload", "git sync-up"],
+    "correctIndex": 0,
+    "explanation": "'git push' dùng để đồng bộ các commit từ máy cá nhân lên server từ xa."
+  },
+  {
+    "id": "it-03",
+    "topic": "logic_it",
+    "question": "Ngôn ngữ nào dưới đây là ngôn ngữ đánh dấu siêu văn bản, KHÔNG PHẢI là ngôn ngữ lập trình?",
+    "options": ["HTML", "Python", "Java", "C++"],
+    "correctIndex": 0,
+    "explanation": "HTML là HyperText Markup Language — ngôn ngữ đánh dấu cấu trúc tài liệu web."
+  },
+  {
+    "id": "it-04",
+    "topic": "logic_it",
+    "question": "Trong cơ sở dữ liệu quan hệ (SQL), từ khóa nào dùng để truy vấn và lấy dữ liệu từ bảng?",
+    "options": ["SELECT", "TAKE", "GET", "FETCH_ALL"],
+    "correctIndex": 0,
+    "explanation": "Cú pháp SELECT dùng để trích xuất các cột dữ liệu theo điều kiện mong muốn."
+  },
+  {
+    "id": "it-05",
+    "topic": "logic_it",
+    "question": "Biểu thức logic Boolean: !(true && false) có kết quả trả về là gì?",
+    "options": ["true", "false", "undefined", "null"],
+    "correctIndex": 0,
+    "explanation": "Toán tử AND (true && false) trả về false, phủ định !false cho kết quả là true."
+  },
+  {
+    "id": "it-06",
+    "topic": "logic_it",
+    "question": "Khi vòng lặp 'while (true)' không có điều kiện dừng hoặc lệnh break, hiện tượng gì sẽ xảy ra?",
+    "options": ["Vòng lặp vô tận (Infinite Loop)", "Chương trình tăng tốc xử lý", "Trình duyệt tự sửa lỗi", "Không có ảnh hưởng gì"],
+    "correctIndex": 0,
+    "explanation": "Vòng lặp vô tận làm chiếm dụng CPU và có thể khiến tiến trình ứng dụng bị treo (freeze/crash)."
+  },
+  {
+    "id": "it-07",
+    "topic": "logic_it",
+    "question": "Ngoại lệ 'NullPointerException' (NPE) là lỗi thời gian chạy (Runtime Exception) phổ biến trong ngôn ngữ nào?",
+    "options": ["Java", "HTML", "CSS", "Markdown"],
+    "correctIndex": 0,
+    "explanation": "Trong Java, NPE xảy ra khi cố gắng truy cập phương thức hoặc thuộc tính của một đối tượng có giá trị null."
+  },
+  {
+    "id": "it-08",
+    "topic": "logic_it",
+    "question": "Chuỗi nhị phân '0101' tương ứng với giá trị bao nhiêu trong hệ thập phân?",
+    "options": ["5", "3", "7", "9"],
+    "correctIndex": 0,
+    "explanation": "0*8 + 1*4 + 0*2 + 1*1 = 5."
+  },
+  {
+    "id": "it-09",
+    "topic": "logic_it",
+    "question": "Để thuật toán tìm kiếm nhị phân (Binary Search) hoạt động chính xác với độ phức tạp O(log n), dữ liệu đầu vào cần điều kiện gì?",
+    "options": ["Mảng đã được sắp xếp", "Mảng có độ dài chẵn", "Chỉ chứa các số nguyên dương", "Có kích thước dưới 100 phần tử"],
+    "correctIndex": 0,
+    "explanation": "Tìm kiếm nhị phân chia đôi không gian tìm kiếm ở mỗi bước nên mảng bắt buộc phải được sắp xếp trước."
+  },
+  {
+    "id": "it-10",
+    "topic": "logic_it",
+    "question": "Mã trạng thái HTTP Status Code nào biểu thị tài nguyên được yêu cầu không tìm thấy (Not Found)?",
+    "options": ["404", "200", "500", "302"],
+    "correctIndex": 0,
+    "explanation": "HTTP 404 Not Found thông báo rằng máy chủ không thể tìm thấy trang hoặc tài nguyên theo URL yêu cầu."
+  },
+  {
+    "id": "it-11",
+    "topic": "logic_it",
+    "question": "Một byte (Byte) theo quy chuẩn kiến trúc máy tính bao gồm bao nhiêu bit (bits)?",
+    "options": ["8", "4", "16", "32"],
+    "correctIndex": 0,
+    "explanation": "1 Byte tiêu chuẩn gồm 8 bit nhị phân, có thể biểu diễn 256 trạng thái khác nhau (0 đến 255)."
+  },
+  {
+    "id": "it-12",
+    "topic": "logic_it",
+    "question": "Trong lập trình hướng đối tượng (OOP), khi nhiều hàm cùng tên nhưng khác nhau về kiểu hoặc số lượng tham số, kỹ thuật này gọi là gì?",
+    "options": ["Method Overloading (Nạp chồng phương thức)", "Method Overriding (Ghi đè phương thức)", "Encapsulation", "Polymorphism"],
+    "correctIndex": 0,
+    "explanation": "Overloading xảy ra trong cùng một class khi định nghĩa nhiều hàm cùng tên nhưng khác chữ ký tham số."
+  },
+  {
+    "id": "it-13",
+    "topic": "logic_it",
+    "question": "Toán tử so sánh nghiêm ngặt '===' trong JavaScript khác biệt như thế nào so với '=='?",
+    "options": ["So sánh cả giá trị và kiểu dữ liệu mà không ép kiểu ngầm định", "Chỉ so sánh địa chỉ vùng nhớ", "Tự động chuyển đổi kiểu dữ liệu trước", "Chỉ áp dụng cho chuỗi"],
+    "correctIndex": 0,
+    "explanation": "Toán tử '===' (Strict Equality) kiểm tra cả kiểu dữ liệu (type) và giá trị (value) mà không tự ý coercion."
+  },
+
+  {
+    "id": "meme-01",
+    "topic": "fptu_meme",
+    "question": "Thời điểm hạn nộp bài tập trên hệ thống FAP / CMS quen thuộc nhất với sinh viên là khi nào?",
+    "options": ["23:59:59", "12:00:00 trưa", "06:00:00 sáng", "Bất cứ lúc nào"],
+    "correctIndex": 0,
+    "explanation": "23:59:59 là mốc deadline tiêu chuẩn của hầu hết các bài tập và đồ án môn học."
+  },
+  {
+    "id": "meme-02",
+    "topic": "fptu_meme",
+    "question": "Môn học phát triển ứng dụng web nền tảng Java tiêu biểu tại FPT University có mã môn là gì?",
+    "options": ["PRJ301", "VOV123", "LAB101", "CSI104"],
+    "correctIndex": 0,
+    "explanation": "PRJ301 (Java Web Application Development) là môn học lập trình web quan trọng của ngành Kỹ thuật Phần mềm."
+  },
+  {
+    "id": "meme-03",
+    "topic": "fptu_meme",
+    "question": "Linh vật đại diện quen thuộc gắn liền với văn hóa trường Đại học FPT là hình ảnh gì?",
+    "options": ["Chú Cóc FPT", "Chú Voi", "Đại Bàng", "Sư Tử"],
+    "correctIndex": 0,
+    "explanation": "Cóc là linh vật biểu trưng cho sự kiên trì, thông minh và tinh thần học hỏi của sinh viên FPT."
+  },
+  {
+    "id": "meme-04",
+    "topic": "fptu_meme",
+    "question": "Môn giáo dục thể chất đặc trưng bắt buộc mang đậm tinh thần võ đạo tại FPT University là gì?",
+    "options": ["Vovinam (Việt Võ Đạo)", "Karate", "Taekwondo", "Judo"],
+    "correctIndex": 0,
+    "explanation": "Vovinam rèn luyện sức khỏe, kỷ luật và tinh thần thượng võ trong suốt các học kỳ thể chất."
+  },
+  {
+    "id": "meme-05",
+    "topic": "fptu_meme",
+    "question": "Thuật ngữ sinh viên thường dùng khi chưa hoàn thành môn học và phải học lại ở kỳ kế tiếp là gì?",
+    "options": ["Học lại môn / Retake", "Bảo lưu kết quả", "Miễn giảm tín chỉ", "Chuyển ngành"],
+    "correctIndex": 0,
+    "explanation": "Retake môn học là điều cần tránh để đảm bảo tiến độ ra trường đúng hạn."
+  },
+  {
+    "id": "meme-06",
+    "topic": "fptu_meme",
+    "question": "Đồ uống phổ biến giúp sinh viên IT duy trì sự tỉnh táo trong những buổi chạy đồ án đêm là gì?",
+    "options": ["Cà phê / Trà xanh", "Nước ép cần tây", "Sữa nóng có đường", "Nước khoáng có ga"],
+    "correctIndex": 0,
+    "explanation": "Cà phê là người bạn đồng hành quen thuộc của các lập trình viên khi làm việc tập trung."
+  },
+  {
+    "id": "meme-07",
+    "topic": "fptu_meme",
+    "question": "Câu nói kinh điển của các lập trình viên khi ứng dụng chạy tốt trên máy cá nhân nhưng lỗi trên môi trường khác là gì?",
+    "options": ["'It works on my machine!' (Trên máy em chạy bình thường mà!)", "'Lỗi do hệ điều hành'", "'Máy tính của trường bị lag'", "'Do kết nối wifi'"],
+    "correctIndex": 0,
+    "explanation": "Đó là lý do các công nghệ như Docker và Container ra đời để đồng nhất môi trường triển khai."
+  },
+  {
+    "id": "meme-08",
+    "topic": "fptu_meme",
+    "question": "Phong cách trang phục thường ngày đơn giản, thoải mái nhất của sinh viên IT trên giảng đường là gì?",
+    "options": ["Áo thun / Hoodie + Quần jeans hoặc short", "Vest tuxedo kèm cà vạt", "Áo sơ mi đóng thùng nghiêm ngặt", "Đồ bảo hộ lao động"],
+    "correctIndex": 0,
+    "explanation": "Sự năng động, thoải mái và tập trung vào hiệu quả học tập là phong cách đặc trưng của sinh viên kỹ thuật."
+  },
+  {
+    "id": "meme-09",
+    "topic": "fptu_meme",
+    "question": "Trải nghiệm học kỳ Quân sự Quốc phòng (Rèn luyện tập trung) mang lại điều gì quý giá nhất cho tân sinh viên?",
+    "options": ["Tinh thần kỷ luật, đồng đội gắn kết và những kỷ niệm đáng nhớ", "Kỹ năng lập trình nâng cao", "Học bổng chuyên môn", "Chứng chỉ ngoại ngữ"],
+    "correctIndex": 0,
+    "explanation": "Tháng rèn luyện quân sự giúp tân sinh viên rèn luyện tác phong nề nếp và xây dựng tình bạn gắn bó."
+  },
+  {
+    "id": "meme-10",
+    "topic": "fptu_meme",
+    "question": "Để đạt kết quả tốt trong các kỳ thi thực hành PE (Practical Exam) ngành IT, điều quan trọng nhất là gì?",
+    "options": ["Thực hành code đều đặn, hiểu rõ logic bài toán và quản lý thời gian", "Học thuộc lòng code mẫu", "Trông chờ vào may mắn", "Đoán trước đề thi"],
+    "correctIndex": 0,
+    "explanation": "Kỹ năng thực hành vững chắc và khả năng debug độc lập là chìa khóa để hoàn thành tốt bài thi PE."
+  },
+  {
+    "id": "meme-11",
+    "topic": "fptu_meme",
+    "question": "Không gian lý tưởng trong trường thường được sinh viên chọn để ôn tập nhóm và làm đồ án là ở đâu?",
+    "options": ["Thư viện & Không gian Co-working", "Sân bóng đá", "Bãi giữ xe", "Hội trường lớn"],
+    "correctIndex": 0,
+    "explanation": "Thư viện với nguồn tài liệu phong phú và không gian yên tĩnh là nơi học tập lý tưởng của sinh viên."
+  },
+  {
+    "id": "meme-12",
+    "topic": "fptu_meme",
+    "question": "Đồ án tốt nghiệp (Capstone Project) tại Đại học FPT thường yêu cầu sinh viên đạt được tiêu chuẩn nào?",
+    "options": ["Phát triển sản phẩm công nghệ hoàn chỉnh giải quyết bài toán thực tế của doanh nghiệp", "Chỉ viết báo cáo lý thuyết", "Làm mô hình thử nghiệm nhỏ", "Không cần demo phần mềm"],
+    "correctIndex": 0,
+    "explanation": "Capstone Project rèn luyện kỹ năng làm việc nhóm chuyên nghiệp theo quy trình Agile/Scrum như doanh nghiệp thực thụ."
+  },
+
+  {
+    "id": "riddle-01",
+    "topic": "trick_riddles",
+    "question": "Vật gì chuyển động quay liên tục ngày đêm để đo đếm thời gian mà không bao giờ di chuyển vị trí?",
+    "options": ["Chiếc đồng hồ", "Bánh xe", "Con lắc đơn", "Vòng tròn số"],
+    "correctIndex": 0,
+    "explanation": "Các kim đồng hồ quay liên tục quanh trục để chỉ giờ mà vị trí đồng hồ vẫn cố định."
+  },
+  {
+    "id": "riddle-02",
+    "topic": "trick_riddles",
+    "question": "Càng bước đi nhiều về phía trước, bạn càng để lại nhiều thứ gì ở phía sau?",
+    "options": ["Dấu chân / Bước chân", "Thời gian", "Khoảng cách", "Ký ức"],
+    "correctIndex": 0,
+    "explanation": "Mỗi bước chân tiến lên đều để lại một dấu chân ở phía sau."
+  },
+  {
+    "id": "riddle-03",
+    "topic": "trick_riddles",
+    "question": "Thứ gì thuộc quyền sở hữu của bạn, nhưng người xung quanh lại sử dụng nhiều hơn chính bạn?",
+    "options": ["Tên gọi / Nickname của bạn", "Chiếc điện thoại", "Máy tính xách tay", "Thẻ sinh viên"],
+    "correctIndex": 0,
+    "explanation": "Tên của bạn chủ yếu do người khác dùng để gọi và xưng hô khi giao tiếp."
+  },
+  {
+    "id": "riddle-04",
+    "topic": "trick_riddles",
+    "question": "Vật dụng nào có cổ nhưng không có đầu, thường dùng để chứa chất lỏng?",
+    "options": ["Cái chai / Lọ", "Chiếc áo len", "Chiếc ly", "Cái bình hoa"],
+    "correctIndex": 0,
+    "explanation": "Cái chai có phần thân, đáy và cổ chai (bottle neck) để rót nước."
+  },
+  {
+    "id": "riddle-05",
+    "topic": "trick_riddles",
+    "question": "Vật gì khi chưa dùng thì màu đen, khi đang sử dụng thì đỏ rực, và khi dùng xong thì biến thành màu xám?",
+    "options": ["Than củi", "Mực in", "Thỏi son", "Cục pin"],
+    "correctIndex": 0,
+    "explanation": "Than củi ban đầu đen, khi đốt cháy đỏ rực và tàn than có màu tro xám."
+  },
+  {
+    "id": "riddle-06",
+    "topic": "trick_riddles",
+    "question": "Một gia đình có 7 người con trai, mỗi người con trai đều có đúng 1 người em gái. Hỏi gia đình có tất cả mấy người con?",
+    "options": ["8 người con", "14 người con", "7 người con", "9 người con"],
+    "correctIndex": 0,
+    "explanation": "Gia đình có 7 anh trai và 1 cô em gái út chung, tổng cộng là 7 + 1 = 8 người con."
+  },
+  {
+    "id": "riddle-07",
+    "topic": "trick_riddles",
+    "question": "Tháng nào trong năm theo dương lịch có tổng số ngày ít nhất?",
+    "options": ["Tháng Hai (28 hoặc 29 ngày)", "Tháng Mười Hai", "Tháng Bảy", "Tháng Tư"],
+    "correctIndex": 0,
+    "explanation": "Tháng 2 là tháng ngắn nhất trong năm với 28 ngày (hoặc 29 ngày vào năm nhuận)."
+  },
+  {
+    "id": "riddle-08",
+    "topic": "trick_riddles",
+    "question": "Bộ phận nào trong cơ thể người hoạt động co bóp liên tục không ngừng để duy trì sự sống?",
+    "options": ["Trái tim", "Dạ dày", "Hai lá phổi", "Cơ hoành"],
+    "correctIndex": 0,
+    "explanation": "Trái tim co bóp tuần hoàn liên tục để bơm máu nuôi dưỡng toàn bộ cơ thể."
+  },
+  {
+    "id": "riddle-09",
+    "topic": "trick_riddles",
+    "question": "Đặc điểm sinh học nào về cách di chuyển là đúng với các loài vịt bình thường trong tự nhiên?",
+    "options": ["Tất cả các loài vịt đều đi bằng 2 chân", "Chỉ có vịt thuần dưỡng mới đi 2 chân", "Vịt chỉ bơi không đi được", "Vịt đi bằng 4 chân"],
+    "correctIndex": 0,
+    "explanation": "Loài vịt thuộc lớp chim (Aves), có cấu tạo hai chi sau dùng để di chuyển trên cạn và bơi dưới nước."
+  },
+  {
+    "id": "riddle-10",
+    "topic": "trick_riddles",
+    "question": "Trong một cuộc thi chạy, nếu bạn bứt phá vượt qua người đang chạy ở vị trí thứ hai, bạn đang đứng ở vị trí thứ mấy?",
+    "options": ["Vị trí thứ hai", "Vị trí thứ nhất", "Vị trí thứ ba", "Về đích đầu tiên"],
+    "correctIndex": 0,
+    "explanation": "Khi vượt người thứ 2, bạn chiếm vị trí thứ 2 của người đó, người thứ nhất vẫn đang dẫn đầu."
+  },
+  {
+    "id": "riddle-11",
+    "topic": "trick_riddles",
+    "question": "Vị trí nào trên cơ thể bạn có thể chạm tới bằng bàn tay phải nhưng KHÔNG THỂ chạm tới bằng bàn tay trái?",
+    "options": ["Khuỷu tay trái của chính bạn", "Bàn chân trái", "Đầu gối trái", "Bả vai trái"],
+    "correctIndex": 0,
+    "explanation": "Cẳng tay trái và bàn tay trái không thể tự gập lại để chạm vào chính khuỷu tay trái của mình."
+  },
+  {
+    "id": "riddle-12",
+    "topic": "trick_riddles",
+    "question": "Loại nông sản nào có cách chế biến bóc lớp bẹ bên ngoài, giữ hạt để nướng và bỏ phần lõi bên trong khi thưởng thức?",
+    "options": ["Bắp ngô (Ngô nếp / Ngô ngọt)", "Bắp cải", "Củ đậu", "Quả dừa"],
+    "correctIndex": 0,
+    "explanation": "Khi chế biến bắp ngô, ta bóc vỏ bẹ, nướng chín phần hạt và bỏ cùi ngô."
+  },
+
+  {
+    "id": "dever-01",
+    "topic": "fu_dever",
+    "question": "Mascot đại diện chính thức với biểu tượng bọ rùa công nghệ của CLB FU-DEVER có tên là gì?",
+    "options": ["Buggy", "Froggy", "Codie", "Pixel"],
+    "correctIndex": 0,
+    "explanation": "Buggy là chú bọ rùa công nghệ — biểu trưng cho tinh thần phát hiện và khắc phục lỗi lập trình của FU-DEVER."
+  },
+  {
+    "id": "dever-02",
+    "topic": "fu_dever",
+    "question": "Tên gọi chính thức và định hướng học thuật của CLB FU-DEVER là gì?",
+    "options": ["CLB Kỹ thuật Phần mềm FU-DEVER (Software Engineering Club)", "CLB Thể thao Điện tử", "CLB Nhiếp ảnh & Media", "CLB Kỹ năng mềm"],
+    "correctIndex": 0,
+    "explanation": "FU-DEVER là CLB học thuật chuyên sâu về Kỹ thuật Phần mềm trực thuộc Đại học FPT Đà Nẵng."
+  },
+  {
+    "id": "dever-03",
+    "topic": "fu_dever",
+    "question": "Tông màu nhận diện thương hiệu chủ đạo trên logo chính thức của FU-DEVER là gì?",
+    "options": ["Màu xanh công nghệ (#0091EA / Tech Blue)", "Màu cam neon", "Màu tím thẫm", "Màu xanh lá chuối"],
+    "correctIndex": 0,
+    "explanation": "Màu xanh #0091EA đại diện cho sự chuyên nghiệp, tin cậy và khát vọng công nghệ của các Dever."
+  },
+  {
+    "id": "dever-04",
+    "topic": "fu_dever",
+    "question": "Các hoạt động chuyên môn trọng tâm thường niên do FU-DEVER tổ chức bao gồm những chương trình nào?",
+    "options": ["Hackathon, Workshop công nghệ, Training lập trình, Dự án phát triển phần mềm", "Giao lưu ẩm thực", "Thi cờ tướng", "Biểu diễn ca múa"],
+    "correctIndex": 0,
+    "explanation": "FU-DEVER tập trung vào các sân chơi học thuật chất lượng cao, chia sẻ kiến thức và rèn luyện kỹ năng thực chiến."
+  },
+  {
+    "id": "dever-05",
+    "topic": "fu_dever",
+    "question": "Lợi ích nổi bật khi tân sinh viên tham gia sinh hoạt tại CLB FU-DEVER là gì?",
+    "options": ["Được mentor hướng dẫn, làm việc trong dự án thực tế, phát triển portfolio và kết nối cộng đồng IT", "Chỉ tham gia sinh hoạt lý thuyết", "Không được tham gia dự án", "Bắt buộc phải có kinh nghiệm trước"],
+    "correctIndex": 0,
+    "explanation": "FU-DEVER tạo môi trường thực tế giúp thành viên phát triển cả kỹ năng kỹ thuật (Hard skills) lẫn kỹ năng làm việc nhóm (Soft skills)."
+  },
+  {
+    "id": "dever-06",
+    "topic": "fu_dever",
+    "question": "Chiến dịch trải nghiệm công nghệ tương tác tại gian hàng FU-DEVER Club Day 2026 có tên là gì?",
+    "options": ["Deploy Ước Mơ & Buggy AI Arena", "Vòng quay số may mắn", "Đại hội Diệt Virus", "Hội chợ Đồ án"],
+    "correctIndex": 0,
+    "explanation": "Chiến dịch kết hợp giữa trải nghiệm văn hóa thả đèn lồng ước mơ số và đấu trường trí tuệ đối đầu mascot Buggy."
+  },
+  {
+    "id": "dever-07",
+    "topic": "fu_dever",
+    "question": "Ý nghĩa biểu tượng mascot Buggy đối với các lập trình viên FU-DEVER là gì?",
+    "options": ["Tinh thần không ngại khó khăn trước các bug trong mã nguồn, biến thử thách thành giải pháp tối ưu", "Yêu thích sưu tầm côn trùng", "Lấy cảm hứng ngẫu nhiên", "Mang ý nghĩa thời trang"],
+    "correctIndex": 0,
+    "explanation": "Bug là một phần tất yếu của lập trình, và người làm kỹ thuật phần mềm luôn chủ động tìm kiếm và khắc phục lỗi triệt để."
+  },
+  {
+    "id": "dever-08",
+    "topic": "fu_dever",
+    "question": "Hình thức thi đấu của cuộc thi Hackathon do FU-DEVER tổ chức thường diễn ra như thế nào?",
+    "options": ["Các đội làm việc tập trung 24h-48h liên tục để xây dựng sản phẩm phần mềm hoàn chỉnh theo chủ đề", "Thi trắc nghiệm trên giấy", "Viết bài luận 10 trang", "Tranh biện lý thuyết"],
+    "correctIndex": 0,
+    "explanation": "Hackathon là môi trường thử thách cường độ cao, thúc đẩy sáng tạo, kỹ năng giải quyết vấn đề và năng lực làm việc nhóm."
+  },
+  {
+    "id": "dever-09",
+    "topic": "fu_dever",
+    "question": "Bộ phận nào trong FU-DEVER chịu trách nhiệm chính về mảng nghiên cứu công nghệ, xây dựng chương trình training và phát triển hệ thống?",
+    "options": ["Ban Chuyên Môn (Tech Team)", "Ban Hậu Cần", "Ban Tài Chính", "Ban Lễ Tân"],
+    "correctIndex": 0,
+    "explanation": "Ban Chuyên Môn là nòng cốt kỹ thuật đảm nhiệm việc đào tạo kiến thức và phát triển các sản phẩm phần mềm của CLB."
+  },
+  {
+    "id": "dever-10",
+    "topic": "fu_dever",
+    "question": "Yếu tố quan trọng nhất FU-DEVER tìm kiếm ở các ứng viên tân sinh viên trong đợt tuyển thành viên mới là gì?",
+    "options": ["Tinh thần chủ động học hỏi, đam mê công nghệ và sự nhiệt huyết gắn kết cùng tập thể", "Bắt buộc phải thành thạo 5 ngôn ngữ lập trình", "Đã từng đạt giải quốc tế", "Kinh nghiệm làm việc trên 2 năm"],
+    "correctIndex": 0,
+    "explanation": "Thái độ tích cực và đam mê học hỏi luôn là nền tảng quan trọng nhất để phát triển kỹ năng chuyên môn."
+  },
+  {
+    "id": "dever-11",
+    "topic": "fu_dever",
+    "question": "Mạng lưới cựu thành viên (Alumni) của FU-DEVER đóng vai trò gì trong sự phát triển của các thế hệ tiếp nối?",
+    "options": ["Chia sẻ kinh nghiệm thực tế, định hướng nghề nghiệp và kết nối cơ hội thực tập, việc làm tại các doanh nghiệp", "Chỉ tham gia sự kiện kỷ niệm", "Không giữ liên lạc", "Hỗ trợ tài chính đơn thuần"],
+    "correctIndex": 0,
+    "explanation": "Mạng lưới Alumni là nguồn lực quý báu hỗ trợ định hướng nghề nghiệp và truyền lửa kinh nghiệm cho các thế hệ sinh viên tiếp sau."
+  },
+  {
+    "id": "dever-12",
+    "topic": "fu_dever",
+    "question": "Tinh thần cốt lõi trong hoạt động của sinh viên kỹ thuật phần mềm FU-DEVER hướng tới mục tiêu gì?",
+    "options": ["Học tập nghiêm túc, đam mê sáng tạo, xây dựng sản phẩm có giá trị thực tiễn cho cộng đồng", "Chỉ tập trung vào điểm số lý thuyết", "Hạn chế chia sẻ kiến thức", "Tránh thử nghiệm công nghệ mới"],
+    "correctIndex": 0,
+    "explanation": "FU-DEVER luôn đề cao tinh thần chia sẻ kiến thức, làm việc nhóm và kiến tạo những sản phẩm công nghệ hữu ích."
+  }
+]

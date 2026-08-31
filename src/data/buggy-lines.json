@@ -1,0 +1,117 @@
+{
+  "intro": [
+    "Buggy đang chờ một đối thủ xứng tầm đây, liệu bạn có làm Buggy bất ngờ không?",
+    "Chào tân sinh viên K22! Buggy đã chuẩn bị 5 câu hỏi logic và meme FPTU cho bạn rồi đây!",
+    "Bấm nút đi nào! Buggy cam đoan sẽ nhẹ tay... nếu bạn trả lời đúng hết!",
+    "Đấu với Buggy thì đừng run tay nha, 60 giây trôi nhanh như hạn nộp deadline vậy!",
+    "Buggy bọ cánh cam sẵn sàng rồi, bạn có dám so tài logic với Buggy không?",
+    "Tự tin bước vào đấu trường Buggy Arena chưa? Thua là Buggy cười đấy nha!",
+    "Buggy nghe nói K22 năm nay nhiều cao thủ IT lắm, để Buggy kiểm tra thử tài nhé!",
+    "Một trận solo 60 giây giữa bạn và Buggy bắt đầu ngay bây giờ!",
+    "Đừng để Buggy phải thất vọng nha, các tiền bối DEVER đang quan sát đấy!",
+    "Nhập nickname của bạn vào, biết đâu tên bạn sẽ xuất hiện trên Top 1 màn hình lớn của Buggy!"
+  ],
+  "correct_fast": [
+    "Ủa nhanh dữ vậy? Buggy chưa kịp chớp mắt bạn đã chọn xong rồi!",
+    "Chính xác! Tốc độ phản xạ nhanh như lúc nộp bài 23:59 vậy!",
+    "Tốc độ ấn tượng đấy! Xứng đáng gia nhập team Backend của FU-DEVER rồi!",
+    "Buggy nể bạn rồi đó! Nhanh như chớp mà vẫn chuẩn chỉ 100%!",
+    "Xử lý chuẩn xác, Buggy ghi nhận điểm tối đa cho bạn!",
+    "Não load quá nhanh! Buggy thật sự khâm phục phản xạ của bạn!",
+    "Chuẩn không cần chỉnh! Tốc độ này chắc chắn qua môn PRJ301 nhẹ nhàng!",
+    "Buggy vừa ra đề xong bạn đã chọn đúng, tốc độ tư duy đáng nể thật!",
+    "Xử lý dứt khoát! Buggy bắt đầu thấy áp lực rồi nha!",
+    "Tốc độ xử lý quá mượt mà! Điểm thưởng thời gian đã cộng trọn vẹn vào điểm số của bạn!"
+  ],
+  "correct_slow": [
+    "Hú hồn! Suýt nữa là hết giờ rồi nhưng may mà chọn đúng phút chót!",
+    "Đúng rồi nè! Nhưng mà hồi hộp quá, Buggy tưởng bạn quên bấm luôn chứ!",
+    "Thong thả suy nghĩ nhưng chốt đáp án vẫn chuẩn chỉ, Buggy khen nha!",
+    "Sát nút 1 giây cuối luôn! Pha xử lý nghẹt thở làm Buggy bất ngờ đấy!",
+    "Đúng rồi nhé, lần sau tăng tốc chút để hốt trọn điểm thưởng thời gian của Buggy nha!",
+    "Chậm mà chắc, phong cách của Senior Developer tương lai đây rồi!",
+    "Buggy đếm ngược đến 1 rồi mà bạn mới chịu bấm, đau tim quá đi!",
+    "Tính toán cẩn thận đấy! Điểm số đã về tài khoản của bạn!",
+    "Đúng rồi nha! Buggy suýt chút nữa là bấm còi hết giờ rồi đó!",
+    "Ghi điểm thành công trong gang tấc! Pha xử lý làm Buggy thót tim!"
+  ],
+  "wrong": [
+    "Sai mất tiêu rồi! Câu này có bẫy nhỏ mà bạn chưa để ý kỹ rồi!",
+    "Sai rồi nè! Chắc tại bạn chưa nạp đủ năng lượng trước khi đấu với Buggy đúng không?",
+    "Bẫy của Buggy rõ ràng thế mà bạn vẫn chọn nhầm, tiếc ghê chưa!",
+    "Sai rồi nha! Đừng lo, các coder DEVER cũng từng fix hàng trăm bug mới thành pro!",
+    "Bị dính bẫy logic của Buggy rồi nha! Buggy xin điểm câu này nhé!",
+    "Buggy thấy câu này bạn chọn theo cảm tính chứ chưa đọc kỹ đề rồi!",
+    "Sai một ly là đi bài kiểm tra! Câu sau gỡ lại nha, Buggy vẫn tin bạn!",
+    "Ôi bạn ơi, đáp án đó là Buggy cài vào để thử độ tập trung đó!",
+    "Tiếc quá! Câu này chỉ cần đọc kỹ bẫy một chút là ăn trọn điểm rồi!",
+    "Sai rồi nè! Về đội FU-DEVER rèn luyện thêm vài khóa logic với Buggy ngay thôi!",
+    "Cú click chuột hơi vội vàng rồi! Đọc kỹ bẫy của Buggy hơn ở câu sau nhé!",
+    "Đáp án đúng ở ngay bên cạnh mà bạn lại chọn nhầm mất rồi!"
+  ],
+  "streak": [
+    "COMBO X2! Buggy thấy phong độ chiến thắng đang bùng cháy trong bạn rồi!",
+    "STREAK X3 LIÊN TIẾP! Bạn đang out trình Buggy rồi đấy, phong độ đỉnh!",
+    "CHUỖI ĐÚNG X4! Màn hình lớn đang sáng rực tên bạn kìa, giữ vững nhé!",
+    "Phong độ rất cao! Buggy bắt đầu thấy run rẩy trước chuỗi streak của bạn rồi!",
+    "Phong độ thăng hoa! Điểm thưởng combo đang tăng vọt!",
+    "Chuỗi đúng liên tục! Tư duy phản xạ của bạn rất sắc bén!",
+    "Buggy không thể tin vào mắt Buggy, chuỗi thắng quá thuyết phục!",
+    "Giữ vững chuỗi streak này để rinh quà Tier 2 cao nhất từ Buggy nào!",
+    "Buggy chính thức công nhận bạn là đối thủ nặng ký nhất hôm nay!",
+    "Không thể cản phá! Buggy đang chuẩn bị sẵn phần quà xịn cho bạn rồi đây!"
+  ],
+  "win_perfect": [
+    "HOÀN HẢO 5/5! Bạn đã giải quyết toàn bộ 5 câu hỏi mà không mắc một lỗi nào!",
+    "Tuyệt đỉnh! 5/5 câu đúng trọn vẹn, bạn chính thức đưa Buggy vào thế bất ngờ!",
+    "Móc khóa/Thẻ Hacker DEVER sinh ra là để dành riêng cho bạn! Quá xuất sắc!",
+    "Buggy thật sự ấn tượng! Tư duy logic của bạn xứng đáng ghi danh bảng vàng!",
+    "5/5 không sai một câu! Bạn phải ứng tuyển ngay vào Ban Chuyên Môn FU-DEVER thôi!",
+    "Thành tích ấn tượng! Mau đem mã QR này ra quầy nhận phần quà vinh danh nhé!",
+    "Tư duy logic chuẩn xác 100%! Bạn hoàn toàn xứng đáng đứng Top 1 hôm nay!",
+    "Chiến thắng tuyệt đối 5/5! Bạn làm Buggy nể phục rồi đó tân sinh viên K22 ơi!",
+    "Xuất sắc toàn diện! Hãy để Buggy vinh danh tên bạn trên màn hình lớn của sảnh trường!",
+    "Điểm số tuyệt đối! Bạn là một trong những đối thủ xuất sắc nhất của Buggy hôm nay!"
+  ],
+  "win_tier1": [
+    "Làm tốt lắm! Đúng 3-4 câu là đủ chuẩn để rinh Sticker DEVER độc quyền rồi nè!",
+    "Khá lắm tân binh! Buggy thấy bạn có tư duy logic rất bén đó!",
+    "Xuất sắc! Mang mã QR ra bàn Check-in nhận bộ sticker DEVER ngay nhé!",
+    "Đạt 3-4 câu đúng là kết quả rất ấn tượng! Buggy chúc mừng bạn nhé!",
+    "Điểm số rất tốt! Buggy sẵn sàng trao quà cho một người chơi nhạy bén như bạn!",
+    "3-4 câu đúng không phải chuyện đơn giản, bạn đã vượt qua phần lớn người chơi hôm nay!",
+    "Chúc mừng bạn đạt Tier 1! Ra bàn Check-in nhận sticker Buggy dán laptop ngay nhé!",
+    "Một trận đấu rất thuyết phục! Buggy rất vui được so tài cùng bạn hôm nay!",
+    "Gần chạm mốc 5/5 rồi, quà tặng vẫn về tay bạn! Ra quầy nhận ngay đi nào!",
+    "Phần thưởng đã sẵn sàng! Mang mã QR này đến quầy gặp admin Nhật để nhận quà nhé!"
+  ],
+  "lose": [
+    "Chưa đủ câu đúng để nhận quà lần này, nhưng trận đấu rất kịch tính!",
+    "Đấu trường Buggy Arena vốn không dễ dàng, quay lại phục thù Buggy lượt sau nhé!",
+    "Thua keo này ta bày keo khác! Vào gian hàng DEVER trải nghiệm rồi quay lại đấu tiếp với Buggy nào!",
+    "Đề thi của Buggy có nhiều bẫy logic, lượt sau bạn chắc chắn sẽ làm tốt hơn!",
+    "Dù chưa nhận quà lớn nhưng bạn đã có 60 giây trải nghiệm rất thú vị cùng Buggy đúng không?",
+    "Đừng nản chí! Rất nhiều bạn cũng từng thử lại vài lần trước khi leo lên bảng xếp hạng đấy!",
+    "Buggy vẫn dành cho bạn một tràng pháo tay vì tinh thần dám bước vào thách đấu!",
+    "Chưa may mắn lần này thôi, ghé bàn FU-DEVER quét mã thả đèn ước mơ gỡ lại vận may nhé!",
+    "Lượt sau bạn chắc chắn sẽ đọc vị được các bẫy của Buggy và đạt điểm cao!",
+    "Chúc bạn có một ngày Club Day rực rỡ và đừng quên theo dõi FU-DEVER nha!"
+  ],
+  "timeout": [
+    "Hết giờ mất tiêu rồi! Đồng hồ của Buggy đếm ngược nhanh quá bạn chưa kịp chọn sao?",
+    "Hết giờ rồi nha, lần sau nếu phân vân thì hãy tin vào phán đoán đầu tiên của bạn!",
+    "Thời gian trôi rất nhanh, đặc biệt là khi đang solo nghẹt thở cùng Buggy!",
+    "Hết 10 giây rồi nè! Đừng chần chừ ở các câu sau nha bạn ơi!",
+    "Hết giờ đáng tiếc quá! Câu này mà bấm kịp là có điểm rồi đó bạn ơi!"
+  ],
+  "idle": [
+    "Buggy đang ở đây chờ các bạn tân sinh viên K22 đến so tài logic nè...",
+    "Gian hàng DEVER đông vui quá, bạn nào muốn solo 60 giây với Buggy không?",
+    "Quét QR vào /duel ngay đi các bạn ơi, quà tặng Hacker DEVER đang đợi chủ nhân!",
+    "Vị trí Top 1 hôm nay vẫn đang chờ người xuất sắc nhất xác lập kỷ lục!",
+    "Buggy đã sẵn sàng, bước vào so tài logic nhận quà độc quyền nào!",
+    "60 giây đấu trí cùng mascot Buggy — sẵn sàng ghi danh trên bảng xếp hạng hôm nay chưa?",
+    "Đèn lồng ước mơ đang bay rực rỡ, còn bạn thì chần chừ gì chưa bước vào Buggy Arena?",
+    "Tân sinh viên K22 ơi, thử một lần đối đầu với Buggy xem độ nhạy bén IT của bạn tới đâu nào!"
+  ]
+}

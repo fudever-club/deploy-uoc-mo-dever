@@ -490,10 +490,11 @@ export async function generateMockBatch(count = 5): Promise<Dream[]> {
 
 const DEFAULT_REWARDS = [
   { name: "Sticker Buggy Hologram Phiên Bản Giới Hạn", emoji: "🐞", desc: "Bộ sticker chống nước phản quang độc quyền FU-DEVER" },
-  { name: "Móc Khóa FU-DEVER Cyber 2026", emoji: "🔑", desc: "Móc khóa mica dạ quang khắc logo FU-DEVER" },
-  { name: "Ly Trà Sữa Phúc Long 0% Đường", emoji: "🧋", desc: "Voucher 1 ly trà sữa tiếp năng lượng code đêm" },
-  { name: "Bình Giữ Nhiệt DEVER Space", emoji: "🪐", desc: "Bình giữ nhiệt kim loại khắc tên bạn tại Booth" },
-  { name: "Voucher Bí Mật Bàn Check-in", emoji: "🎁", desc: "Món quà bất ngờ từ Ban Chủ Nhiệm FU-DEVER" },
+  { name: "Móc Khóa Limited Edition FU-DEVER", emoji: "🔑", desc: "Móc khóa mica khắc logo FU-DEVER phiên bản giới hạn" },
+  { name: "Ly Trà Đào Thanh Mát DEVER", emoji: "🍹", desc: "1 ly trà đào thơm mát tiếp năng lượng tại gian hàng FU-DEVER" },
+  { name: "Bình Giữ Nhiệt DEVER Space", emoji: "🥤", desc: "Bình giữ nhiệt kim loại cao cấp phong cách DEVER" },
+  { name: "Pad Chuột Buggy Coder", emoji: "🖱️", desc: "Pad chuột lót phím độc quyền hình Mascot Buggy" },
+  { name: "Gấu Bông Tốt Nghiệp / Mascot", emoji: "🧸", desc: "Gấu bông quà tặng kỷ niệm đặc biệt từ CLB" },
 ];
 
 export function getActiveMysteryDrop(): MysteryDrop | null {

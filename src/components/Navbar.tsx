@@ -60,6 +60,20 @@ export const Navbar: React.FC = () => {
             </Link>
 
             <Link
+              href="/duel"
+              onClick={() => playTactileClick()}
+              className={`min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                pathname === "/duel"
+                  ? "bg-gradient-to-r from-[#0091EA] to-[#E14CE8] text-white shadow-sm"
+                  : "text-slate-600 hover:text-[#0091EA] hover:bg-cyan-50"
+              }`}
+              title="Đấu trí 60 giây cùng AI Buggy nhận quà"
+            >
+              <Trophy className="w-3.5 h-3.5 text-[#FAC775] shrink-0" />
+              <span>Đấu Buggy ⚔️</span>
+            </Link>
+
+            <Link
               href="/display"
               onClick={() => playTactileClick()}
               className={`min-h-[38px] px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${

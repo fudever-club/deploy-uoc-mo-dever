@@ -22,9 +22,9 @@ import {
   RotateCw,
   Wind,
   Globe2,
-  Wifi,
   ArrowLeft,
-  Home,
+  Columns,
+  Swords,
 } from "lucide-react";
 import { StandeeQRModal } from "@/components/StandeeQRModal";
 import { LanternSkyCanvas } from "@/components/LanternSkyCanvas";
@@ -32,6 +32,7 @@ import { ConstellationGalaxyView } from "@/components/ConstellationGalaxyView";
 import { FloatingLanternCardsSky, FlightMode } from "@/components/FloatingLanternCardsSky";
 import { FireworksCanvas } from "@/components/FireworksCanvas";
 import { MysteryDropBanner } from "@/components/MysteryDropBanner";
+import { BuggyLiveArena } from "@/components/BuggyLiveArena";
 import { LiveReaction } from "@/types/dream";
 
 export default function DisplaySkyPage() {
@@ -43,6 +44,9 @@ export default function DisplaySkyPage() {
   const [spotlightIndex, setSpotlightIndex] = useState<number>(0);
   const [isAutoSpotlight, setIsAutoSpotlight] = useState<boolean>(true);
   const [latestReaction, setLatestReaction] = useState<LiveReaction | null>(null);
+
+  // Split-View: "split" (65% Sky + 35% Buggy Arena) vs "full" (100% Sky)
+  const [splitViewMode, setSplitViewMode] = useState<"split" | "full">("split");
 
   // Flight Mode: "carousel" (Xoay vòng 3D) vs "drift" (Trôi tự do) vs "galaxy" (Chòm sao)
   const [flightMode, setFlightMode] = useState<FlightMode>("carousel");
@@ -123,7 +127,6 @@ export default function DisplaySkyPage() {
   };
 
   const visibleDreams = useMemo(() => dreams.filter((d) => !d.hidden), [dreams]);
-
   const [isDisplayIdle, setIsDisplayIdle] = useState(false);
 
   // Auto-spotlight rotation every 12 seconds
@@ -141,303 +144,335 @@ export default function DisplaySkyPage() {
 
   return (
     <div
-      className={`relative w-screen h-screen overflow-hidden select-none bg-[#12203A] text-[#faeeda] ${
+      className={`relative w-screen h-screen overflow-hidden select-none bg-[#12203A] text-[#faeeda] flex ${
         isDisplayIdle ? "cursor-none" : ""
       }`}
     >
-      {/* 1. BACKGROUND PARTICLES & SKY LAYER */}
-      <LanternSkyCanvas />
+      {/* =========================================================
+          LEFT CONTAINER: DEPLOY ƯỚC MƠ SKY (65% in Split, 100% in Full)
+      ========================================================= */}
+      <div
+        className={`relative h-full transition-all duration-500 overflow-hidden ${
+          splitViewMode === "split" ? "w-full lg:w-[65%]" : "w-full"
+        }`}
+      >
+        {/* 1. BACKGROUND PARTICLES & SKY LAYER */}
+        <LanternSkyCanvas />
 
-      {/* 2. DYNAMIC FLOATING LANTERN WISH CARDS (OR CONSTELLATION GALAXY) */}
-      {viewMode === "lanterns" ? (
-        <FloatingLanternCardsSky
-          dreams={dreams}
-          flightMode={flightMode}
-          selectedTagFilter={selectedTagFilter}
-          onSelectDream={(d) => setSelectedDream(d)}
-          onIdleChange={setIsDisplayIdle}
+        {/* 2. DYNAMIC FLOATING LANTERN WISH CARDS (OR CONSTELLATION GALAXY) */}
+        {viewMode === "lanterns" ? (
+          <FloatingLanternCardsSky
+            dreams={dreams}
+            flightMode={flightMode}
+            selectedTagFilter={selectedTagFilter}
+            onSelectDream={(d) => setSelectedDream(d)}
+            onIdleChange={setIsDisplayIdle}
+          />
+        ) : (
+          <ConstellationGalaxyView
+            dreams={dreams}
+            onSelectDream={(d) => setSelectedDream(d)}
+          />
+        )}
+
+        {/* 2.5 LIVE CROWD FIREWORKS & REACTIONS OVERLAY */}
+        <FireworksCanvas
+          latestReaction={latestReaction}
+          soundEnabled={soundEnabled}
         />
-      ) : (
-        <ConstellationGalaxyView
-          dreams={dreams}
-          onSelectDream={(d) => setSelectedDream(d)}
+
+        {/* 2.6 SECRET MYSTERY DROP BANNER (SINGLE WINNER) */}
+        <MysteryDropBanner
+          drop={activeMysteryDrop}
+          onClose={() => setActiveMysteryDrop(null)}
+          soundEnabled={soundEnabled}
         />
-      )}
 
-      {/* 2.5 LIVE CROWD FIREWORKS & REACTIONS OVERLAY */}
-      <FireworksCanvas
-        latestReaction={latestReaction}
-        soundEnabled={soundEnabled}
-      />
-
-      {/* 2.6 SECRET MYSTERY DROP BANNER (SINGLE WINNER) */}
-      <MysteryDropBanner
-        drop={activeMysteryDrop}
-        onClose={() => setActiveMysteryDrop(null)}
-        soundEnabled={soundEnabled}
-      />
-
-      {/* 3. TOP BRANDING & ACTION CONTROLS DOCK */}
-      <div className="absolute top-2.5 sm:top-6 inset-x-2.5 sm:inset-x-6 z-30 flex items-center justify-between pointer-events-none gap-1.5 sm:gap-2 max-w-full">
-        {/* Brand Link Left */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 sm:gap-3 group pointer-events-auto bg-[#12203A]/80 hover:bg-[#12203A] border border-[#fac775]/40 rounded-full py-1 sm:py-1.5 px-2.5 sm:px-3.5 backdrop-blur-md shadow-xl transition-all cursor-pointer shrink-0 max-w-[60%] sm:max-w-none"
-        >
-          <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#993c1d] to-[#12203a] border border-[#fac775] p-1 group-hover:scale-105 transition-transform shrink-0">
-            <Image
-              src="/assets/logo/logo-dever-white.png"
-              alt="FU-DEVER Logo"
-              width={24}
-              height={24}
-              style={{ width: "auto", height: "auto" }}
-              className="object-contain"
-            />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-1 leading-none mb-0.5">
-              <span className="text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded-full bg-[#fac775] text-[#712b13] uppercase tracking-wider shrink-0">
-                FU-DEVER
-              </span>
-              <span className="hidden sm:inline-block text-[11px] text-[#fac775]/90 font-semibold truncate">
-                FPT University
-              </span>
-            </div>
-            <h1 className="text-xs sm:text-base font-extrabold text-white tracking-tight drop-shadow-md flex items-center gap-1 font-display truncate">
-              <span className="truncate">Deploy Ước Mơ</span>
-              <span className="text-xs shrink-0">🏮</span>
-            </h1>
-          </div>
-        </Link>
-
-        {/* Action Controls Dock */}
-        <div className="flex items-center gap-1 sm:gap-2 pointer-events-auto shrink-0">
-          {/* Back to Home Button */}
+        {/* 3. TOP BRANDING & ACTION CONTROLS DOCK */}
+        <div className="absolute top-2.5 sm:top-5 inset-x-2.5 sm:inset-x-5 z-30 flex items-center justify-between pointer-events-none gap-1.5 sm:gap-2 max-w-full">
+          {/* Brand Link Left */}
           <Link
             href="/"
-            onClick={() => playTactileClick()}
-            className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-[#993c1d] to-[#712b13] hover:opacity-95 border border-[#fac775]/50 text-white text-xs font-bold flex items-center gap-1 transition-all shadow-md group cursor-pointer shrink-0"
-            title="Quay về trang gửi ước mơ K22"
+            className="flex items-center gap-2 sm:gap-3 group pointer-events-auto bg-[#12203A]/80 hover:bg-[#12203A] border border-[#fac775]/40 rounded-full py-1 sm:py-1.5 px-2.5 sm:px-3.5 backdrop-blur-md shadow-xl transition-all cursor-pointer shrink-0 max-w-[60%] sm:max-w-none"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#fac775] group-hover:-translate-x-0.5 transition-transform shrink-0" />
-            <span className="hidden sm:inline">Trang Chủ</span>
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#993c1d] to-[#12203a] border border-[#fac775] p-1 group-hover:scale-105 transition-transform shrink-0">
+              <Image
+                src="/assets/logo/logo-dever-white.png"
+                alt="FU-DEVER Logo"
+                width={24}
+                height={24}
+                style={{ width: "auto", height: "auto" }}
+                className="object-contain"
+              />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1 leading-none mb-0.5">
+                <span className="text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded-full bg-[#fac775] text-[#712b13] uppercase tracking-wider shrink-0">
+                  FU-DEVER
+                </span>
+                <span className="hidden sm:inline-block text-[11px] text-[#fac775]/90 font-semibold truncate">
+                  FPT University
+                </span>
+              </div>
+              <h1 className="text-xs sm:text-base font-extrabold text-white tracking-tight drop-shadow-md flex items-center gap-1 font-display truncate">
+                <span className="truncate">Deploy Ước Mơ</span>
+                <span className="text-xs shrink-0">🏮</span>
+              </h1>
+            </div>
           </Link>
 
-          {/* FLIGHT MOTION MODE SWITCHER */}
-          <div className="flex items-center p-0.5 sm:p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg shrink-0">
+          {/* Action Controls Dock */}
+          <div className="flex items-center gap-1 sm:gap-2 pointer-events-auto shrink-0">
+            {/* Back to Home Button */}
+            <Link
+              href="/"
+              onClick={() => playTactileClick()}
+              className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-[#993c1d] to-[#712b13] hover:opacity-95 border border-[#fac775]/50 text-white text-xs font-bold flex items-center gap-1 transition-all shadow-md group cursor-pointer shrink-0"
+              title="Quay về trang gửi ước mơ K22"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-[#fac775] group-hover:-translate-x-0.5 transition-transform shrink-0" />
+              <span className="hidden sm:inline">Trang Chủ</span>
+            </Link>
+
+            {/* SPLIT-VIEW TOGGLE (65/35 vs 100%) */}
             <button
               onClick={() => {
                 playTactileClick();
-                setViewMode("lanterns");
-                setFlightMode("carousel");
+                setSplitViewMode(splitViewMode === "split" ? "full" : "split");
               }}
-              className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                viewMode === "lanterns" && flightMode === "carousel"
-                  ? "bg-gradient-to-r from-[#993c1d] to-[#712b13] text-white shadow-xs"
-                  : "text-white/70 hover:text-white"
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shrink-0 ${
+                splitViewMode === "split"
+                  ? "bg-gradient-to-r from-[#4CE0D2] to-[#0091EA] text-[#0B1220] border border-[#4CE0D2] font-black"
+                  : "bg-white/10 hover:bg-white/20 text-white/80 border border-white/20"
               }`}
-              title="Chế độ Bay Xoay Vòng 3D (Đèn Kéo Quân Vũ Trụ - Ai cũng được nhìn thấy)"
+              title={splitViewMode === "split" ? "Đóng Buggy Arena (Xem Bầu Trời Toàn Cảnh)" : "Mở Chia Đôi 65/35 (Sky + Buggy Arena)"}
             >
-              <RotateCw className="w-3.5 h-3.5 text-amber-300" />
-              <span className="hidden md:inline">Bay Xoay Vòng</span>
+              {splitViewMode === "split" ? <Columns className="w-3.5 h-3.5" /> : <Swords className="w-3.5 h-3.5 text-[#4CE0D2]" />}
+              <span className="hidden md:inline">{splitViewMode === "split" ? "Chia Đôi 65/35" : "Buggy Arena"}</span>
             </button>
 
-            <button
-              onClick={() => {
-                playTactileClick();
-                setViewMode("lanterns");
-                setFlightMode("drift");
-              }}
-              className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                viewMode === "lanterns" && flightMode === "drift"
-                  ? "bg-gradient-to-r from-[#0091ea] to-[#0055a5] text-white shadow-xs"
-                  : "text-white/70 hover:text-white"
-              }`}
-              title="Chế độ Trôi Tự Do Tự Nhiên"
-            >
-              <Wind className="w-3.5 h-3.5 text-sky-300" />
-              <span className="hidden md:inline">Trôi Tự Do</span>
-            </button>
+            {/* FLIGHT MOTION MODE SWITCHER */}
+            <div className="hidden sm:flex items-center p-0.5 sm:p-1 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg shrink-0">
+              <button
+                onClick={() => {
+                  playTactileClick();
+                  setViewMode("lanterns");
+                  setFlightMode("carousel");
+                }}
+                className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                  viewMode === "lanterns" && flightMode === "carousel"
+                    ? "bg-gradient-to-r from-[#993c1d] to-[#712b13] text-white shadow-xs"
+                    : "text-white/70 hover:text-white"
+                }`}
+                title="Chế độ Bay Xoay Vòng 3D"
+              >
+                <RotateCw className="w-3.5 h-3.5 text-amber-300" />
+                <span className="hidden xl:inline">Xoay Vòng</span>
+              </button>
 
-            <button
-              onClick={() => {
-                playTactileClick();
-                setViewMode("galaxy");
-              }}
-              className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                viewMode === "galaxy"
-                  ? "bg-gradient-to-r from-[#0091ea] to-[#12203a] border border-[#85b7eb]/50 text-white shadow-xs"
-                  : "text-white/70 hover:text-white"
-              }`}
-              title="Chế độ Chòm Sao Thiên Hà"
-            >
-              <Globe2 className="w-3.5 h-3.5 text-[#85b7eb]" />
-              <span className="hidden md:inline">Chòm Sao</span>
-            </button>
-          </div>
+              <button
+                onClick={() => {
+                  playTactileClick();
+                  setViewMode("lanterns");
+                  setFlightMode("drift");
+                }}
+                className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                  viewMode === "lanterns" && flightMode === "drift"
+                    ? "bg-gradient-to-r from-[#0091ea] to-[#0055a5] text-white shadow-xs"
+                    : "text-white/70 hover:text-white"
+                }`}
+                title="Chế độ Trôi Tự Do"
+              >
+                <Wind className="w-3.5 h-3.5 text-sky-300" />
+                <span className="hidden xl:inline">Trôi Tự Do</span>
+              </button>
 
-          {/* Dream Counter Badge */}
-          <div id="counter-pill" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg shrink-0">
-            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#fac775] animate-pulse" />
-            <span className="text-xs sm:text-sm font-extrabold text-white">
-              {visibleDreams.length}
-            </span>
-            <span className="text-[10px] sm:text-xs text-[#faeeda]/90 font-medium hidden sm:inline">
-              ước mơ
-            </span>
-          </div>
-
-          {/* Standee QR Code Button */}
-          <button
-            onClick={() => {
-              playTactileClick();
-              setShowQRModal(true);
-            }}
-            className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-[#fac775]/30 text-[#fac775] transition-colors shadow-md cursor-pointer"
-            title="Mở mã QR Standee"
-          >
-            <QrCode className="w-4 h-4 text-[#0091ea]" />
-          </button>
-
-          {/* Auto-Spotlight Toggle */}
-          <button
-            onClick={() => {
-              playTactileClick();
-              setIsAutoSpotlight(!isAutoSpotlight);
-            }}
-            className={`p-2.5 rounded-full border transition-colors shadow-md cursor-pointer ${
-              isAutoSpotlight
-                ? "bg-[#fac775]/25 border-[#fac775] text-[#fac775]"
-                : "bg-white/10 border-white/20 text-white/50"
-            }`}
-            title={isAutoSpotlight ? "Tạm dừng chiếu tiêu điểm" : "Bật chiếu tiêu điểm tự động"}
-          >
-            {isAutoSpotlight ? <Radio className="w-4 h-4 animate-pulse" /> : <Play className="w-4 h-4" />}
-          </button>
-
-          {/* Sound Toggle (Ambient + Chime) */}
-          <button
-            onClick={toggleSound}
-            className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-[#fac775]/30 text-[#fac775] transition-colors shadow-md cursor-pointer"
-            title={soundEnabled ? "Tắt âm thanh nhạc nền" : "Bật âm thanh nhạc nền"}
-          >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 opacity-60" />}
-          </button>
-
-          {/* Fullscreen Toggle */}
-          <button
-            onClick={toggleFullscreen}
-            className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-[#fac775]/30 text-[#fac775] transition-colors shadow-md cursor-pointer"
-            title="Toàn màn hình"
-          >
-            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-          </button>
-        </div>
-      </div>
-
-      {/* 4. BROADCAST ANNOUNCEMENT BANNER IF ACTIVE */}
-      {activeAnnouncement && activeAnnouncement.active && (
-        <div className="absolute top-18 inset-x-6 z-30 pointer-events-none flex justify-center animate-in slide-in-from-top duration-300">
-          <div className="max-w-2xl px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#993c1d]/95 via-[#0091ea]/90 to-[#993c1d]/95 border-2 border-[#fac775] shadow-2xl backdrop-blur-md flex items-center gap-3 text-white text-xs sm:text-sm font-bold">
-            <Megaphone className="w-5 h-5 text-[#fac775] shrink-0 animate-pulse" />
-            <span className="truncate">{activeAnnouncement.message}</span>
-          </div>
-        </div>
-      )}
-
-      {/* 5. LIVE REACTIONS RISING FLOAT STREAM */}
-      <div className="absolute inset-x-0 bottom-0 top-1/2 pointer-events-none z-25 overflow-hidden">
-        {reactions.map((react, idx) => (
-          <div
-            key={react.id}
-            className="absolute bottom-4 text-3xl animate-in fade-in zoom-in-75 duration-300"
-            style={{
-              left: `${(idx * 17 + 25) % 85}%`,
-              animation: "floatSlow 4.5s ease-out forwards",
-            }}
-          >
-            <span className="drop-shadow-[0_0_12px_rgba(250,199,117,0.8)] select-none">
-              {react.emoji}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* 6. SPOTLIGHT CAROUSEL BANNER (Bottom-left card on desktop, floating above filter bar on mobile) */}
-      {currentSpotlightDream && isAutoSpotlight && (
-        <div
-          onClick={() => {
-            playPoemMagicSound();
-            setSelectedDream(currentSpotlightDream);
-          }}
-          className="absolute bottom-20 left-4 right-4 sm:right-auto sm:bottom-6 sm:left-6 z-30 sm:max-w-sm p-3.5 sm:p-4 rounded-3xl bg-[#12203A]/90 border border-[#fac775] backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all animate-in slide-in-from-bottom duration-500 pointer-events-auto"
-        >
-          <div className="flex items-center justify-between text-xs font-bold text-[#fac775] mb-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>Tiêu Điểm Ước Mơ</span>
+              <button
+                onClick={() => {
+                  playTactileClick();
+                  setViewMode("galaxy");
+                }}
+                className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                  viewMode === "galaxy"
+                    ? "bg-gradient-to-r from-[#0091ea] to-[#12203a] border border-[#85b7eb]/50 text-white shadow-xs"
+                    : "text-white/70 hover:text-white"
+                }`}
+                title="Chế độ Chòm Sao Thiên Hà"
+              >
+                <Globe2 className="w-3.5 h-3.5 text-[#85b7eb]" />
+                <span className="hidden xl:inline">Chòm Sao</span>
+              </button>
             </div>
-            <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">
-              {DREAM_CATEGORIES.find((c) => c.id === currentSpotlightDream.tag)?.emoji}{" "}
-              {DREAM_CATEGORIES.find((c) => c.id === currentSpotlightDream.tag)?.shortLabel}
-            </span>
-          </div>
 
-          <h4 className="text-sm font-extrabold text-white mb-1 truncate">
-            {currentSpotlightDream.name || "Tân Sinh Viên K22"}
-          </h4>
+            {/* Dream Counter Badge */}
+            <div id="counter-pill" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-[#fac775]/40 shadow-lg shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-[#fac775] animate-pulse" />
+              <span className="text-xs sm:text-sm font-extrabold text-white">
+                {visibleDreams.length}
+              </span>
+            </div>
 
-          <p className="text-xs text-[#faeeda]/90 italic line-clamp-2 sm:line-clamp-3 leading-relaxed whitespace-pre-line">
-            &ldquo;{currentSpotlightDream.content}&rdquo;
-          </p>
-
-          <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-[#fac775]">
-            <span>✨ Chạm để xem Dream Card Story</span>
-            <span className="hidden sm:inline">#FUDEVER2026</span>
-          </div>
-        </div>
-      )}
-
-      {/* 7. CATEGORY FILTER BAR (Bottom Center) */}
-      {viewMode === "lanterns" && (
-        <div className="absolute bottom-4 sm:bottom-6 inset-x-0 z-30 flex justify-center pointer-events-none px-3 sm:px-4">
-          <div className="flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-[#12203A]/90 backdrop-blur-xl border border-[#fac775]/40 shadow-2xl pointer-events-auto overflow-x-auto max-w-full scrollbar-none">
+            {/* Standee QR Code Button */}
             <button
               onClick={() => {
                 playTactileClick();
-                setSelectedTagFilter("all");
+                setShowQRModal(true);
               }}
-              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                selectedTagFilter === "all"
-                  ? "bg-[#fac775] text-[#12203a] shadow-xs"
-                  : "text-[#faeeda]/80 hover:text-white hover:bg-white/10"
-              }`}
+              className="p-2 sm:p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-[#fac775]/30 text-[#fac775] transition-colors shadow-md cursor-pointer"
+              title="Mở mã QR Standee"
             >
-              Tất cả ({visibleDreams.length})
+              <QrCode className="w-4 h-4 text-[#0091ea]" />
             </button>
 
-            {DREAM_CATEGORIES.map((cat) => {
-              const count = visibleDreams.filter((l) => l.tag === cat.id).length;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    playTactileClick();
-                    setSelectedTagFilter(cat.id);
-                  }}
-                  className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all shrink-0 cursor-pointer ${
-                    selectedTagFilter === cat.id
-                      ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
-                      : "text-[#faeeda]/70 hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  <span>{cat.emoji}</span>
-                  <span className="hidden md:inline">{cat.shortLabel}</span>
-                  <span className="text-[10px] opacity-75">({count})</span>
-                </button>
-              );
-            })}
+            {/* Auto-Spotlight Toggle */}
+            <button
+              onClick={() => {
+                playTactileClick();
+                setIsAutoSpotlight(!isAutoSpotlight);
+              }}
+              className={`p-2 sm:p-2.5 rounded-full border transition-colors shadow-md cursor-pointer ${
+                isAutoSpotlight
+                  ? "bg-[#fac775]/25 border-[#fac775] text-[#fac775]"
+                  : "bg-white/10 border-white/20 text-white/50"
+              }`}
+              title={isAutoSpotlight ? "Tạm dừng chiếu tiêu điểm" : "Bật chiếu tiêu điểm tự động"}
+            >
+              {isAutoSpotlight ? <Radio className="w-4 h-4 animate-pulse" /> : <Play className="w-4 h-4" />}
+            </button>
+
+            {/* Sound Toggle (Ambient + Chime) */}
+            <button
+              onClick={toggleSound}
+              className="p-2 sm:p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-[#fac775]/30 text-[#fac775] transition-colors shadow-md cursor-pointer"
+              title={soundEnabled ? "Tắt âm thanh nhạc nền" : "Bật âm thanh nhạc nền"}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 opacity-60" />}
+            </button>
+
+            {/* Fullscreen Toggle */}
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 sm:p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-[#fac775]/30 text-[#fac775] transition-colors shadow-md cursor-pointer"
+              title="Toàn màn hình"
+            >
+              {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+            </button>
           </div>
+        </div>
+
+        {/* 4. BROADCAST ANNOUNCEMENT BANNER IF ACTIVE */}
+        {activeAnnouncement && activeAnnouncement.active && (
+          <div className="absolute top-18 inset-x-6 z-30 pointer-events-none flex justify-center animate-in slide-in-from-top duration-300">
+            <div className="max-w-2xl px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#993c1d]/95 via-[#0091ea]/90 to-[#993c1d]/95 border-2 border-[#fac775] shadow-2xl backdrop-blur-md flex items-center gap-3 text-white text-xs sm:text-sm font-bold">
+              <Megaphone className="w-5 h-5 text-[#fac775] shrink-0 animate-pulse" />
+              <span className="truncate">{activeAnnouncement.message}</span>
+            </div>
+          </div>
+        )}
+
+        {/* 5. LIVE REACTIONS RISING FLOAT STREAM */}
+        <div className="absolute inset-x-0 bottom-0 top-1/2 pointer-events-none z-25 overflow-hidden">
+          {reactions.map((react, idx) => (
+            <div
+              key={react.id}
+              className="absolute bottom-4 text-3xl animate-in fade-in zoom-in-75 duration-300"
+              style={{
+                left: `${(idx * 17 + 25) % 85}%`,
+                animation: "floatSlow 4.5s ease-out forwards",
+              }}
+            >
+              <span className="drop-shadow-[0_0_12px_rgba(250,199,117,0.8)] select-none">
+                {react.emoji}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* 6. SPOTLIGHT CAROUSEL BANNER */}
+        {currentSpotlightDream && isAutoSpotlight && (
+          <div
+            onClick={() => {
+              playPoemMagicSound();
+              setSelectedDream(currentSpotlightDream);
+            }}
+            className="absolute bottom-20 left-4 right-4 sm:right-auto sm:bottom-6 sm:left-6 z-30 sm:max-w-sm p-3.5 sm:p-4 rounded-3xl bg-[#12203A]/90 border border-[#fac775] backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all animate-in slide-in-from-bottom duration-500 pointer-events-auto"
+          >
+            <div className="flex items-center justify-between text-xs font-bold text-[#fac775] mb-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span>Tiêu Điểm Ước Mơ</span>
+              </div>
+              <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">
+                {DREAM_CATEGORIES.find((c) => c.id === currentSpotlightDream.tag)?.emoji}{" "}
+                {DREAM_CATEGORIES.find((c) => c.id === currentSpotlightDream.tag)?.shortLabel}
+              </span>
+            </div>
+
+            <h4 className="text-sm font-extrabold text-white mb-1 truncate">
+              {currentSpotlightDream.name || "Tân Sinh Viên K22"}
+            </h4>
+
+            <p className="text-xs text-[#faeeda]/90 italic line-clamp-2 sm:line-clamp-3 leading-relaxed whitespace-pre-line">
+              &ldquo;{currentSpotlightDream.content}&rdquo;
+            </p>
+
+            <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-[#fac775]">
+              <span>✨ Chạm để xem Dream Card Story</span>
+              <span className="hidden sm:inline">#FUDEVER2026</span>
+            </div>
+          </div>
+        )}
+
+        {/* 7. CATEGORY FILTER BAR (Bottom Center) */}
+        {viewMode === "lanterns" && (
+          <div className="absolute bottom-4 sm:bottom-6 inset-x-0 z-30 flex justify-center pointer-events-none px-3 sm:px-4">
+            <div className="flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-[#12203A]/90 backdrop-blur-xl border border-[#fac775]/40 shadow-2xl pointer-events-auto overflow-x-auto max-w-full scrollbar-none">
+              <button
+                onClick={() => {
+                  playTactileClick();
+                  setSelectedTagFilter("all");
+                }}
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedTagFilter === "all"
+                    ? "bg-[#fac775] text-[#12203a] shadow-xs"
+                    : "text-[#faeeda]/80 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                Tất cả ({visibleDreams.length})
+              </button>
+
+              {DREAM_CATEGORIES.map((cat) => {
+                const count = visibleDreams.filter((l) => l.tag === cat.id).length;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      playTactileClick();
+                      setSelectedTagFilter(cat.id);
+                    }}
+                    className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all shrink-0 cursor-pointer ${
+                      selectedTagFilter === cat.id
+                        ? "bg-[#993c1d] text-white border border-[#fac775] shadow-xs"
+                        : "text-[#faeeda]/70 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span>{cat.emoji}</span>
+                    <span className="hidden md:inline">{cat.shortLabel}</span>
+                    <span className="text-[10px] opacity-75">({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* =========================================================
+          RIGHT CONTAINER: BUGGY LIVE ARENA (35% in Split View)
+      ========================================================= */}
+      {splitViewMode === "split" && (
+        <div className="hidden lg:block lg:w-[35%] h-full relative z-30 animate-in slide-in-from-right duration-500">
+          <BuggyLiveArena soundEnabled={soundEnabled} />
         </div>
       )}
 

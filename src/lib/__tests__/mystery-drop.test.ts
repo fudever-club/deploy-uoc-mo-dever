@@ -35,8 +35,8 @@ describe("Mystery Drop System (Atomic Single-Winner Lock)", () => {
 
   it("should allow the first user to claim the drop successfully", () => {
     const drop = triggerMysteryDrop({
-      rewardName: "Ly Trà Sữa Phúc Long",
-      rewardEmoji: "🧋",
+      rewardName: "Ly Trà Đào Thanh Mát DEVER",
+      rewardEmoji: "🍹",
     });
 
     const result = claimMysteryDrop(drop.id, "Nguyễn Văn A - K22");

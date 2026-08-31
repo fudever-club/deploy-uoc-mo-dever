@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import confetti from "canvas-confetti";
 import { DREAM_CATEGORIES, BUGGY_MOODS, INSPIRATION_PROMPTS } from "@/lib/constants";
@@ -293,6 +294,21 @@ export default function WishSubmissionPage() {
                   <span className="text-slate-600 text-[11px] sm:text-xs">Thiệp phong cách hoàng kim, triện may mắn, sẵn sàng tải về khoe story.</span>
                 </div>
               </div>
+
+              <Link
+                href="/duel"
+                onClick={() => playTactileClick()}
+                className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 text-xs text-purple-900 group hover:border-[#E14CE8] transition-all cursor-pointer"
+              >
+                <span className="text-xl shrink-0">⚔️</span>
+                <div className="flex-1 min-w-0">
+                  <strong className="block text-[#0091ea] flex items-center justify-between">
+                    <span>Đấu Trí AI Buggy Arena 60s</span>
+                    <span className="text-[9px] bg-[#E14CE8] text-white px-2 py-0.5 rounded-full font-bold uppercase">MỚI</span>
+                  </strong>
+                  <span className="text-slate-600 text-[11px] sm:text-xs">Solo 5 câu đố IT & Meme FPTU, rinh quà Sticker & Thẻ Hacker độc quyền!</span>
+                </div>
+              </Link>
             </div>
 
             {/* Start Button */}

@@ -218,11 +218,11 @@ export const MID_AUTUMN_BUGGY_REWARDS: MidAutumnBuggyReward[] = [
 
 export const INSPIRATION_PROMPTS = [
   "Trở thành Fullstack Developer tại tập đoàn công nghệ lớn 🚀",
-  "Đạt học bổng kỳ đầu tiên và qua môn với GPA xuất sắc 🎓",
-  "Tìm được nhóm bạn chí cốt cùng làm đồ án và tham gia Hackathon 🤝",
-  "Gia nhập ban chuyên môn CLB FU-DEVER và code project triệu view 💻",
-  "Tự tin thuyết trình tiếng Anh trước toàn trường 🌏",
-  "Deploy thành công một ứng dụng AI giải quyết vấn đề thực tế ✨",
+  "Đạt học bổng kỳ đầu tiên và hoàn thành các môn học với GPA xuất sắc 🎓",
+  "Tìm được những người bạn cùng đam mê để làm đồ án và tham gia Hackathon 🤝",
+  "Gia nhập ban chuyên môn CLB FU-DEVER và phát triển các dự án công nghệ thực tế 💻",
+  "Tự tin thuyết trình ý tưởng công nghệ trước hội đồng đánh giá 🌏",
+  "Deploy thành công một ứng dụng AI giải quyết bài toán thực tiễn ✨",
 ];
 
 export const EVENT_INFO = {
