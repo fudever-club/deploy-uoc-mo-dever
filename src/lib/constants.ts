@@ -232,6 +232,9 @@ export const EVENT_INFO = {
   eventDate: "12/09/2026",
   eventTime: "08:15 — 12:00",
   eventLocation: "Gian hàng FU-DEVER · Club Day 2026",
+  websiteUrl: "https://fudever.com",
+  fanpageUrl: "https://www.facebook.com/FPTUDever",
+  githubUrl: "https://github.com/fudever-club",
   hashtags: ["#FUDEVER", "#ClubDay2026", "#DeployUocMo", "#DEVER_K22"],
   defaultAdminPasscode: "dever2026",
   brandColors: {

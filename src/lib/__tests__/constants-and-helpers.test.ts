@@ -30,6 +30,7 @@ describe("Brand Constants & Asset Helpers", () => {
     expect(EVENT_INFO.clubName).toContain("FU-DEVER");
     expect(EVENT_INFO.university).toContain("FPT");
     expect(EVENT_INFO.eventLocation).toContain("Gian hàng");
+    expect(EVENT_INFO.websiteUrl).toBe("https://fudever.com");
     expect(EVENT_INFO.hashtags).toContain("#FUDEVER");
     expect(EVENT_INFO.hashtags).toContain("#DeployUocMo");
   });

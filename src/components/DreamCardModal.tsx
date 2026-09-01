@@ -192,8 +192,8 @@ export const DreamCardModal: React.FC<DreamCardModalProps> = ({
   const handleUniversalShare = async () => {
     playTactileClick();
     try {
-      const caption = `🏮 Ước mơ của tôi tại Ngày hội FU-DEVER 2026: "${dream.content}"\n🚀 #FUDEVER #ClubDay2026 #DeployUocMo #FPTU_DaNang`;
-      const currentUrl = typeof window !== "undefined" ? window.location.origin : "https://deployuocmodever.vercel.app";
+      const caption = `🏮 Ước mơ của tôi tại Ngày hội FU-DEVER 2026: "${dream.content}"\n🚀 #FUDEVER #ClubDay2026 #DeployUocMo #FPTU_DaNang\n🌐 https://fudever.com`;
+      const currentUrl = typeof window !== "undefined" ? window.location.origin : "https://fudever.com";
 
       if (navigator.share) {
         await navigator.share({

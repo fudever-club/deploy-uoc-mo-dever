@@ -153,8 +153,8 @@ npm run build
 
 **CLB Lập trình FU-DEVER** là tổ chức học thuật chuyên môn hàng đầu tại **Trường Đại học FPT Đà Nẵng**, nơi quy tụ những sinh viên đam mê Software Engineering, Web/Mobile Development, Artificial Intelligence và Competitive Programming (ICPC, Hackathon).
 
+* **Website Chính Thức**: [fudever.com](https://fudever.com)
 * **Fanpage Chính Thức**: [facebook.com/FPTUDever](https://www.facebook.com/FPTUDever)
-* **Website Chính Thức**: [fu-dever-landingpage-v2.vercel.app](https://fu-dever-landingpage-v2.vercel.app/)
 * **GitHub Organization**: [github.com/fudever-club](https://github.com/fudever-club)
 * **Email Liên Hệ**: `club.dever@gmail.com`
 * **Địa Chỉ**: Tòa nhà FPT University, Khu đô thị FPT City, Ngũ Hành Sơn, Đà Nẵng
