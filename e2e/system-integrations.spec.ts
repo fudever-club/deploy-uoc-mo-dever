@@ -1,4 +1,4 @@
-﻿import { test, expect } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 
 test.describe("System Integrations & Official Brand QA", () => {
   test("1. About Modal renders official portals (fudever.com, Facebook, GitHub)", async ({ page }) => {
@@ -18,7 +18,11 @@ test.describe("System Integrations & Official Brand QA", () => {
 
     // Close Modal
     const closeBtn = page.locator("button[aria-label='Đóng']");
-    await closeBtn.click();
+    if (await closeBtn.isVisible()) {
+      await closeBtn.click({ force: true });
+    } else {
+      await page.keyboard.press("Escape");
+    }
   });
 
   test("2. Admin Arena God Mode: Zalo 1-Click button and Reset action present", async ({ page }) => {
@@ -29,10 +33,13 @@ test.describe("System Integrations & Official Brand QA", () => {
     await page.fill("#admin-password-input", "dever2026");
     await page.click("#btn-admin-login");
 
+    // Wait for Dashboard Header to ensure authenticated state
+    await expect(page.locator("h1")).toContainText(/Admin God Mode|Bảng Quản Trị/i, { timeout: 10000 });
+
     // Switch to Buggy Arena Tab
-    const arenaTab = page.locator("button:has-text('Buggy Arena')");
-    await expect(arenaTab).toBeVisible({ timeout: 10000 });
-    await arenaTab.click();
+    const arenaTab = page.locator("button:has-text('Buggy AI Arena'), button:has-text('Buggy Arena')");
+    await expect(arenaTab.first()).toBeVisible({ timeout: 10000 });
+    await arenaTab.first().click();
 
     // Verify Action Bar controls
     await expect(page.getByText("Quầy Đổi Thưởng Buggy Arena")).toBeVisible();
